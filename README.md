@@ -1,171 +1,254 @@
- # :fallen_leaf: :leaves: Testinium-QA :leaves: :fallen_leaf:
-Automating the Testinium browser  (JAVA, Selenium, Cucumber, JUnit, Jira, Jenkins)
+# Node.js Hello World Server - Backprop Integration Test Project
 
-### Tools
+A minimal Node.js HTTP server designed as a test integration for Backprop tooling, demonstrating progressive enhancement from basic HTTP functionality to production-ready applications with comprehensive documentation coverage.
 
-<p align="left"> 
+## Overview
 
-<a href="https://www.java.com" target="_blank" rel="noreferrer"> 
-  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/java/java-original.svg" alt="java" width="60" height="60"/> 
-</a> 
+This project serves as a foundational test integration for Backprop tooling capabilities, starting with a simple "Hello World" server implementation and providing clear pathways for enhancement into more complex architectures. The project demonstrates:
 
-<a href="https://www.selenium.dev" target="_blank" rel="noreferrer">
-  <img src="https://selenium.dev/images/selenium_logo_square_green.png" alt="selenium" width="60" height="60"/> 
-</a>    
+- **Basic HTTP Server**: Core Node.js HTTP module implementation
+- **Progressive Enhancement**: Clear upgrade paths to Express.js, production deployment, and security hardening  
+- **Cross-Platform Development**: Documentation for both Node.js and Python Flask implementations
+- **Testing Integration**: Comprehensive test setup with Jest/Mocha frameworks
+- **Production Readiness**: PM2 deployment, monitoring, and scaling strategies
+- **Security Implementation**: Headers, HTTPS, rate limiting, and CORS policies
 
-<a href="https://www.oracle.com/" target="_blank" rel="noreferrer"> 
-  <img src="https://lisacrispin.com/wp-content/uploads/2019/01/Screen-Shot-2019-01-17-at-12.13.33-PM.png" alt="oracle" width="60" height="60"/> 
-</a>
-
-<a href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPEOYG6Ap6vFoqv5bNXkDvnCa1yAqbDr_f_YQhXa97QwYXvNqWIvnCzpFJJz1ZwcLrwbM&usqp=CAU" rel="noreferrer">
-  <img src="https://www.codeaffine.com/wp-content/uploads/2016/02/junit-lambda.png" width="115" height="60"/> 
-</a> 
-<a href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPEOYG6Ap6vFoqv5bNXkDvnCa1yAqbDr_f_YQhXa97QwYXvNqWIvnCzpFJJz1ZwcLrwbM&usqp=CAU" rel="noreferrer">
-  <img src="https://i0.wp.com/invotra.com/wp-content/uploads/2019/09/jira_software_logo-e1571063680300.png?fit=768%2C216&ssl=1" width="160" height="60"/> 
-</a> 
-<a href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPEOYG6Ap6vFoqv5bNXkDvnCa1yAqbDr_f_YQhXa97QwYXvNqWIvnCzpFJJz1ZwcLrwbM&usqp=CAU" rel="noreferrer">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Jenkins_logo.svg/1200px-Jenkins_logo.svg.png" width="50" height="80"/> 
-</a> 
-</p>
-
-* JAVA
-* SELENIUM
-* CUCUMBER
-* JUNIT
-* JIRA
-* JENKINS
-
-### Testinium-QA
-
-This repository contains a collection of sample `Testinium-QA` projects and libraries that demonstrate how to
-use the tool and develop automation script using the Cucumber BDD framework with Java as programming language.
-It generate JSON, HTML and Txt reporters as well. It also generate `screen shots` for your tests if you enable it and
-also generate `error shots` for your failed test cases as well.
-
-### Installation (pre-requisites)
-
-1. JDK 1.8+ 
-2. Maven 
-3. IntelliJ
-4. IntelliJ Plugins for
-    - Maven
-    - Cucumber
-5. Browser driver (make sure you have your desired browser driver and class path is set)
-
-### Framework set up
-
-Git:
-
-    git clone https://github.com/BalamiRR/Testinium-QA.git
- 
-Manually :
-
-Fork / Clone repository from [here](https://github.com/BalamiRR/Testinium-QA/archive/main.zip) or download zip and set
-it up in your local workspace.
-
-
-
-### Using canned test in the project:
-
-
-```
-import io.cucumber.junit.Cucumber;
-import io.cucumber.junit.CucumberOptions;
-import org.junit.runner.RunWith;
-
-@RunWith(Cucumber.class)
-@CucumberOptions(
-    plugin = {
-        "html:target/cucumber-reports.html",
-        "json:target/cucumber.json",
-        "rerun:target/rerun.txt",
-        "me.jvt.cucumber.report.PrettyReports:target/cucumber"
-    },
-    features = "src/main/resources/features",
-    glue = "com/testinium/step_definitions",
-    dryRun = false,
-    tags = "@LogOut"
-)
-public class CukesRunner {
-
-}
-
+```mermaid
+graph LR
+    Client[HTTP Client] --> Server[Node.js Server]
+    Server --> Handler[Request Handler]
+    Handler --> Response[Hello World Response]
+    Server --> BackpropIntegration[Backprop Integration]
+    BackpropIntegration --> TestingTools[Testing & Analysis]
 ```
 
-### Develop automation scripts using BDD approach - Cucumber-Java
+**Source**: Based on Codebase Ingestion Prompt requirements for Backprop tooling test integration.
 
-There are already many predefined StepDefinitions which is packaged under `/step_definitions/LoginSD.java` will help you speed
-up your automation development that support both your favorite workaday helpers methods.
+## Quick Start
 
-Tests are written in the Cucumber framework using the Gherkin Syntax.
-Here is one of the scenarios:
+### Prerequisites
 
+- **Node.js**: Version 14.0 or higher
+- **npm**: Version 6.0 or higher (included with Node.js)
+- **Git**: For cloning and version control
+- **Terminal/Command Prompt**: For running commands
+
+### Installation
+
+1. **Clone the repository**:
+   ```bash
+   git clone <repository-url>
+   cd node-hello-world-server
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Start the server**:
+   ```bash
+   npm start
+   # Alternative: node server.js
+   ```
+
+4. **Verify installation**:
+   ```bash
+   curl http://localhost:3000
+   # Expected output: Hello, World!
+   
+   curl http://localhost:3000/hello  
+   # Expected output: Hello world
+   ```
+
+**Source**: Installation steps derived from standard Node.js project setup patterns and `/server.js` implementation requirements.
+
+### Basic Usage
+
+The server provides two primary endpoints out of the box:
+
+- `GET /` - Returns "Hello, World!" response
+- `GET /hello` - Returns "Hello world" response
+
+**Default Configuration**:
+- **Host**: `localhost` (127.0.0.1)
+- **Port**: `3000` (configurable via `PORT` environment variable)
+- **Protocol**: HTTP (HTTPS available in security-hardened version)
+
+## Backprop Integration
+
+This project is specifically designed as a test integration for Backprop tooling, providing:
+
+### Integration Points
+
+1. **Code Analysis Integration**
+   - Static code analysis hooks
+   - Performance monitoring endpoints
+   - Test coverage integration points
+
+2. **Enhancement Testing**
+   - Framework migration testing (Node.js ↔ Express.js ↔ Flask)
+   - Progressive feature addition validation
+   - Security hardening verification
+
+3. **Documentation Testing**
+   - Multi-format documentation generation
+   - API specification validation
+   - Guide accuracy verification
+
+### Usage with Backprop Tools
+
+```bash
+# Enable Backprop integration mode
+export BACKPROP_ENABLED=true
+npm start
+
+# Run with enhanced logging for Backprop analysis
+npm run start:backprop
 ```
-@Login
-Feature: Testinium app login feature
-  User Story:
-  As a user, I should be able to login with correct credentials to different accounts.
 
-  Accounts are: PosManager, SalesManager
+**Source**: Integration requirements specified in Backprop tooling documentation and enhancement scenarios.
 
-  Background: For the scenarios in the feature file, user is expected to be on login page
-    Given User is on the Testinium login page
+## Available Enhancements
 
-  #1-Users can log in with valid credentials (We have 5 types of users but will test only 2 user: PosManager, SalesManager)
-  @UPGN-286
-  Scenario Outline: Users log in with valid credentials
-    When User enters "<username>" username
-    And User enters "<password>" password
-    And User clicks the login button
-    Then User should see the dashboard
-  
-  #2-"Wrong login/password" should be displayed for invalid (valid username-invalid password and invalid username-valid password) credentials
-  @UPGN-287
-  Scenario Outline: Users log in with invalid email or invalid password credentials
-    When User enters "<username>" username
-    And User enters "<password>" password
-    And User clicks the login button
-    Then User sees error message
+This project provides clear pathways for progressive enhancement, each with comprehensive documentation:
+
+### 🚀 Express.js Migration
+Transform the basic HTTP server into a full Express.js application with routing, middleware, and enhanced features.
+- **Guide**: [Express.js Migration Guide](docs/guides/express-migration.md)
+- **Features**: Advanced routing, middleware integration, template engines
+- **Use Case**: Adding `/good-evening` endpoint and additional routes
+
+### 🐍 Python Flask Port
+Convert the Node.js implementation to Python Flask while maintaining feature parity.
+- **Guide**: [Python Flask Porting Guide](docs/guides/python-flask-port.md)  
+- **Features**: Cross-language compatibility, framework comparison
+- **Use Case**: Multi-language team environments
+
+### 🧪 Testing Framework Integration
+Implement comprehensive testing with Jest or Mocha frameworks.
+- **Guide**: [Testing Setup Guide](docs/guides/testing.md)
+- **Features**: Unit tests, integration tests, coverage reporting
+- **Use Case**: HTTP response validation, status code testing, header verification
+
+### 🏭 Production Deployment
+Deploy with PM2 process manager for production environments.
+- **Guide**: [Production Deployment Guide](docs/guides/production.md)
+- **Features**: Process management, monitoring, clustering, logging
+- **Use Case**: Scalable production deployment with load balancing
+
+### 🛡️ Security Hardening
+Implement security best practices with Helmet.js, rate limiting, and HTTPS.
+- **Guide**: [Security Implementation Guide](docs/guides/security.md)
+- **Features**: Security headers, rate limiting, HTTPS, CORS policies
+- **Use Case**: Enterprise-grade security compliance
+
+**Source**: Enhancement scenarios derived from user prompts and progressive development requirements.
+
+## Documentation Index
+
+### 📖 API Reference
+- [**Endpoints Documentation**](docs/api/endpoints.md) - Complete API reference for all server endpoints
+
+### 📚 User Guides  
+- [**Getting Started**](docs/guides/getting-started.md) - Detailed setup and first-run instructions
+- [**Express.js Migration**](docs/guides/express-migration.md) - Step-by-step Express.js integration
+- [**Python Flask Port**](docs/guides/python-flask-port.md) - Cross-language porting guide
+- [**Testing Setup**](docs/guides/testing.md) - Comprehensive testing framework configuration
+- [**Production Deployment**](docs/guides/production.md) - PM2 and production environment setup
+- [**Security Implementation**](docs/guides/security.md) - Security hardening and best practices
+
+### 🏗️ Technical Architecture
+- [**Design Documentation**](docs/architecture/design.md) - System architecture and Backprop integration details
+
+### 💡 Examples
+Working code examples for each enhancement scenario are available in the `/examples/` directory:
+- `examples/basic-server.js` - Original implementation reference
+- `examples/express-server.js` - Express.js enhanced version
+- `examples/flask-server.py` - Python Flask equivalent
+- `examples/server-with-tests.js` - Testing-integrated version
+- `examples/production-server.js` - Production-ready implementation
+- `examples/secure-server.js` - Security-hardened version
+
+## Contributing
+
+### Development Setup
+
+1. **Fork and clone** the repository
+2. **Install dependencies**: `npm install`
+3. **Create feature branch**: `git checkout -b feature/your-feature-name`
+4. **Make changes** following the project's coding standards
+5. **Test your changes**: `npm test` (when testing is configured)
+6. **Commit changes**: `git commit -m "Add feature: your feature description"`
+7. **Push to branch**: `git push origin feature/your-feature-name`
+8. **Submit pull request** with detailed description
+
+### Coding Standards
+
+- **JavaScript Style**: ES6+ syntax with consistent formatting
+- **Documentation**: JSDoc comments for all functions and modules
+- **Testing**: Comprehensive test coverage for new features
+- **Security**: Follow security best practices outlined in guides
+- **Performance**: Consider performance implications of changes
+
+### Enhancement Contributions
+
+When contributing enhancements:
+1. **Follow existing patterns** demonstrated in enhancement guides
+2. **Update documentation** to reflect new features
+3. **Add examples** to the `/examples/` directory
+4. **Test integration** with Backprop tooling where applicable
+5. **Maintain backward compatibility** unless explicitly breaking
+
+## Architecture Overview
+
+```mermaid
+graph TB
+    subgraph "Current Architecture"
+        BasicServer[Basic HTTP Server]
+        BasicServer --> GetRoot[GET / Handler]
+        BasicServer --> GetHello[GET /hello Handler]
+    end
     
-  #3- "Please fill out this field" message should be displayed if the password or username is empty
-  @UPGN-288
-  Scenario Outline:Users log in with invalid email or invalid password credentials
-    When User enters "<password>" username
-    And User clicks the login button
-    Then User sees "Veuillez renseigner ce champ." message
-
-    @SalesManager
-    Examples: SalesManager's username and password
-      |username               |password    |
-      |salesmanager7@info.com |salesmanager|
-      |salesmanager8@info.com |salesmanager|
-      |salesmanager9@info.com |salesmanager|
-      
-    @PosManager
-    Examples: PosManager's username and password
-      |username               |password  |
-      |posmanager5@info.com   |posmanager|
-      |posmanager6@info.com   |posmanager|
+    subgraph "Enhancement Paths"
+        ExpressJS[Express.js Server]
+        Flask[Python Flask Server]
+        Production[Production PM2]
+        Security[Security Hardened]
+        Testing[Test Integration]
+    end
+    
+    BasicServer -.-> ExpressJS
+    BasicServer -.-> Flask
+    BasicServer -.-> Production
+    BasicServer -.-> Security
+    BasicServer -.-> Testing
+    
+    subgraph "Backprop Integration"
+        Analysis[Code Analysis]
+        Monitoring[Performance Monitoring]
+        Documentation[Doc Generation]
+    end
+    
+    BasicServer --> Analysis
+    BasicServer --> Monitoring
+    BasicServer --> Documentation
 ```
 
+**Source**: Architecture design based on progressive enhancement requirements and Backprop integration specifications.
 
-### Jenkins Cucumber Reports
-![alt text](./image/Jenkins-Cucumber-Reports.png)
+## License
 
-##### HTML Report:
+MIT License - see [LICENSE](LICENSE) file for details.
 
-To generate HTML report use  `mvn test -Dcucumber.options="–plugin html:target/cucumber-reports.html"`
+## Support
 
-##### Txt Report:
+For questions, issues, or contributions:
+- **Issues**: Use the GitHub Issues tracker
+- **Discussions**: GitHub Discussions for general questions
+- **Security**: Report security issues privately via repository security tab
+- **Documentation**: All guides include troubleshooting sections
 
-To generate a Txt report Use `mvn test -Dcucumber.options="–plugin rerun:target/rerun.txt"`
+---
 
-### Jira Test Execution
-
-  ![alt text](./image/Jira-Test-Exectuion.png)
-  
-
-  
-
-### THE END
-
+**Backprop Test Integration Project** - Demonstrating progressive enhancement from basic HTTP server to production-ready applications with comprehensive documentation coverage.
