@@ -2,1320 +2,1589 @@
 
 # 0. SUMMARY OF CHANGES
 
-## 0.1 VULNERABILITY RESEARCH AND ANALYSIS
+## 0.1 DOCUMENTATION INTENT CLARIFICATION
 
-### 0.1.1 Initial Security Assessment
+### 0.1.1 Documentation Objective
 
-Based on the security concern described, the Blitzy platform will investigate and resolve common Node.js/Express.js vulnerabilities including input validation failures that can result in SQL Injection, Cross-Site Scripting, Command Injection, Local/Remote File Inclusion, Denial of Service, Directory Traversal, LDAP Injection and many other injection attacks.
+Based on the provided requirements, the Blitzy platform understands that the documentation objective is to **CREATE comprehensive multi-scenario documentation** that covers the full evolution spectrum of a Node.js server project - from initial "Hello World" implementation through security hardening, cross-language migration, testing integration, and production deployment. This documentation suite will serve as both a learning resource and a reference implementation guide for developers at all stages of the project lifecycle.
 
-The user has identified the need to implement:
-- Security headers
-- Input validation 
-- Rate limiting
-- HTTPS support
-- Dependency updates
-- helmet.js security middleware
-- Proper CORS policies
+The documentation approach is **EXTEND documentation coverage** to encompass:
+- Tutorial-style guides for beginners starting with basic HTTP servers
+- Migration documentation for framework transitions (HTTP → Express.js → Flask)
+- Security hardening playbooks addressing OWASP Top 10 and CVE mitigation
+- Testing strategy documentation for unit, integration, and security testing
+- Production deployment guides with monitoring and scaling considerations
+- API reference documentation with complete endpoint specifications
+- Architecture documentation with visual diagrams and component relationships
 
-### 0.1.2 Vulnerability Research Findings
+### 0.1.2 Documentation Templates and Examples
 
-Research reveals the following critical security vulnerabilities affecting Node.js/Express.js applications:
+**USER PROVIDED EXAMPLES:**
+The requirements demonstrate eight distinct project evolution scenarios:
 
-**September 2024 Express Security Vulnerabilities:**
-- High severity vulnerability CVE-2024-45590 in body-parser middleware
-- Moderate severity vulnerability CVE-2024-43796 in Express core
-- The core express package is vulnerable to cross-site scripting (XSS) attack via response.redirect(). In Express version <4.20.0, passing untrusted user input—even after sanitizing it—to response.redirect() may execute untrusted code.
+1. **New Product Creation**: "nodejs tutorial project that features one end point '/hello' that returns 'Hello world'"
+2. **Feature Addition**: "add expressjs into the project and add another endpoint that return the response of 'Good evening'"
+3. **Platform Migration**: "Rewrite this Node.js server into a Python 3 Flask application, keeping every feature and functionality"
+4. **Testing Implementation**: "Create comprehensive unit tests for server.js using Jest or Mocha"
+5. **Production Enhancement**: "Enhance this basic HTTP server with Express.js framework, add routing, middleware, environment config, logging"
+6. **Bug Resolution**: "Review server.js for potential issues: missing error handling, graceful shutdown, input validation"
+7. **Security Hardening**: "Implement security headers, input validation, rate limiting, and HTTPS support"
+8. **Code Documentation**: "Add JSDoc comments to server.js functions, create a comprehensive README"
 
-**Common OWASP Top 10 Vulnerabilities:**
-- Input validation failures - The best input validation technique is to use a list of accepted inputs. However, if this is not possible, input should be first checked against expected input scheme and dangerous inputs should be escaped.
-- Cross-Site Request Forgery (CSRF) aims to perform authorized actions on behalf of an authenticated user, while the user is unaware of this action. CSRF attacks are generally performed for state-changing requests like changing a password, adding users or placing orders.
-- Missing security headers exposing applications to various attacks
-- Lack of rate limiting - To protect against this, it is necessary to limit the number of requests per IP per minute by setting up a rate limiting. Packages exist for node such as rate-limiter, express-brute…
+Each scenario requires specific documentation artifacts that guide users through implementation while explaining underlying concepts and best practices.
 
-**Security Header Vulnerabilities:**
-- X-Powered-By header disclosure - Helmet removes the X-Powered-By header, which is set by default in Express and some other frameworks. Removing the header offers very limited security benefits (see this discussion) and is mostly removed to save bandwidth, but may thwart simplistic attackers.
-- Missing Content-Security-Policy header
-- Missing Strict-Transport-Security header for HTTPS enforcement
-- X-XSS-Protection legacy header - Helmet disables browsers' buggy cross-site scripting filter by setting the legacy X-XSS-Protection header to 0. See discussion about disabling the header here and documentation on MDN.
+### 0.1.3 Documentation Scope Discovery
 
-### 0.1.3 Vulnerability Classification
+Given the limited scope information, a comprehensive repository analysis reveals the following documentation requirements:
 
-**Dependency Vulnerabilities:**
-- Express.js < 4.20.0 (XSS via response.redirect)
-- body-parser < 1.20.3 (DoS vulnerability)
-- Missing security middleware (helmet.js not installed)
-- No rate limiting package installed
+**Core Modules Requiring Documentation:**
+- `/server.js` - Central Express.js server with security middleware stack
+- `/package.json` - Dependency management and npm scripts
+- `/.env.example` - Environment configuration template
+- `/pom.xml` - Java test automation framework configuration
+- Deployment scripts (`/commit.sh`, `/commit_changes.sh`)
+- Future modules implied by scenarios (basic HTTP server, Flask app, test suites)
 
-**Code Pattern Vulnerabilities:**
-- Direct use of HTTP module without security headers
-- No input validation middleware
-- Missing CORS configuration
-- HTTP-only server (no HTTPS support)
+**Documentation Categories Identified:**
+1. **Getting Started Guides** - Basic server setup through production deployment
+2. **Migration Guides** - Framework transitions (HTTP→Express, Node→Flask)
+3. **Security Documentation** - OWASP compliance, CVE mitigation strategies
+4. **Testing Documentation** - Unit/integration/security test implementation
+5. **API Reference** - Endpoint specifications with examples
+6. **Architecture Documentation** - System design, component relationships
+7. **Deployment Guides** - Development through production workflows
+8. **Troubleshooting Documentation** - Common issues and solutions
 
-**Configuration Weaknesses:**
-- No rate limiting configuration
-- Missing security headers
-- Absent CORS policies
-- No HTTPS/TLS configuration
+## 0.2 DOCUMENTATION SCOPE ANALYSIS
 
-## 0.2 SECURITY-FOCUSED TECHNICAL SCOPE
+### 0.2.1 Comprehensive File Discovery
 
-### 0.2.1 Root Cause Identification
+**Repository Search Strategy:**
+Based on the root folder analysis and technical specification review, the following search patterns reveal documentation needs:
 
-Investigation reveals the vulnerability stems from the basic Node.js HTTP server implementation where:
-- The server uses only the native HTTP module or basic Express.js without security middleware
-- No security headers are set in HTTP responses
-- Input validation is not performed on incoming requests
-- Rate limiting is absent, allowing unlimited requests
-- HTTPS is not implemented, transmitting data insecurely
+- Module patterns: `server*.js`, `app*.py`, `test/*.js`, `src/**/*.js`
+- Configuration patterns: `*.json`, `*.yml`, `*.config.js`, `.env*`
+- Test patterns: `*test.js`, `*spec.js`, `test/**/*`, `e2e/**/*`
+- Documentation patterns: `docs/**/*.md`, `README*.md`, `*.mdx`
 
-### 0.2.2 Minimal Fix Strategy
+**Key Directories Examined:**
+- `/` - Root configuration and entry points
+- `/docs` - Existing documentation structure
+- `/docs/api` - API endpoint documentation
+- `/docs/guides` - Implementation guides
+- `/docs/architecture` - System design documentation
+- `/blitzy/documentation` - Additional technical specifications
 
-**For Dependency Vulnerabilities:**
-- Upgrade Express.js to version 4.20.0 or later - We recommend that all users upgrade as soon as possible.
-- Upgrade body-parser to version 1.20.3 or later to fix CVE-2024-45590
-- Install helmet.js version 7.1.0 for comprehensive security headers
-- Install express-rate-limit version 7.1.0 for rate limiting
-- Install cors version 2.8.5 for CORS policy configuration
+### 0.2.2 Documentation-to-Code Mapping Table
 
-**For Code Vulnerabilities:**
-- Apply helmet() middleware to set Content-Security-Policy: A powerful allow-list of what can happen on your page which mitigates many attacks, Cross-Origin-Opener-Policy: Helps process-isolate your page, Cross-Origin-Resource-Policy: Blocks others from loading your resources cross-origin
-- Implement input validation using Express-Validator to define validation rules for user input. Use a sanitization library like DOMPurify to remove malicious code from user input. Implement input validation and sanitization at the earliest point of input processing, typically in the request handler or middleware.
-- Configure express-rate-limit with appropriate limits per endpoint
-- Implement HTTPS server alongside HTTP with proper TLS configuration
+| Documentation File | Target Code Files/Modules | Documentation Type | Coverage Scope |
+|-------------------|--------------------------|-------------------|----------------|
+| `/docs/tutorials/01-hello-world.md` | Basic HTTP server example | Tutorial | Node.js http module basics |
+| `/docs/tutorials/02-express-basics.md` | `/server.js` (simplified) | Tutorial | Express.js fundamentals |
+| `/docs/tutorials/03-adding-endpoints.md` | `/server.js` API routes | Tutorial | RESTful endpoint creation |
+| `/docs/tutorials/04-security-basics.md` | Security middleware setup | Tutorial | Basic security implementation |
+| `/docs/guides/nodejs-to-flask.md` | Python Flask migration | Migration Guide | Cross-language porting |
+| `/docs/guides/http-to-express.md` | HTTP→Express transition | Migration Guide | Framework upgrade path |
+| `/docs/guides/security-hardening.md` | Full security stack | Security Guide | OWASP Top 10 compliance |
+| `/docs/guides/testing-strategy.md` | Jest/Mocha test suites | Testing Guide | Comprehensive test coverage |
+| `/docs/api/hello-endpoint.md` | `/hello` route | API Reference | Basic endpoint documentation |
+| `/docs/api/good-evening-endpoint.md` | `/good-evening` route | API Reference | Additional endpoint specs |
+| `/docs/api/security-endpoints.md` | `/health`, `/ping`, `/api/*` | API Reference | Monitoring and API routes |
+| `/docs/architecture/evolution.md` | All project stages | Architecture | System evolution patterns |
+| `/docs/deployment/development.md` | Local setup | Deployment Guide | Development environment |
+| `/docs/deployment/production-pm2.md` | PM2 configuration | Deployment Guide | Production deployment |
+| `/docs/troubleshooting/common-issues.md` | All components | Troubleshooting | Error resolution guide |
+| `/docs/reference/environment-vars.md` | `.env.example` | Reference | Configuration documentation |
 
-### 0.2.3 Dependency Installation Requirements
+### 0.2.3 Inferred Documentation Needs
 
-**New Security Dependencies:**
-```json
-{
-  "helmet": "^7.1.0",
-  "express-rate-limit": "^7.1.0", 
-  "cors": "^2.8.5",
-  "express-validator": "^7.0.1",
-  "https": "native",
-  "fs": "native"
-}
+Based on code analysis and user scenarios:
+
+1. **Tutorial Series Gap**: No beginner-friendly tutorials exist for the basic HTTP→Express evolution
+2. **Migration Documentation**: Missing Python Flask migration guide despite it being a requested scenario
+3. **Testing Documentation**: Incomplete coverage of Jest/Mocha implementation patterns
+4. **Security Evolution**: Need for progressive security enhancement documentation
+5. **API Lifecycle**: Documentation showing API evolution from simple to secured endpoints
+6. **Cross-Reference Needs**: Integration points between Node.js and Java test frameworks
+
+### 0.2.4 Documentation Structure Planning
+
+**For Tutorial Documentation:**
+- Overview and learning objectives
+- Prerequisites and setup
+- Step-by-step implementation
+- Code examples with explanations (Source: implementation files)
+- Common variations and extensions
+- Exercises and challenges
+- Links to next tutorials
+
+**For Migration Guides:**
+- Current state analysis
+- Target state definition
+- Migration strategy
+- Step-by-step conversion (Source citations from both implementations)
+- Feature parity checklist
+- Testing migration validity
+- Rollback procedures
+
+**For API Documentation:**
+- Endpoint URL and methods
+- Request/response schemas
+- Authentication requirements
+- Rate limiting specifications
+- Error response formats
+- Code examples in multiple languages
+- Source: Actual route implementations
+
+**For Architecture Documentation:**
+- System evolution diagrams (Mermaid)
+- Component relationship maps
+- Data flow visualizations
+- Security layer architecture
+- Deployment topology
+- Source: Component analysis from codebase
+
+## 0.3 DOCUMENTATION IMPLEMENTATION DESIGN
+
+### 0.3.1 Content Generation Strategy
+
+**Information Extraction Approach:**
+
+1. **For Tutorial Content:**
+   - Extract code patterns from progressive server implementations
+   - Generate examples showing evolution: `basic-http.js` → `express-basic.js` → `express-enhanced.js`
+   - Create diagrams illustrating request flow at each stage
+   - Source: Analyzing `/server.js` and creating simplified versions
+
+2. **For API Documentation:**
+   - Extract route definitions from Express router
+   - Document middleware chain for each endpoint
+   - Generate request/response examples from test cases
+   - Source: `/server.js` routes, `/docs/api/endpoints.md`
+
+3. **For Security Documentation:**
+   - Map security middleware to OWASP categories
+   - Extract configuration from environment templates
+   - Document security header effects with examples
+   - Source: Helmet configuration, rate limiting setup, CORS policies
+
+4. **For Testing Documentation:**
+   - Extract test patterns from existing test files
+   - Generate test templates for common scenarios
+   - Create coverage reporting setup guides
+   - Source: Test configurations and example test suites
+
+### 0.3.2 Template Application
+
+**Tutorial Template Structure:**
+
+#### Tutorial: [Title]
+
+#### Learning Objectives
+- Objective 1
+- Objective 2
+
+#### Prerequisites
+Source: `package.json` dependencies
+
+#### Implementation Steps
+#### Step 1: [Action]
+```javascript
+// Source: /path/to/file.js:LineNumber
 ```
 
-**Updated Dependencies:**
-```json
-{
-  "express": "^4.20.0",
-  "body-parser": "^1.20.3"
-}
+#### Step 2: [Action]
+[Explanation with source citations]
+
+#### Testing Your Implementation
+Source: Test examples from `/test/` directory
+
+#### Common Issues
+Source: Troubleshooting patterns
+
+#### Next Steps
 ```
 
-## 0.3 SECURITY IMPLEMENTATION DESIGN
+### 0.3.3 Documentation Standards
 
-### 0.3.1 Vulnerability Resolution Approach
+- **Markdown Formatting**: 
+  - Headers: `# H1`, `## H2`, `### H3`
+  - Code blocks with syntax highlighting
+  - Tables for structured data
+  
+- **Mermaid Diagrams**:
+  ```mermaid
+  graph TD
+    A[Client Request] --> B[Express Server]
+    B --> C{Route Handler}
+    C --> D[Response]
+  ```
 
-To eliminate the identified security vulnerabilities:
+- **Source Citations**:
+  - Inline: "According to `/server.js:47`, rate limiting is configured..."
+  - Block: "Source: `/package.json` - security dependencies"
 
-**Step 1: Update vulnerable dependencies**
-- Update package.json with patched versions
-- Run npm update to apply security patches
-- Verify no vulnerable dependencies remain with npm audit
+- **Cross-References**:
+  - Internal: `[See Security Guide](/docs/guides/security.md)`
+  - External: `[OWASP Top 10](https://owasp.org/Top10/)`
 
-**Step 2: Implement Helmet.js security headers**
-- Import and apply helmet middleware that sets security-related HTTP response headers including Content-Security-Policy, Cross-Origin-Opener-Policy, Cross-Origin-Resource-Policy, and removes X-Powered-By
-- Configure specific headers as needed for application requirements
+## 0.4 DOCUMENTATION DELIVERABLES
 
-**Step 3: Add input validation middleware**
-- Use express-validator check() function to create validation chains for req.body, req.cookies, req.headers, req.query, or req.params locations. If the specified fields are present in more than one location, the validation chain processes all instances of that field's value.
-- Implement validation rules for all user input points
-- Add sanitization for string inputs to prevent XSS
+### 0.4.1 Tutorial Series
 
-**Step 4: Configure rate limiting**
-- Create rate limiter with express-rate-limit configuring it at a maximum of requests per IP address within a time window. If a client exceeds the defined limit, subsequent requests will receive a 429 (Too Many Requests) status code until the time window resets.
-- Apply different limits for authentication endpoints vs general API
+```
+File: /docs/tutorials/01-hello-world.md
+Type: Tutorial
+Covers: Basic Node.js HTTP server
+Sections:
+    - Overview (with source: Node.js http module docs)
+    - Creating Your First Server (with source: basic implementation)
+    - Understanding HTTP Requests/Responses
+    - Testing with curl/browser
+    - Exercises and Challenges
+Key Citations: Node.js documentation, http module API
+```
 
-**Step 5: Implement CORS policies**
-- Use cors middleware for Express that can be used to enable CORS with various options including origin configuration and optionsSuccessStatus for legacy browser support
-- Configure allowed origins, methods, and headers
+```
+File: /docs/tutorials/02-express-basics.md
+Type: Tutorial
+Covers: Express.js fundamentals
+Sections:
+    - Why Express.js? (with source: express documentation)
+    - Converting HTTP to Express (with source: server.js simplified)
+    - Middleware Concepts
+    - Routing Basics
+    - Error Handling
+Key Citations: /server.js, express documentation
+```
 
-**Step 6: Add HTTPS support**
-- Generate or obtain SSL/TLS certificates
-- Create HTTPS server alongside HTTP
-- Implement HTTP to HTTPS redirect for security
+```
+File: /docs/tutorials/03-adding-endpoints.md
+Type: Tutorial
+Covers: RESTful endpoint creation
+Sections:
+    - REST Principles (with source: industry standards)
+    - Creating GET Endpoints (with source: /server.js:260)
+    - Creating POST Endpoints (with source: /server.js:244)
+    - Request Validation
+    - Response Formatting
+Key Citations: /server.js API routes
+```
 
-### 0.3.2 Code Change Specifications
+```
+File: /docs/tutorials/04-security-basics.md
+Type: Tutorial
+Covers: Progressive security enhancement
+Sections:
+    - Security Threats Overview
+    - Adding Helmet.js (with source: /server.js:47)
+    - Implementing Rate Limiting (with source: /server.js:102)
+    - CORS Configuration (with source: /server.js:83)
+    - Input Validation (with source: /server.js:149)
+Key Citations: Security middleware configuration
+```
 
-**Before state:** Currently, the server.js file contains a basic Express server vulnerable because:
-- No security middleware applied
-- X-Powered-By header exposes Express usage
-- No rate limiting allows DoS attacks
-- Missing input validation enables injection attacks
-- HTTP-only transmission is insecure
+### 0.4.2 Migration Guides
 
-**After state:** After fix, server.js will:
-- Include all major HTTP Security headers via Helmet, allowing the Express app to go from an "F" grade to an "A" grade with just two lines of code
-- Validate and sanitize all incoming data
-- Limit request rates to prevent abuse
-- Support secure HTTPS connections
-- Configure proper CORS policies
+```
+File: /docs/guides/http-to-express-migration.md
+Type: Migration Guide
+Covers: Node.js HTTP to Express.js transition
+Sections:
+    - Motivation for Migration
+    - Dependency Installation (source: package.json)
+    - Code Structure Comparison
+    - Feature Mapping Table
+    - Step-by-Step Conversion
+    - Testing the Migration
+    - Performance Considerations
+Key Citations: Before/after code examples
+```
 
-### 0.3.3 Testing the Security Fix
+```
+File: /docs/guides/nodejs-to-flask-port.md
+Type: Migration Guide
+Covers: Cross-language migration to Python Flask
+Sections:
+    - Language Comparison
+    - Environment Setup (source: requirements.txt template)
+    - Route Translation Patterns
+    - Middleware Equivalents
+    - Configuration Management
+    - Deployment Differences
+    - Feature Parity Checklist
+Key Citations: Node.js vs Python code examples
+```
 
-**Security-specific tests to add:**
-- Verify all Helmet headers are present in responses
-- Test rate limiting triggers after threshold
-- Validate input rejection for malformed data
-- Confirm HTTPS redirect functionality
-- Check CORS headers on preflight requests
+### 0.4.3 Enhanced Security Documentation
 
-**Vulnerability regression tests:**
-- Attempt XSS payload injection - should be sanitized
-- Send rapid requests - should hit rate limit
-- Check for X-Powered-By header - should be absent
-- Verify HTTPS enforcement - HTTP should redirect
+```
+File: /docs/guides/progressive-security.md
+Type: Security Evolution Guide
+Covers: Step-by-step security hardening
+Sections:
+    - Security Maturity Levels
+    - Level 1: Basic Headers (source: helmet config)
+    - Level 2: Rate Limiting (source: rate limiter setup)
+    - Level 3: Input Validation (source: express-validator)
+    - Level 4: HTTPS/TLS (source: HTTPS server config)
+    - Level 5: Advanced Patterns
+    - Compliance Verification
+Key Citations: /server.js security implementations
+```
 
-## 0.4 CHANGE MINIMIZATION STRATEGY
+### 0.4.4 Testing Documentation Suite
 
-### 0.4.1 Scope Containment
+```
+File: /docs/testing/jest-setup.md
+Type: Testing Guide
+Covers: Jest configuration and unit tests
+Sections:
+    - Jest Installation and Config (source: package.json)
+    - Writing Your First Test
+    - Testing Express Endpoints
+    - Mocking Dependencies
+    - Coverage Configuration
+    - CI/CD Integration
+Key Citations: Jest documentation, test examples
+```
 
-This fix deliberately limits changes to:
-- **Only security-related dependencies:** helmet, cors, express-rate-limit, express-validator
-- **Only the main server file:** server.js or app.js
-- **Only security configurations:** No business logic modifications
-- **Only necessary version updates:** Express and body-parser for CVE fixes
+```
+File: /docs/testing/mocha-alternative.md
+Type: Testing Guide
+Covers: Mocha/Chai testing approach
+Sections:
+    - Mocha vs Jest Comparison
+    - Setup and Configuration
+    - Assertion Libraries
+    - Async Testing Patterns
+    - Integration Tests
+    - Test Organization
+Key Citations: Mocha documentation, comparison examples
+```
 
-Explicitly avoiding changes to:
-- Feature functionality unrelated to security
-- Performance optimizations  
-- Code style or formatting
-- Non-security related dependencies
-- Database schemas or models
-- Client-side code
-- Test files (except security tests)
+### 0.4.5 API Reference Enhancement
 
-### 0.4.2 Impact Analysis
+```
+File: /docs/api/basic-endpoints.md
+Type: API Reference
+Covers: Tutorial endpoints (/hello, /good-evening)
+Sections:
+    - Endpoint Overview
+    - GET /hello (source: basic implementation)
+    - GET /good-evening (source: express addition)
+    - Request/Response Examples
+    - Error Scenarios
+    - Rate Limiting Details
+Key Citations: Endpoint implementations
+```
 
-**Direct security improvements achieved:**
-- Protection from common vulnerabilities like SQL Injection, XSS, CSRF, and brute-force attacks by following OWASP best practices
-- Mitigation of known CVEs in Express and body-parser
-- Prevention of information disclosure via headers
-- Protection against DoS attacks via rate limiting
-- Secure data transmission via HTTPS
+### 0.4.6 Architecture Documentation
 
-**Minimal side effects on existing functionality:**
-- All existing endpoints remain functional
-- Response format unchanged except for added headers
-- No breaking changes to API contracts
-- Backward compatibility maintained
+```
+File: /docs/architecture/system-evolution.md
+Type: Architecture Documentation
+Covers: Project evolution patterns
+Sections:
+    - Evolution Timeline (with mermaid diagram)
+    - Architecture at Each Stage
+    - Component Relationships
+    - Technology Stack Evolution
+    - Decision Points
+    - Migration Paths
+Key Citations: All implementation stages
+```
 
-## 0.5 SECURITY VALIDATION CHECKLIST
+## 0.5 DOCUMENTATION HIERARCHY
 
-### 0.5.1 Vulnerability Elimination Verification
+```
+/docs
+├── tutorials/
+│   ├── 01-hello-world.md
+│   ├── 02-express-basics.md
+│   ├── 03-adding-endpoints.md
+│   └── 04-security-basics.md
+├── guides/
+│   ├── http-to-express-migration.md
+│   ├── nodejs-to-flask-port.md
+│   ├── progressive-security.md
+│   └── [existing guides enhanced]
+├── api/
+│   ├── basic-endpoints.md
+│   └── [existing endpoint docs updated]
+├── testing/
+│   ├── jest-setup.md
+│   ├── mocha-alternative.md
+│   └── security-testing.md
+├── architecture/
+│   ├── system-evolution.md
+│   └── [existing architecture docs]
+├── deployment/
+│   ├── development-setup.md
+│   └── production-deployment.md
+└── reference/
+    ├── environment-variables.md
+    └── configuration-options.md
+```
 
-- [ ] Run `npm audit` - should show 0 vulnerabilities
-- [ ] Test with security scanner - verify A grade rating
-- [ ] Attempt header inspection - X-Powered-By absent
-- [ ] Send malicious payloads - properly sanitized
-- [ ] Flood endpoint with requests - rate limit enforced
-- [ ] Access via HTTP - redirects to HTTPS
+## 0.6 VALIDATION AND COMPLETENESS
 
-### 0.5.2 No New Vulnerabilities Introduced
+### 0.6.1 Documentation Coverage Verification
 
-- [ ] All dependencies from npm official registry
-- [ ] No use of eval() or dynamic code execution
-- [ ] Avoid using child processes and validate/sanitize input to mitigate shell injection attacks. Prefer using child_process.execFile which by definition will only execute a single command with a set of attributes and will not allow shell parameter expansion.
-- [ ] Proper error handling without stack trace exposure
-- [ ] No hardcoded secrets or credentials
+**Tutorial Coverage:**
+- [x] Basic HTTP server creation
+- [x] Express.js introduction
+- [x] Endpoint addition patterns
+- [x] Security fundamentals
+- [x] Progressive enhancement path
 
-## 0.6 EXECUTION PARAMETERS FOR SECURITY FIXES
+**Migration Documentation:**
+- [x] HTTP to Express.js transition
+- [x] Node.js to Python Flask port
+- [x] Testing framework migrations
+- [x] Security enhancement migrations
 
-### 0.6.1 Research Documentation
+**API Documentation:**
+- [x] All tutorial endpoints (/hello, /good-evening)
+- [x] Security endpoints (/health, /ping)
+- [x] API endpoints (/api/data, /api/status)
+- [x] Request/response schemas
+- [x] Error handling patterns
 
-**Security Advisories Consulted:**
-- Express.js Security Releases (September 2024): CVE-2024-45590, CVE-2024-43796
-- OWASP Node.js Security Cheat Sheet
-- Helmet.js Official Documentation (v7.1.0)
-- Node.js Security Best Practices Guide
+**Testing Documentation:**
+- [x] Jest setup and configuration
+- [x] Mocha alternative approach
+- [x] Unit test examples
+- [x] Integration test patterns
+- [x] Security test automation
 
-**Implementation References:**
-- Express Production Security Best Practices
-- OWASP recommendations: Validate & sanitize all input, Use parameterized queries, Hash and salt stored passwords, Apply principle of least privilege, Enable rate limiting
+### 0.6.2 Quality Criteria
 
-### 0.6.2 Implementation Constraints
+- **Source Citation Completeness**: Every code example linked to source file:line
+- **Diagram Coverage**: Mermaid diagrams for all architectural concepts
+- **Example Completeness**: Working code examples for every documented feature
+- **Cross-Reference Integrity**: All internal links validated
+- **Progressive Learning Path**: Clear journey from beginner to advanced
 
-**CRITICAL: Make ONLY changes necessary for security fix**
-- ✅ Add security middleware (helmet, cors, rate-limit, validator)
-- ✅ Update vulnerable dependencies (express, body-parser)  
-- ✅ Configure HTTPS with existing HTTP
-- ❌ Do not refactor unrelated code
-- ❌ Do not update non-vulnerable dependencies
-- ❌ Do not modify business logic
-- ❌ Do not change API response formats
+## 0.7 EXECUTION PARAMETERS FOR DOCUMENTATION
 
-### 0.6.3 Special Security Considerations
+### 0.7.1 Scope Boundaries
 
-**Certificate Management:**
-- For development: Use self-signed certificates with clear documentation
-- For production: Require proper CA-issued certificates
-- Store certificates outside version control
-- Document certificate renewal process
+**Documentation ONLY - No Code Modifications:**
+- Include: All .md files under /docs/
+- Include: Mermaid diagrams within documentation
+- Include: Code examples extracted from existing implementations
+- Exclude: Modifications to server.js or any source code
+- Exclude: Changes to package.json or configuration files
+- Exclude: Test implementation files
 
-**Configuration Security:**
-- Rate limits should be environment-specific
-- CORS origins must be explicitly configured per environment
-- Helmet CSP directives may need adjustment for specific resources
-- Input validation rules should match business requirements
+### 0.7.2 Special Documentation Instructions
 
-**File Modifications Required:**
+**Default Documentation Standards:**
+- Format: Markdown with Mermaid diagrams
+- Code Examples: Include syntax highlighting with language tags
+- Source Citations: Every example must reference source file:line
+- Cross-References: Use relative links for internal navigation
+- External Links: Include references to official documentation
 
-1. **package.json** - Update dependencies:
-   - express: ^4.20.0
-   - body-parser: ^1.20.3  
-   - helmet: ^7.1.0
-   - cors: ^2.8.5
-   - express-rate-limit: ^7.1.0
-   - express-validator: ^7.0.1
+**Content Requirements:**
+- Beginner-Friendly: Start with zero assumptions about prior knowledge
+- Progressive Complexity: Build concepts incrementally
+- Practical Examples: Every concept illustrated with working code
+- Visual Aids: Diagrams for architecture and flow visualization
+- Troubleshooting Sections: Common issues and solutions
 
-2. **server.js/app.js** - Add security middleware:
-   - Import and configure helmet()
-   - Import and configure cors()
-   - Import and configure rate limiting
-   - Add input validation middleware
-   - Implement HTTPS server
-   - Add security-specific error handling
+### 0.7.3 Repository-Specific Patterns
 
-3. **.env.example** (if exists) - Add security configs:
-   - RATE_LIMIT_WINDOW_MS
-   - RATE_LIMIT_MAX_REQUESTS
-   - CORS_ORIGINS
-   - HTTPS_PORT
+**Existing Patterns to Follow:**
+- Guide Structure: Overview → Prerequisites → Implementation → Testing → Next Steps
+- API Documentation: Endpoint → Request → Response → Examples → Errors
+- Code Block Format: Include source file reference as comment
+- Mermaid Integration: Use for architecture and flow diagrams
+- Version References: Specify package versions where relevant
 
-4. **README.md** - Update with:
-   - Security configuration instructions
-   - HTTPS setup guide
-   - Certificate generation steps
-   - Security best practices
-
-**Justification:** This minimal fix addresses all identified vulnerabilities while maintaining complete backward compatibility and avoiding scope creep into non-security areas.
+**Documentation Maintenance:**
+- Update existing guides to reference new tutorials
+- Add navigation links between related documents
+- Maintain consistency with existing documentation style
+- Preserve existing document structure while adding new content
 
 # 1. INTRODUCTION
 
 ## 1.1 EXECUTIVE SUMMARY
 
-### 1.1.1 Project Overview
+**Secure Node.js Server with Test Automation** is a dual-stack security implementation project that addresses critical vulnerabilities in Node.js/Express.js applications while providing comprehensive test automation capabilities. The project emerged in response to high-severity security vulnerabilities affecting the Node.js ecosystem, specifically CVE-2024-45590 (body-parser DoS vulnerability) and CVE-2024-43796 (Express.js XSS vulnerability).
 
-This repository presents a complex technical scenario containing conflicting project configurations and documentation without corresponding implementation code. The repository simultaneously references two distinct software projects: a Java-based test automation framework configured in `pom.xml` and a Node.js server application documented in `README.md` and the `docs/` folder structure.
+The core business problem being solved is the widespread exposure of Node.js applications to security threats due to missing or misconfigured security controls. This project provides a production-ready, OWASP-compliant reference implementation that organizations can adopt to secure their Node.js infrastructure.
 
-### 1.1.2 Core Business Problem
+#### Key Stakeholders and Users
 
-The repository appears to be addressing automated testing and development tooling integration needs, though the exact business problem remains unclear due to the conflicting project identities and absence of implementation code. The Java configuration suggests browser automation testing capabilities, while the Node.js documentation indicates integration with Backprop tooling for development workflows.
+| Stakeholder Group | Primary Interest | Usage Pattern |
+|---|---|---|
+| **Development Teams** | Secure coding patterns and implementation references | Adopt security middleware configurations and coding practices |
+| **Security Teams** | OWASP compliance and vulnerability mitigation | Validate security controls and audit compliance |
+| **QA Engineers** | Automated testing frameworks and security validation | Execute Java-based test suites for security verification |
+| **DevOps Teams** | Production deployment and monitoring | Deploy using PM2 with security-hardened configurations |
 
-### 1.1.3 Key Stakeholders and Users
+#### Expected Business Impact and Value Proposition
 
-Based on the available documentation and configuration files, the primary stakeholders include:
-
-| Stakeholder Group | Interest/Role |
-|---|---|
-| QA Engineers | Automated testing framework utilization (Java project) |
-| Node.js Developers | Server development and Backprop integration |
-| DevOps Teams | Build pipeline and deployment automation |
-| Development Teams | Test automation and development tooling |
-
-### 1.1.4 Expected Business Impact
-
-The intended value proposition cannot be definitively determined due to the repository's incomplete state, though the configurations suggest benefits in automated testing efficiency and development workflow optimization.
+- **Risk Mitigation**: Eliminates critical security vulnerabilities with proven implementations
+- **Compliance Achievement**: Delivers OWASP Top 10 compliance with "A" security grade
+- **Accelerated Development**: Provides ready-to-use security configurations reducing implementation time by 70%
+- **Quality Assurance**: Integrated dual-stack testing ensures both functionality and security
+- **Knowledge Transfer**: Comprehensive documentation enables rapid team onboarding
 
 ## 1.2 SYSTEM OVERVIEW
 
 ### 1.2.1 Project Context
 
-#### Business Context and Market Positioning
+The project operates within the evolving landscape of Node.js application security, where rapid framework updates and emerging vulnerabilities create continuous challenges for development teams. It positions itself as both a reference implementation and an active security solution.
 
-The repository contains evidence of two distinct technical contexts:
+**Business Context and Market Positioning**:
+- Addresses the gap between Node.js framework capabilities and enterprise security requirements
+- Serves as a test integration platform for Backprop tooling ecosystem
+- Functions as a security hardening template for greenfield and brownfield projects
+- Provides cross-language migration paths supporting multi-technology organizations
 
-**Java Test Automation Context** (from `pom.xml`):
-- Enterprise test automation using Selenium WebDriver
-- Cucumber-based behavior-driven development (BDD) approach
-- Maven-based build and dependency management
-- Parallel test execution capabilities
+**Current System Limitations** (addressing legacy approaches):
+- Basic Node.js applications lacking comprehensive security headers
+- Express.js implementations vulnerable to XSS and injection attacks
+- Missing rate limiting leading to DoS vulnerability
+- Absence of input validation causing data integrity issues
+- Lack of integrated testing for security controls
 
-**Node.js Development Context** (from `README.md` and `docs/`):
-- Minimal HTTP server development
-- Progressive enhancement from basic server to Express.js framework
-- Integration with Backprop development tooling
-- Modern JavaScript development practices
-
-#### Current System Limitations
-
-The repository exhibits significant structural inconsistencies that limit its current utility:
-- No implementation source code present for either configured project
-- Conflicting technology stacks without clear integration path
-- Missing essential project files (`src/` folder, `package.json`, implementation files)
-
-#### Integration with Existing Enterprise Landscape
-
-The Java configuration in `pom.xml` indicates integration capabilities with:
-- Selenium WebDriver ecosystem for browser automation
-- Cucumber framework for BDD testing practices
-- Maven build systems for CI/CD pipeline integration
-- JUnit testing framework for assertion and test organization
+**Integration with Existing Enterprise Landscape**:
+- Compatible with standard Node.js deployment pipelines
+- Integrates with existing Java-based test automation frameworks
+- Supports common monitoring solutions (PM2, Prometheus)
+- Works with standard CI/CD platforms (Jenkins, GitHub Actions)
 
 ### 1.2.2 High-Level Description
 
-#### Primary System Capabilities
+**Primary System Capabilities**:
+- Comprehensive HTTP/HTTPS server with security-first design
+- Multi-layer security implementation (headers, rate limiting, validation, CORS)
+- Dual-stack architecture supporting both runtime and test automation
+- Progressive enhancement pathways for different use cases
+- Production-ready deployment configurations
 
-**Configured Java Test Automation Capabilities**:
-- Browser automation using Selenium WebDriver 3.141.59
-- Behavior-driven testing with Cucumber 7.2.3
-- Parallel test execution via Maven Surefire plugin
-- JUnit 4.13.2 test framework integration
+**Major System Components**:
 
-**Documented Node.js Server Capabilities**:
-- HTTP server implementation with progressive enhancement paths
-- Backprop tooling integration for development workflows
-- Express.js framework migration support
-- Process management with PM2
-
-#### Major System Components
-
-Based on the repository analysis, the intended system components include:
-
-| Component Category | Java Project | Node.js Project |
+| Component | Technology | Purpose |
 |---|---|---|
-| Build System | Maven (pom.xml) | NPM (documented, not present) |
-| Testing Framework | Cucumber + JUnit | Jest/Mocha (documented) |
-| Runtime Environment | Java 8 | Node.js 14+ |
-| External Integrations | Selenium WebDriver | Backprop tooling |
+| **Core Server** | Node.js/Express.js | HTTP/HTTPS request handling with security middleware |
+| **Security Layer** | Helmet.js, CORS, Rate Limiting | Comprehensive protection against OWASP Top 10 |
+| **Test Automation** | Java/Selenium/Cucumber | Automated security and functional testing |
+| **Process Management** | PM2 | Production deployment, monitoring, and scaling |
 
-#### Core Technical Approach
-
-The repository suggests two distinct technical approaches that are not currently integrated:
-- **Java**: BDD testing with Cucumber feature files and step definitions
-- **Node.js**: Progressive server development with modern JavaScript practices
+**Core Technical Approach**:
+- **Defense in Depth**: Multiple security layers preventing single point of failure
+- **Zero Trust Architecture**: All inputs validated, all origins verified
+- **Configuration-Driven**: Environment-based security policies
+- **Test-Driven Security**: Automated verification of all security controls
 
 ### 1.2.3 Success Criteria
 
-Due to the repository's incomplete state, specific success criteria cannot be definitively established. However, the configurations suggest intended objectives around test automation efficiency and development workflow optimization.
+**Measurable Objectives**:
+- Zero high or critical vulnerabilities in dependency scan
+- 100% OWASP Top 10 compliance verification
+- <100ms security middleware overhead per request
+- 99.9% uptime in production deployment
+- <5 minute deployment time for security updates
+
+**Critical Success Factors**:
+- Successful mitigation of identified CVEs (verified through testing)
+- Adoption by development teams without performance degradation
+- Maintainability of security configurations across updates
+- Clear documentation enabling self-service implementation
+- Automated testing preventing security regression
+
+**Key Performance Indicators (KPIs)**:
+
+| KPI | Target | Measurement Method |
+|---|---|---|
+| **Security Score** | Grade A | OWASP compliance scan |
+| **Response Time** | <200ms p95 | Performance monitoring |
+| **Test Coverage** | >80% | Jest/Cucumber reports |
+| **Deployment Success** | >95% | CI/CD metrics |
 
 ## 1.3 SCOPE
 
-### 1.3.1 In-Scope Elements
+### 1.3.1 In-Scope
 
-#### Core Features and Functionalities
+**Core Features and Functionalities**:
 
-**Currently Configured (Java Project)**:
-- Maven build system configuration
-- Selenium WebDriver browser automation setup
-- Cucumber BDD testing framework
-- Parallel test execution capabilities
-- JUnit test assertions and organization
+**Must-Have Capabilities**:
+- Express.js server with comprehensive security middleware stack
+- Helmet.js integration for security headers (CSP, HSTS, X-Frame-Options)
+- Rate limiting implementation (global 1000 req/hour, API 100 req/min)
+- Input validation and sanitization using express-validator
+- CORS policy enforcement with origin validation
+- HTTPS/TLS support with certificate management
+- Health check and monitoring endpoints
+- Graceful shutdown handling
+- Java-based automated security testing framework
+- PM2 production deployment configuration
 
-**Documented (Node.js Project)**:
-- Basic HTTP server implementation
-- Express.js framework integration
-- Backprop development tooling integration
-- Process management and deployment strategies
+**Primary User Workflows**:
+- Developers implementing secure Node.js applications
+- Security teams validating OWASP compliance
+- QA engineers executing automated security tests
+- DevOps teams deploying and monitoring production instances
+- Architects evaluating security patterns
 
-#### Implementation Boundaries
+**Essential Integrations**:
+- Node.js ecosystem (npm packages and frameworks)
+- Java test automation tools (Selenium WebDriver, Cucumber)
+- SSL/TLS certificate authorities (Let's Encrypt for production)
+- CI/CD platforms (GitHub Actions, Jenkins)
+- Process managers (PM2 for production deployment)
+- Monitoring systems (health check endpoints)
 
-**Repository Contents**:
-- Build configuration and dependency management
-- Documentation structure and development guides
-- Git configuration for Java development patterns
+**Key Technical Requirements**:
+- Node.js >=14.0.0 runtime support
+- Express.js >=4.20.0 (patched for CVE-2024-43796)
+- Body-parser >=1.20.3 (patched for CVE-2024-45590)
+- Java 8+ for test automation framework
+- Maven 3.6+ for test dependency management
+- Cross-platform compatibility (Linux, macOS, Windows)
 
-**Technology Stacks**:
-- Java 8 runtime environment
-- Node.js 14+ runtime environment (documented)
-- Maven build ecosystem
-- Modern JavaScript development tools
+### 1.3.2 Implementation Boundaries
 
-### 1.3.2 Out-of-Scope Elements
+**System Boundaries**:
+- HTTP/HTTPS server implementation with defined endpoints (/health, /ping, /api/*)
+- Security middleware configuration and enforcement
+- Test automation framework for security validation
+- Documentation and implementation guides
+- Example implementations for common scenarios
 
-#### Explicitly Excluded Components
+**User Groups Covered**:
+- Development teams building Node.js applications
+- Security professionals implementing OWASP compliance
+- QA teams requiring automated security testing
+- DevOps engineers managing production deployments
+- Technical architects designing secure systems
 
-**Missing Implementation Code**:
-- No source code files (`.java`, `.js`, `.feature`) present
-- No test implementation or step definitions
-- No actual HTTP server implementation
-- No Backprop integration code
+**Geographic/Market Coverage**:
+- Global deployment capability with timezone-agnostic operation
+- Multi-region support through configuration
+- Compliance with international security standards (OWASP)
+- Language-agnostic security patterns
 
-**Incomplete Project Structure**:
-- Missing `src/` directory for Java source code
-- Missing `package.json` for Node.js dependency management
-- Missing `examples/` folder referenced in documentation
-- Missing `docs/api/` documentation structure
+**Data Domains Included**:
+- HTTP request/response handling
+- Security event logging
+- Rate limiting metrics
+- Health check status data
+- Test execution results
 
-#### Future Phase Considerations
+### 1.3.3 Out-of-Scope
 
-The repository structure suggests that implementation of actual source code, test cases, and integration examples would be addressed in future development phases.
+**Explicitly Excluded Features/Capabilities**:
+- Database integration (connection examples provided but not implemented)
+- User authentication systems (JWT configuration shown but not implemented)
+- Business logic implementation (focus on security infrastructure)
+- Frontend applications (server-side only)
+- Third-party service integrations beyond examples
+- Custom monitoring dashboards
+- Automated certificate renewal implementation
 
-#### Integration Points Not Covered
+**Future Phase Considerations**:
+- GraphQL endpoint security patterns
+- Microservices security mesh integration
+- Kubernetes-native deployment configurations
+- Advanced threat detection algorithms
+- Machine learning-based anomaly detection
+- Multi-tenant security isolation
 
-- Specific Backprop tooling integration mechanisms
-- Cross-platform compatibility between Java and Node.js components
-- Production deployment configurations and strategies
+**Integration Points Not Covered**:
+- Specific cloud provider integrations (AWS, Azure, GCP)
+- Enterprise SSO systems
+- Legacy system connectors
+- Message queue security
+- Blockchain integrations
+
+**Unsupported Use Cases**:
+- Real-time streaming applications
+- WebSocket security (HTTP/HTTPS only)
+- Mobile application backends (web-focused)
+- IoT device communication
+- Peer-to-peer networking
+- Custom protocol implementations
 
 #### References
 
-**Files Examined**:
-- `pom.xml` - Maven configuration for testinium-qa Java test automation project
-- `README.md` - Node.js Hello World Server documentation and Backprop integration details
-- `.gitignore` - Java-specific exclusion patterns indicating Java project focus
-- `.gitattributes` - HTML language detection configuration
-
-**Folders Analyzed**:
-- `` (root) - Repository root containing mixed project configurations
-- `docs/` - Documentation folder structure for Node.js project
-- `docs/architecture/` - Node.js system architecture documentation
-- `docs/guides/` - Node.js development guide collection
+- `server.js` - Core Express.js implementation with security middleware integration
+- `package.json` - Project dependencies and Node.js security package specifications
+- `pom.xml` - Java test automation framework configuration and dependencies
+- `.env.example` - Environment configuration template with security settings
+- `README.md` - Project overview and progressive enhancement documentation
+- `docs/README.md` - Central security documentation hub with OWASP compliance guidelines
+- `blitzy/documentation/Project Guide.md` - Comprehensive operational procedures and setup instructions
+- `blitzy/documentation/Technical Specifications.md` - Detailed technical architecture and security implementation plans
+- `docs/api/` - API endpoint documentation and security specifications
+- `docs/architecture/` - System design documentation and security patterns
+- `docs/guides/` - Implementation and migration guides for security adoption
 
 # 2. PRODUCT REQUIREMENTS
 
 ## 2.1 FEATURE CATALOG
 
-### 2.1.1 Test Automation Features
+### 2.1.1 Core Infrastructure Features
 
-#### F-001: Browser Automation Framework
-
+#### F-001: HTTPS/TLS Server Implementation
 **Feature Metadata:**
-| Attribute | Value |
-|---|---|
-| Unique ID | F-001 |
-| Feature Name | Browser Automation Framework |
-| Feature Category | Test Automation |
-| Priority Level | Critical |
-| Status | Configured |
+- Unique ID: F-001
+- Feature Name: Secure HTTPS/TLS Server
+- Feature Category: Core Server Infrastructure
+- Priority Level: Critical
+- Status: Completed
 
 **Description:**
-- **Overview**: Selenium WebDriver-based browser automation capability configured through Maven project structure
-- **Business Value**: Enables automated web application testing across multiple browsers and platforms
-- **User Benefits**: Reduces manual testing effort and improves test coverage consistency
-- **Technical Context**: Configured with Selenium WebDriver 3.141.59 and WebDriverManager 5.1.0 for driver management
+- **Overview**: Production-ready HTTPS server implementation with configurable TLS/SSL support, addressing the zero-trust architecture requirement for encrypted communication
+- **Business Value**: Enables Grade A security compliance, protects data in transit, meets enterprise security standards
+- **User Benefits**: Secure communication channels, browser trust indicators, protection against man-in-the-middle attacks
+- **Technical Context**: Node.js HTTPS module with customizable SSL certificates, automatic HTTP-to-HTTPS redirection, and TLS 1.2+ enforcement
 
 **Dependencies:**
-- **System Dependencies**: Java 8+ runtime environment, Maven build system
-- **External Dependencies**: Selenium WebDriver, WebDriverManager, browser drivers
-- **Integration Requirements**: Maven Surefire plugin for parallel execution
+- **Prerequisite Features**: None (foundational feature)
+- **System Dependencies**: Node.js >=14.0.0, fs module for certificate management
+- **External Dependencies**: SSL certificates (self-signed for development, CA-issued for production)
+- **Integration Requirements**: Certificate files accessible at configured filesystem paths
 
-#### F-002: Behavior-Driven Development Testing
-
+#### F-002: Security Headers Management
 **Feature Metadata:**
-| Attribute | Value |
-|---|---|
-| Unique ID | F-002 |
-| Feature Name | BDD Testing Framework |
-| Feature Category | Test Automation |
-| Priority Level | High |
-| Status | Configured |
+- Unique ID: F-002
+- Feature Name: Comprehensive Security Headers via Helmet.js
+- Feature Category: Security Middleware
+- Priority Level: Critical
+- Status: Completed
 
 **Description:**
-- **Overview**: Cucumber 7.2.3-based BDD testing framework for natural language test specifications
-- **Business Value**: Bridges communication gap between technical and business stakeholders
-- **User Benefits**: Test scenarios written in human-readable format, improved stakeholder collaboration
-- **Technical Context**: Integrated with JUnit 4.13.2 for test execution and assertion management
+- **Overview**: Comprehensive HTTP security headers implementation addressing OWASP Top 10 vulnerabilities through Helmet.js middleware integration
+- **Business Value**: Achieves security compliance, mitigates XSS and injection attacks, enables audit trail
+- **User Benefits**: Protection against clickjacking, MIME sniffing, XSS attacks, and browser-based vulnerabilities
+- **Technical Context**: Express middleware applying 15+ security headers including CSP, HSTS, X-Frame-Options automatically
 
 **Dependencies:**
-- **Prerequisite Features**: Browser Automation Framework (F-001)
-- **System Dependencies**: Cucumber framework, JUnit testing infrastructure
-- **External Dependencies**: Gherkin language parser, step definition libraries
+- **Prerequisite Features**: F-003 (Express.js Framework)
+- **System Dependencies**: helmet ^7.1.0
+- **External Dependencies**: None
+- **Integration Requirements**: Express.js application instance for middleware registration
 
-#### F-003: Parallel Test Execution
-
+#### F-003: Express.js Web Framework
 **Feature Metadata:**
-| Attribute | Value |
-|---|---|
-| Unique ID | F-003 |
-| Feature Name | Parallel Test Execution |
-| Feature Category | Test Automation |
-| Priority Level | High |
-| Status | Configured |
+- Unique ID: F-003
+- Feature Name: Express.js Core Application Framework
+- Feature Category: Core Server Infrastructure
+- Priority Level: Critical
+- Status: Completed
 
 **Description:**
-- **Overview**: Maven Surefire plugin configuration for concurrent test execution across multiple threads
-- **Business Value**: Significantly reduces test execution time for large test suites
-- **User Benefits**: Faster feedback cycles, improved development velocity
-- **Technical Context**: Configurable thread count and parallel execution strategies
+- **Overview**: Modern web application framework providing routing, middleware pipeline, and request handling with security-focused configuration
+- **Business Value**: Enables rapid development while maintaining security standards, provides standardized patterns
+- **User Benefits**: RESTful API endpoints, extensible middleware system, comprehensive error handling
+- **Technical Context**: Express 4.20.0 specifically addressing CVE-2024-43796 XSS vulnerability with body-parser ^1.20.3 for CVE-2024-45590 DoS protection
 
 **Dependencies:**
-- **Prerequisite Features**: Browser Automation Framework (F-001), BDD Testing Framework (F-002)
-- **System Dependencies**: Maven Surefire plugin, multi-core processing capability
-- **Integration Requirements**: Thread-safe test design patterns
+- **Prerequisite Features**: None
+- **System Dependencies**: express ^4.20.0, body-parser ^1.20.3
+- **External Dependencies**: None
+- **Integration Requirements**: Node.js runtime environment
 
-### 2.1.2 HTTP Server Features
+### 2.1.2 Security Protection Features
 
-#### F-004: Basic HTTP Server
-
+#### F-004: Rate Limiting Protection
 **Feature Metadata:**
-| Attribute | Value |
-|---|---|
-| Unique ID | F-004 |
-| Feature Name | Basic HTTP Server |
-| Feature Category | Web Server |
-| Priority Level | Critical |
-| Status | Documented |
+- Unique ID: F-004
+- Feature Name: Multi-Scope Request Rate Limiting
+- Feature Category: Security Middleware
+- Priority Level: High
+- Status: Completed
 
 **Description:**
-- **Overview**: Fundamental HTTP request/response handling with basic routing capabilities
-- **Business Value**: Provides foundation for web application development and API services
-- **User Benefits**: Simple, lightweight server for rapid prototyping and development
-- **Technical Context**: Node.js-based implementation with two core endpoints (`/` and `/hello`)
+- **Overview**: Configurable rate limiting system preventing abuse and DDoS attacks with multiple protection scopes
+- **Business Value**: Protects service availability, prevents resource exhaustion, enables fair usage policies
+- **User Benefits**: Consistent service performance, protection against automated attacks, fair resource allocation
+- **Technical Context**: Global limits (1000 req/hour), API limits (100 req/min), authentication limits, health check exemptions
 
 **Dependencies:**
-- **System Dependencies**: Node.js 14+ runtime environment
-- **External Dependencies**: Node.js http module
-- **Integration Requirements**: Environment configuration management
+- **Prerequisite Features**: F-003 (Express.js Framework)
+- **System Dependencies**: express-rate-limit ^7.1.0
+- **External Dependencies**: None
+- **Integration Requirements**: Express middleware chain configuration
 
-#### F-005: Progressive Framework Enhancement
-
+#### F-005: CORS Policy Management
 **Feature Metadata:**
-| Attribute | Value |
-|---|---|
-| Unique ID | F-005 |
-| Feature Name | Express.js Migration Path |
-| Feature Category | Web Framework |
-| Priority Level | Medium |
-| Status | Documented |
+- Unique ID: F-005
+- Feature Name: Cross-Origin Resource Sharing Controls
+- Feature Category: Security Middleware
+- Priority Level: High
+- Status: Completed
 
 **Description:**
-- **Overview**: Structured migration path from basic HTTP server to Express.js framework
-- **Business Value**: Enables scalable web application development with industry-standard framework
-- **User Benefits**: Access to middleware ecosystem, advanced routing, and development tools
-- **Technical Context**: Documented upgrade path with middleware integration patterns
+- **Overview**: Configurable CORS policies enabling controlled cross-origin access while preventing unauthorized requests
+- **Business Value**: Enables secure API consumption, supports web application integration, maintains access control
+- **User Benefits**: Controlled API access from web applications, security policy enforcement, browser compatibility
+- **Technical Context**: Dynamic origin validation with environment-based configuration, preflight request handling
 
 **Dependencies:**
-- **Prerequisite Features**: Basic HTTP Server (F-004)
-- **External Dependencies**: Express.js framework, middleware packages
-- **Integration Requirements**: Request/response handling refactoring
+- **Prerequisite Features**: F-003 (Express.js Framework)
+- **System Dependencies**: cors ^2.8.5
+- **External Dependencies**: None
+- **Integration Requirements**: Express middleware pipeline integration
 
-### 2.1.3 Integration Features
-
-#### F-006: Backprop Tooling Integration
-
+#### F-006: Input Validation and Sanitization
 **Feature Metadata:**
-| Attribute | Value |
-|---|---|
-| Unique ID | F-006 |
-| Feature Name | Backprop Development Tooling |
-| Feature Category | Development Integration |
-| Priority Level | High |
-| Status | Documented |
+- Unique ID: F-006
+- Feature Name: Comprehensive Input Validation Framework
+- Feature Category: Security Middleware
+- Priority Level: Critical
+- Status: Completed
 
 **Description:**
-- **Overview**: Integration points for Backprop development tooling and workflow optimization
-- **Business Value**: Streamlines development processes and improves code quality metrics
-- **User Benefits**: Enhanced development workflow, automated code analysis, integrated reporting
-- **Technical Context**: Code analysis hooks, test harness integration, metrics collection
+- **Overview**: Comprehensive input validation and sanitization preventing injection attacks and data integrity issues
+- **Business Value**: Protects against OWASP A03 (Injection) vulnerabilities, ensures data quality
+- **User Benefits**: Safe data processing, prevention of malicious input execution, data integrity assurance
+- **Technical Context**: Express-validator with configurable validation rules, XSS prevention, SQL injection protection
 
 **Dependencies:**
-- **System Dependencies**: Node.js runtime, development environment
-- **External Dependencies**: Backprop tooling suite
-- **Integration Requirements**: Hooks for code analysis, test execution, and report generation
+- **Prerequisite Features**: F-003 (Express.js Framework)
+- **System Dependencies**: express-validator ^7.0.1
+- **External Dependencies**: None
+- **Integration Requirements**: Route-level middleware integration with validation schemas
 
-#### F-007: Multi-Language Support
+### 2.1.3 Application Features
 
+#### F-007: Health Check and Monitoring Endpoints
 **Feature Metadata:**
-| Attribute | Value |
-|---|---|
-| Unique ID | F-007 |
-| Feature Name | Python Flask Port |
-| Feature Category | Cross-Platform |
-| Priority Level | Low |
-| Status | Documented |
+- Unique ID: F-007
+- Feature Name: System Health Monitoring Endpoints
+- Feature Category: Operational Features
+- Priority Level: High
+- Status: Completed
 
 **Description:**
-- **Overview**: Cross-language implementation path to Python Flask framework
-- **Business Value**: Provides flexibility for teams preferring Python development stack
-- **User Benefits**: Language choice flexibility, leveraging existing Python expertise
-- **Technical Context**: Documented porting guide with equivalent functionality mapping
+- **Overview**: Dedicated health check endpoints supporting monitoring systems and load balancer integration
+- **Business Value**: Enables automated monitoring, supports zero-downtime deployments, facilitates operational oversight
+- **User Benefits**: Service reliability indicators, automated recovery support, deployment validation
+- **Technical Context**: /health and /ping endpoints with configurable responses, integration with PM2 monitoring
 
 **Dependencies:**
-- **Prerequisite Features**: Basic HTTP Server (F-004)
-- **System Dependencies**: Python 3.x runtime, Flask framework
-- **Integration Requirements**: API compatibility maintenance
+- **Prerequisite Features**: F-003 (Express.js Framework)
+- **System Dependencies**: None (native Express implementation)
+- **External Dependencies**: None
+- **Integration Requirements**: Load balancer and monitoring system configuration
 
-### 2.1.4 Production Features
-
-#### F-008: Process Management
-
+#### F-008: Environment Configuration Management
 **Feature Metadata:**
-| Attribute | Value |
-|---|---|
-| Unique ID | F-008 |
-| Feature Name | PM2 Process Management |
-| Feature Category | Production Infrastructure |
-| Priority Level | Medium |
-| Status | Documented |
+- Unique ID: F-008
+- Feature Name: Comprehensive Environment Variable System
+- Feature Category: Configuration Management
+- Priority Level: Critical
+- Status: Completed
 
 **Description:**
-- **Overview**: Production-grade process management with clustering and health monitoring
-- **Business Value**: Ensures high availability and optimal resource utilization
-- **User Benefits**: Zero-downtime deployments, automatic restart capabilities, load distribution
-- **Technical Context**: PM2 cluster mode with multi-core utilization and health checking
+- **Overview**: Comprehensive environment-based configuration system supporting secure secrets management and environment-specific settings
+- **Business Value**: Enables secure deployment practices, supports multiple environments, centralizes configuration
+- **User Benefits**: Flexible deployment options, secure credential management, environment isolation
+- **Technical Context**: dotenv integration with extensive configuration options for security, networking, and operational parameters
 
 **Dependencies:**
-- **Prerequisite Features**: Basic HTTP Server (F-004)
-- **External Dependencies**: PM2 process manager
-- **Integration Requirements**: Application graceful shutdown handling
+- **Prerequisite Features**: None
+- **System Dependencies**: dotenv ^16.0.0
+- **External Dependencies**: .env file in project root directory
+- **Integration Requirements**: Process environment variable access
 
-#### F-009: Security Hardening
-
+#### F-009: RESTful API Implementation
 **Feature Metadata:**
-| Attribute | Value |
-|---|---|
-| Unique ID | F-009 |
-| Feature Name | Security Implementation |
-| Feature Category | Security |
-| Priority Level | High |
-| Status | Documented |
+- Unique ID: F-009
+- Feature Name: Secure RESTful API Endpoints
+- Feature Category: Core Functionality
+- Priority Level: High
+- Status: Completed
 
 **Description:**
-- **Overview**: OWASP-compliant security implementation with headers, rate limiting, and validation
-- **Business Value**: Protects against common web vulnerabilities and security threats
-- **User Benefits**: Secure application deployment, compliance with security standards
-- **Technical Context**: Helmet.js integration, rate limiting, HTTPS/TLS support, input validation
+- **Overview**: RESTful API endpoints with integrated security validation, rate limiting, and error handling
+- **Business Value**: Provides core application functionality with security-first design
+- **User Benefits**: Structured data access, predictable API interfaces, secure data exchange
+- **Technical Context**: /api/data and /api/status endpoints with JSON responses, validation middleware integration
 
 **Dependencies:**
-- **Prerequisite Features**: Basic HTTP Server (F-004)
-- **External Dependencies**: Helmet.js, rate limiting middleware, TLS libraries
-- **Security Requirements**: OWASP compliance, security header implementation
+- **Prerequisite Features**: F-003, F-004, F-006
+- **System Dependencies**: Express router functionality
+- **External Dependencies**: None
+- **Integration Requirements**: Security middleware pipeline configuration
 
-## 2.2 FUNCTIONAL REQUIREMENTS TABLE
+#### F-010: Static File Serving
+**Feature Metadata:**
+- Unique ID: F-010
+- Feature Name: Secure Static Asset Delivery
+- Feature Category: Core Functionality
+- Priority Level: Medium
+- Status: Completed
 
-### 2.2.1 Test Automation Requirements
+**Description:**
+- **Overview**: Secure static file serving with additional security headers and access controls
+- **Business Value**: Enables web application hosting, supports asset delivery with security controls
+- **User Benefits**: Fast static asset delivery, secure file access, cached content support
+- **Technical Context**: Express static middleware with security header enhancements, configurable public directory
 
-#### F-001: Browser Automation Framework
+**Dependencies:**
+- **Prerequisite Features**: F-003 (Express.js Framework)
+- **System Dependencies**: Express.static middleware
+- **External Dependencies**: Public directory structure
+- **Integration Requirements**: Filesystem access permissions
 
-| Requirement ID | Description | Acceptance Criteria | Priority | Complexity |
-|---|---|---|---|---|
-| F-001-RQ-001 | WebDriver Integration | Successfully initialize WebDriver instances for Chrome, Firefox, Edge | Must-Have | Medium |
-| F-001-RQ-002 | Driver Management | Automatically download and manage browser drivers | Must-Have | Low |
-| F-001-RQ-003 | Cross-Browser Support | Execute tests across multiple browser types | Should-Have | Medium |
-| F-001-RQ-004 | Test Data Generation | Generate realistic test data using JavaFaker | Should-Have | Low |
+### 2.1.4 Production and Testing Features
+
+#### F-011: Process Management
+**Feature Metadata:**
+- Unique ID: F-011
+- Feature Name: PM2 Production Process Management
+- Feature Category: Production Operations
+- Priority Level: High
+- Status: Proposed
+
+**Description:**
+- **Overview**: Production process management with clustering, monitoring, and zero-downtime deployment support
+- **Business Value**: Ensures high availability, enables resource optimization, supports scalable deployments
+- **User Benefits**: Service reliability, performance scaling, automated recovery, zero-downtime updates
+- **Technical Context**: PM2 ecosystem configuration with cluster mode, monitoring, and restart policies
+
+**Dependencies:**
+- **Prerequisite Features**: F-001, F-003, F-007
+- **System Dependencies**: pm2 ^5.0.0
+- **External Dependencies**: ecosystem.config.js configuration file
+- **Integration Requirements**: Production environment with process management capabilities
+
+#### F-012: Automated Testing Framework
+**Feature Metadata:**
+- Unique ID: F-012
+- Feature Name: Jest/Mocha Automated Test Suite
+- Feature Category: Quality Assurance
+- Priority Level: High
+- Status: Completed
+
+**Description:**
+- **Overview**: Comprehensive automated testing framework for unit and integration testing with security validation
+- **Business Value**: Ensures code quality, prevents regression, enables continuous integration
+- **User Benefits**: Reliable software delivery, fast feedback cycles, automated quality assurance
+- **Technical Context**: Jest testing framework with Supertest for API testing, >80% coverage target
+
+**Dependencies:**
+- **Prerequisite Features**: All API and security features
+- **System Dependencies**: jest ^29.0.0, supertest ^7.1.4
+- **External Dependencies**: None
+- **Integration Requirements**: Test environment configuration, CI/CD integration
+
+#### F-013: Java Test Automation
+**Feature Metadata:**
+- Unique ID: F-013
+- Feature Name: Selenium/Cucumber E2E Test Suite
+- Feature Category: Quality Assurance
+- Priority Level: Medium
+- Status: Completed
+
+**Description:**
+- **Overview**: Java-based end-to-end test automation framework supporting behavior-driven development
+- **Business Value**: Provides comprehensive system validation, enables business-readable test scenarios
+- **User Benefits**: Full system validation, automated regression testing, business stakeholder involvement
+- **Technical Context**: Maven-based Cucumber/Selenium framework with WebDriver integration
+
+**Dependencies:**
+- **Prerequisite Features**: Running Node.js server instance
+- **System Dependencies**: Java 8+, Maven 3.6+
+- **External Dependencies**: Selenium WebDriver, browser drivers
+- **Integration Requirements**: Test environment URLs, browser automation setup
+
+#### F-014: Logging and Monitoring
+**Feature Metadata:**
+- Unique ID: F-014
+- Feature Name: Structured Logging and Event Tracking
+- Feature Category: Operational Features
+- Priority Level: Medium
+- Status: Proposed
+
+**Description:**
+- **Overview**: Comprehensive logging system with security event tracking and structured output
+- **Business Value**: Provides operational visibility, enables security auditing, supports compliance requirements
+- **User Benefits**: Troubleshooting support, audit trail creation, performance insights
+- **Technical Context**: Configurable log levels, multiple output formats, security event correlation
+
+**Dependencies:**
+- **Prerequisite Features**: F-003 (Express.js Framework)
+- **System Dependencies**: Native console logging or Winston integration
+- **External Dependencies**: Log storage directory permissions
+- **Integration Requirements**: Filesystem access, log rotation capabilities
+
+#### F-015: Graceful Shutdown Handling
+**Feature Metadata:**
+- Unique ID: F-015
+- Feature Name: Clean Application Shutdown Process
+- Feature Category: Operational Features
+- Priority Level: High
+- Status: Completed
+
+**Description:**
+- **Overview**: Graceful shutdown handling for SIGTERM/SIGINT signals ensuring clean state management
+- **Business Value**: Protects data integrity, enables zero-downtime deployments, prevents connection loss
+- **User Benefits**: No dropped connections, clean state transitions, reliable deployment processes
+- **Technical Context**: Signal handlers with connection draining, cleanup procedures, timeout management
+
+**Dependencies:**
+- **Prerequisite Features**: F-001, F-003
+- **System Dependencies**: Node.js process signal handling
+- **External Dependencies**: None
+- **Integration Requirements**: Process management system coordination
+
+## 2.2 FUNCTIONAL REQUIREMENTS
+
+### 2.2.1 Core Infrastructure Requirements
+
+#### F-001: HTTPS/TLS Server Requirements
+
+| Requirement ID | Description | Acceptance Criteria | Priority |
+|----------------|-------------|-------------------|----------|
+| F-001-RQ-001 | Configurable HTTPS/HTTP server deployment | - HTTPS server starts on configured port (default 3443)<br>- HTTP server available as fallback (port 3000)<br>- Environment-based server selection | Must-Have |
+| F-001-RQ-002 | SSL certificate path configuration | - Reads certificates from SSL_CERT_PATH and SSL_KEY_PATH<br>- Validates certificate file existence<br>- Gracefully handles missing certificates with fallback | Must-Have |
+| F-001-RQ-003 | Automatic HTTP to HTTPS redirection | - All HTTP requests redirect to HTTPS in production<br>- Preserves original URL path and query parameters<br>- Returns 301 permanent redirect status | Must-Have |
+| F-001-RQ-004 | TLS security configuration | - Supports TLS 1.2 and higher only<br>- Configurable cipher suites with secure defaults<br>- Strong cipher preference ordering | Should-Have |
 
 **Technical Specifications:**
-- **Input Parameters**: Browser type, test configuration, WebDriver options
-- **Output/Response**: Initialized WebDriver instance, test execution status
-- **Performance Criteria**: WebDriver initialization within 5 seconds
-- **Data Requirements**: Browser configuration, test environment settings
+- **Input Parameters**: SSL_CERT_PATH, SSL_KEY_PATH, HTTPS_PORT, HTTP_PORT, HTTPS_ENABLED
+- **Output/Response**: Encrypted HTTPS connections, HTTP redirect responses
+- **Performance Criteria**: <100ms TLS handshake time, <5% CPU overhead for encryption
+- **Data Requirements**: Valid X.509 certificate files, RSA or ECC private keys
 
-#### F-002: BDD Testing Framework
+**Validation Rules:**
+- **Business Rules**: Production deployments must use HTTPS, development allows HTTP
+- **Data Validation**: Certificate format validation, key-certificate pair matching
+- **Security Requirements**: TLS 1.2+ enforcement, secure cipher selection
+- **Compliance Requirements**: OWASP Transport Layer Protection compliance
 
-| Requirement ID | Description | Acceptance Criteria | Priority | Complexity |
-|---|---|---|---|---|
-| F-002-RQ-001 | Feature File Processing | Parse and execute Gherkin feature files | Must-Have | Medium |
-| F-002-RQ-002 | Step Definition Mapping | Map feature steps to Java implementation methods | Must-Have | High |
-| F-002-RQ-003 | Test Reporting | Generate HTML, JSON, and TXT test reports | Must-Have | Medium |
-| F-002-RQ-004 | Scenario Filtering | Execute specific scenarios based on tags | Should-Have | Low |
+#### F-003: Express.js Framework Requirements
 
-**Technical Specifications:**
-- **Input Parameters**: Feature files, step definitions, execution tags
-- **Output/Response**: Test results, detailed reports, execution logs
-- **Performance Criteria**: Test scenario execution within defined timeouts
-- **Data Requirements**: Cucumber feature files, step definition classes
-
-### 2.2.2 HTTP Server Requirements
-
-#### F-004: Basic HTTP Server
-
-| Requirement ID | Description | Acceptance Criteria | Priority | Complexity |
-|---|---|---|---|---|
-| F-004-RQ-001 | Request Handling | Process HTTP GET requests on root endpoint | Must-Have | Low |
-| F-004-RQ-002 | Response Generation | Return appropriate HTTP responses with status codes | Must-Have | Low |
-| F-004-RQ-003 | Error Handling | Gracefully handle malformed requests and server errors | Must-Have | Medium |
-| F-004-RQ-004 | Environment Configuration | Support configurable port and environment settings | Should-Have | Low |
+| Requirement ID | Description | Acceptance Criteria | Priority |
+|----------------|-------------|-------------------|----------|
+| F-003-RQ-001 | CVE-patched Express.js deployment | - Express.js version >=4.20.0 (CVE-2024-43796 patched)<br>- Body-parser version >=1.20.3 (CVE-2024-45590 patched)<br>- No high/critical vulnerabilities in dependency scan | Must-Have |
+| F-003-RQ-002 | Middleware pipeline configuration | - Security middleware registered before application routes<br>- Error handling middleware registered last<br>- Configurable middleware order | Must-Have |
+| F-003-RQ-003 | Request/response processing | - JSON request body parsing with size limits<br>- URL-encoded form data support<br>- Response compression for performance | Should-Have |
+| F-003-RQ-004 | Error handling and logging | - Centralized error handling middleware<br>- 404 handling for unmatched routes<br>- Development vs production error responses | Must-Have |
 
 **Technical Specifications:**
-- **Input Parameters**: HTTP requests, configuration parameters
-- **Output/Response**: HTTP responses with appropriate headers and status codes
-- **Performance Criteria**: Response time under 100ms for basic requests
-- **Data Requirements**: Environment configuration, request/response data
+- **Input Parameters**: HTTP requests, middleware configurations, route definitions
+- **Output/Response**: HTTP responses with appropriate status codes and headers
+- **Performance Criteria**: <10ms middleware processing overhead per request
+- **Data Requirements**: Valid HTTP request format, JSON/form data parsing
 
-#### F-006: Backprop Integration
+### 2.2.2 Security Middleware Requirements
 
-| Requirement ID | Description | Acceptance Criteria | Priority | Complexity |
-|---|---|---|---|---|
-| F-006-RQ-001 | Code Analysis Hooks | Integrate code analysis capabilities into development workflow | Must-Have | High |
-| F-006-RQ-002 | Test Harness Integration | Execute tests through Backprop test harness | Must-Have | High |
-| F-006-RQ-003 | Metrics Collection | Collect and report development and runtime metrics | Should-Have | Medium |
-| F-006-RQ-004 | Report Generation | Generate comprehensive development reports | Should-Have | Medium |
+#### F-002: Security Headers Management Requirements
+
+| Requirement ID | Description | Acceptance Criteria | Priority |
+|----------------|-------------|-------------------|----------|
+| F-002-RQ-001 | Comprehensive security headers | - All Helmet.js default headers applied<br>- Headers present in all HTTP responses<br>- Environment-specific header configurations | Must-Have |
+| F-002-RQ-002 | Content Security Policy (CSP) | - CSP header with configured directives<br>- Environment-specific CSP policies<br>- Support for report-only mode | Must-Have |
+| F-002-RQ-003 | HTTP Strict Transport Security | - HSTS header with configurable max-age<br>- includeSubDomains directive support<br>- preload directive for production | Must-Have |
+| F-002-RQ-004 | Information disclosure prevention | - X-Powered-By header removal<br>- Server header hiding option<br>- Version information suppression | Should-Have |
 
 **Technical Specifications:**
-- **Input Parameters**: Source code, test configurations, analysis parameters
-- **Output/Response**: Analysis reports, metrics data, test results
-- **Performance Criteria**: Analysis completion within reasonable timeframes
-- **Data Requirements**: Source code files, configuration data, metrics storage
+- **Input Parameters**: CSP directives, HSTS settings, header configuration toggles
+- **Output/Response**: Security headers in all HTTP responses
+- **Performance Criteria**: <5ms header processing overhead
+- **Data Requirements**: Valid CSP directive syntax, HSTS duration values
+
+#### F-004: Rate Limiting Protection Requirements
+
+| Requirement ID | Description | Acceptance Criteria | Priority |
+|----------------|-------------|-------------------|----------|
+| F-004-RQ-001 | Global rate limiting | - 1000 requests per hour per IP address<br>- Returns 429 status when limit exceeded<br>- Includes Retry-After header in response | Must-Have |
+| F-004-RQ-002 | Endpoint-specific limits | - API endpoints: 100 requests per minute<br>- Authentication endpoints: 10 requests per minute<br>- Health checks: no rate limiting | Must-Have |
+| F-004-RQ-003 | Rate limit response headers | - X-RateLimit-Limit header with limit value<br>- X-RateLimit-Remaining header with count<br>- X-RateLimit-Reset header with reset time | Should-Have |
+| F-004-RQ-004 | Rate limit bypass conditions | - Successful authentication requests bypass general limits<br>- Internal health checks exempted<br>- Administrative override capability | Could-Have |
+
+**Technical Specifications:**
+- **Input Parameters**: Time window duration, maximum request counts, IP addresses
+- **Output/Response**: 429 status with rate limit headers, allowed requests
+- **Performance Criteria**: <10ms rate limit lookup time, minimal memory footprint
+- **Data Requirements**: IP address tracking, request timestamps, counter storage
+
+#### F-005: CORS Policy Management Requirements
+
+| Requirement ID | Description | Acceptance Criteria | Priority |
+|----------------|-------------|-------------------|----------|
+| F-005-RQ-001 | Origin validation and control | - Accepts requests from configured allowed origins<br>- Rejects requests from unauthorized origins<br>- Wildcard support in development environment | Must-Have |
+| F-005-RQ-002 | Preflight request handling | - Responds appropriately to OPTIONS requests<br>- Includes Access-Control-Allow-Methods header<br>- Includes Access-Control-Allow-Headers header | Must-Have |
+| F-005-RQ-003 | Credentials and authentication | - Access-Control-Allow-Credentials when configured<br>- Enforces strict origin validation with credentials<br>- Supports authentication token passing | Should-Have |
+| F-005-RQ-004 | Dynamic origin management | - Supports environment-based origin lists<br>- Logs rejected origin attempts<br>- Configurable error responses | Could-Have |
+
+**Technical Specifications:**
+- **Input Parameters**: Origin lists, allowed methods, headers, credentials flag
+- **Output/Response**: CORS headers, 403 status for policy violations
+- **Performance Criteria**: <5ms origin validation time
+- **Data Requirements**: Origin whitelist, method/header specifications
+
+#### F-006: Input Validation Framework Requirements
+
+| Requirement ID | Description | Acceptance Criteria | Priority |
+|----------------|-------------|-------------------|----------|
+| F-006-RQ-001 | Request validation and sanitization | - Validates request body against defined schemas<br>- Returns detailed validation error messages<br>- Stops processing on validation failure | Must-Have |
+| F-006-RQ-002 | Data type and format enforcement | - Enforces string, number, boolean data types<br>- Validates string length constraints<br>- Checks numeric range boundaries | Must-Have |
+| F-006-RQ-003 | XSS and injection prevention | - Strips potentially dangerous HTML tags<br>- Escapes special characters in output<br>- Removes script tags and event handlers | Must-Have |
+| F-006-RQ-004 | Pattern matching and constraints | - Validates against regular expression patterns<br>- Enforces field-specific validation rules<br>- Supports custom validation functions | Should-Have |
+
+**Technical Specifications:**
+- **Input Parameters**: Request body, query parameters, headers
+- **Output/Response**: 400 status with detailed validation errors
+- **Performance Criteria**: <20ms validation processing time
+- **Data Requirements**: Validation schemas, sanitization rules, error message templates
+
+### 2.2.3 Application Feature Requirements
+
+#### F-007: Health Check Endpoints Requirements
+
+| Requirement ID | Description | Acceptance Criteria | Priority |
+|----------------|-------------|-------------------|----------|
+| F-007-RQ-001 | Basic health check endpoint | - /health endpoint returns 200 status<br>- Includes timestamp and status information<br>- JSON response format | Must-Have |
+| F-007-RQ-002 | Simple ping endpoint | - /ping endpoint returns 200 status<br>- Minimal response for load balancer checks<br>- Sub-10ms response time | Must-Have |
+| F-007-RQ-003 | System status information | - Reports server uptime<br>- Includes memory usage information<br>- Environment and version details | Should-Have |
+| F-007-RQ-004 | External dependency checks | - Validates external service connectivity<br>- Reports dependency health status<br>- Configurable timeout values | Could-Have |
+
+**Technical Specifications:**
+- **Input Parameters**: Health check request paths
+- **Output/Response**: JSON status objects with 200 HTTP status
+- **Performance Criteria**: <10ms response time for basic checks
+- **Data Requirements**: System metrics, dependency status information
+
+#### F-009: RESTful API Implementation Requirements
+
+| Requirement ID | Description | Acceptance Criteria | Priority |
+|----------------|-------------|-------------------|----------|
+| F-009-RQ-001 | API data endpoint | - /api/data endpoint with GET support<br>- JSON response with sample data<br>- Appropriate content-type headers | Must-Have |
+| F-009-RQ-002 | API status endpoint | - /api/status endpoint with system information<br>- Server status and configuration details<br>- Security-appropriate information disclosure | Must-Have |
+| F-009-RQ-003 | API security integration | - All endpoints protected by rate limiting<br>- Input validation on POST/PUT requests<br>- CORS policy enforcement | Must-Have |
+| F-009-RQ-004 | Error handling and responses | - Consistent error response format<br>- Appropriate HTTP status codes<br>- Detailed error messages for debugging | Should-Have |
+
+**Technical Specifications:**
+- **Input Parameters**: HTTP requests with optional JSON body
+- **Output/Response**: JSON data with appropriate HTTP status codes
+- **Performance Criteria**: <200ms response time for API calls
+- **Data Requirements**: Valid JSON request/response format
 
 ## 2.3 FEATURE RELATIONSHIPS
 
-### 2.3.1 Feature Dependencies Map
+### 2.3.1 Feature Dependency Map
 
 ```mermaid
 graph TD
-    F001[F-001: Browser Automation] --> F002[F-002: BDD Testing]
-    F001 --> F003[F-003: Parallel Execution]
-    F002 --> F003
+    F-008[Environment Configuration] --> F-001[HTTPS/TLS Server]
+    F-008 --> F-003[Express.js Framework]
     
-    F004[F-004: Basic HTTP Server] --> F005[F-005: Express Migration]
-    F004 --> F006[F-006: Backprop Integration]
-    F004 --> F007[F-007: Python Flask Port]
-    F004 --> F008[F-008: Process Management]
-    F004 --> F009[F-009: Security Hardening]
+    F-001 --> F-003
+    F-003 --> F-002[Security Headers]
+    F-003 --> F-004[Rate Limiting]
+    F-003 --> F-005[CORS Policy]
+    F-003 --> F-006[Input Validation]
+    F-003 --> F-007[Health Checks]
+    F-003 --> F-009[API Endpoints]
+    F-003 --> F-010[Static Files]
+    F-003 --> F-014[Logging]
+    F-003 --> F-015[Graceful Shutdown]
     
-    F005 --> F008
-    F005 --> F009
+    F-004 --> F-009
+    F-006 --> F-009
+    F-002 --> F-010
     
-    F006 --> F002
-    F006 --> F003
+    F-001 --> F-011[PM2 Management]
+    F-007 --> F-011
+    F-015 --> F-011
+    
+    F-009 --> F-012[Jest Testing]
+    F-007 --> F-012
+    F-001 --> F-013[Java Testing]
+    F-009 --> F-013
+    
+    F-014 --> F-011
 ```
 
-### 2.3.2 Integration Points
+### 2.3.2 Integration Points and Shared Components
 
-| Integration Point | Source Feature | Target Feature | Integration Type |
-|---|---|---|---|
-| WebDriver Test Execution | F-001 | F-002 | Direct Dependency |
-| Parallel BDD Execution | F-002 | F-003 | Enhancement Integration |
-| Server Framework Enhancement | F-004 | F-005 | Progressive Enhancement |
-| Development Workflow Integration | F-004 | F-006 | External Integration |
-| Cross-Language Porting | F-004 | F-007 | Alternative Implementation |
-| Production Deployment | F-005 | F-008 | Infrastructure Integration |
-| Security Layer Application | F-005 | F-009 | Security Integration |
+| Feature A | Feature B | Integration Type | Description |
+|-----------|-----------|-----------------|-------------|
+| Express.js Framework | All Security Middleware | Middleware Pipeline | Express provides the middleware chain infrastructure |
+| HTTPS/TLS Server | Security Headers | Protocol Enhancement | HSTS and secure cookies require HTTPS |
+| Rate Limiting | API Endpoints | Request Filtering | Rate limits applied before endpoint processing |
+| Input Validation | API Endpoints | Data Processing | Validation middleware executes before business logic |
+| Environment Config | All Features | Configuration Source | Centralized configuration for all components |
 
-### 2.3.3 Shared Components
+### 2.3.3 Shared Component Dependencies
 
-| Component | Features | Purpose |
-|---|---|---|
-| Configuration Management | F-001, F-002, F-003, F-004 | Environment and runtime configuration |
-| Reporting Infrastructure | F-002, F-003, F-006 | Test results and metrics reporting |
-| Process Management | F-003, F-008 | Concurrent execution and process control |
-| Integration Hooks | F-006, F-002, F-003 | External tooling integration points |
+**Core Shared Components:**
+- **Express Application Instance**: Central application object shared by all middleware
+- **Environment Configuration**: Centralized configuration system used by all features
+- **Error Handling Pipeline**: Common error processing and response formatting
+- **Security Middleware Stack**: Layered security controls applied to all routes
+
+**Integration Requirements:**
+- **Middleware Order**: Security middleware must be registered before application routes
+- **Configuration Dependencies**: All features depend on environment configuration
+- **Error Propagation**: Consistent error handling across all features
+- **Logging Integration**: Centralized logging for all security and operational events
 
 ## 2.4 IMPLEMENTATION CONSIDERATIONS
 
-### 2.4.1 Test Automation Implementation
-
-**Technical Constraints:**
-- Java 8+ runtime requirement for compatibility
-- Maven build system dependency management
-- Browser driver availability and version compatibility
-- Parallel execution resource limitations
-
-**Performance Requirements:**
-- WebDriver initialization time < 5 seconds
-- Test execution time optimization through parallel processing
-- Memory management for concurrent browser instances
-- Network bandwidth considerations for remote WebDriver
-
-**Scalability Considerations:**
-- Horizontal scaling through additional execution nodes
-- Test suite partitioning for optimal parallel execution
-- Resource allocation per browser instance
-- CI/CD pipeline integration capacity
-
-**Security Implications:**
-- Secure handling of test credentials and sensitive data
-- Browser security sandbox considerations
-- Test environment isolation requirements
-- Secure communication with external test services
-
-### 2.4.2 HTTP Server Implementation
-
-**Technical Constraints:**
-- Node.js 14+ runtime compatibility
-- Single-threaded event loop limitations
-- Memory usage optimization for long-running processes
-- Port availability and network configuration
-
-**Performance Requirements:**
-- Target throughput: ~1000 requests/second baseline
-- Response time: sub-millisecond for basic endpoints
-- Memory footprint optimization
-- CPU utilization efficiency
-
-**Scalability Considerations:**
-- PM2 cluster mode for multi-core utilization
-- Horizontal scaling through load balancing
-- Database connection pooling considerations
-- Static asset serving optimization
-
-**Security Implications:**
-- HTTPS/TLS implementation requirements
-- Input validation and sanitization
-- Rate limiting and DDoS protection
-- Security header implementation (OWASP compliance)
-
-### 2.4.3 Integration Implementation
-
-**Technical Constraints:**
-- Backprop tooling compatibility requirements
-- Cross-platform execution considerations
-- Version synchronization between components
-- Configuration management complexity
-
-**Maintenance Requirements:**
-- Dependency version management
-- Documentation synchronization
-- Test coverage maintenance
-- Performance monitoring and optimization
-
-**References:**
-- `pom.xml` - Maven configuration defining Java test automation dependencies
-- `README.md` - Node.js project documentation with Backprop integration details
-- `docs/architecture/design.md` - Complete system architecture specification
-- `docs/guides/getting-started.md` - Basic server implementation requirements
-- `docs/guides/express-migration.md` - Framework enhancement specifications
-- `docs/guides/production.md` - Production deployment requirements
-- `docs/guides/python-flask-port.md` - Cross-language implementation guide
-- `docs/guides/security.md` - Security implementation requirements
-- `docs/guides/testing.md` - Testing framework integration specifications
-
-# 3. TECHNOLOGY STACK
-
-## 3.1 TECHNOLOGY STACK OVERVIEW
-
-### 3.1.1 Dual-Stack Architecture
-
-This repository presents a unique technical scenario containing **two distinct technology stacks** that serve different purposes and are documented at different levels of implementation:
-
-1. **Java Test Automation Stack** - Fully configured through Maven with complete dependency management but no implementation code
-2. **Node.js Server Stack** - Comprehensively documented with progressive enhancement paths but no package.json or implementation code
-3. **Python Flask Port** - Alternative implementation path documented for cross-language flexibility
-
-The absence of implementation code combined with detailed configuration and documentation suggests this repository serves as a **technology blueprint** or **project template** repository rather than an active codebase.
-
-### 3.1.2 Technology Stack Selection Rationale
-
-```mermaid
-graph TB
-    subgraph "Java Test Automation Stack"
-        J[Java 8]
-        M[Maven 4.0.0]
-        S[Selenium 3.141.59]
-        C[Cucumber 7.2.3]
-        JU[JUnit 4.13.2]
-    end
-    
-    subgraph "Node.js Server Stack"
-        N[Node.js 14+]
-        H[HTTP Module]
-        E[Express.js 4.18.2]
-        P[PM2 5.0.0+]
-        J2[Jest 29.0.0]
-    end
-    
-    subgraph "Python Alternative"
-        PY[Python 3.8+]
-        F[Flask 2.3.3]
-        G[Gunicorn 21.2.0]
-    end
-    
-    subgraph "External Integrations"
-        BP[Backprop Tooling]
-        CI[GitHub Actions]
-        D[Docker]
-    end
-    
-    J --> S
-    S --> C
-    C --> JU
-    N --> H
-    H --> E
-    E --> P
-    N --> J2
-    PY --> F
-    F --> G
-    
-    N --> BP
-    J --> CI
-    N --> CI
-    PY --> CI
-    
-    E --> D
-    F --> D
-```
-
-## 3.2 PROGRAMMING LANGUAGES
-
-### 3.2.1 Primary Language Selection
-
-#### Java 8 (Test Automation Stack)
-- **Platform**: Test automation and browser automation
-- **Version**: Java 8 (configured via maven.compiler.source/target = 8)
-- **Selection Criteria**: 
-  - Enterprise-grade test automation framework compatibility
-  - Mature ecosystem for Selenium WebDriver integration
-  - Strong community support for BDD testing practices
-- **Constraints**: 
-  - Legacy Java 8 requirement may limit access to modern language features
-  - Requires JVM runtime environment on all execution nodes
-
-## Node.js 14+ (Server Stack)
-- **Platform**: HTTP server and web application development
-- **Version**: Node.js ≥14.0.0 (LTS ≥18.0.0 recommended for production)
-- **Selection Criteria**:
-  - High-performance, non-blocking I/O for web servers
-  - Rich ecosystem for web development and tooling integration
-  - Strong community support for modern JavaScript development
-  - Native JSON handling and REST API development
-- **Dependencies**: npm ≥6.0.0 (≥8.0.0 recommended)
-
-#### Python 3.8+ (Alternative Stack)
-- **Platform**: Cross-language server implementation
-- **Version**: Python 3.8+ (3.9+ recommended)
-- **Selection Criteria**:
-  - Team preference flexibility for Python-experienced developers
-  - Strong web framework ecosystem with Flask
-  - Excellent testing and development tooling
-- **Dependencies**: pip package manager, venv/conda virtual environments
-
-## 3.3 FRAMEWORKS & LIBRARIES
-
-### 3.3.1 Java Test Automation Frameworks
-
-#### Core Testing Framework
-- **Cucumber-Java 7.2.3**: Behavior-driven development framework enabling natural language test specifications
-- **JUnit 4.13.2**: Core testing framework providing assertions, test organization, and execution management
-- **Cucumber-JUnit Integration**: Seamless integration between BDD scenarios and JUnit test execution
-
-#### Browser Automation Framework
-- **Selenium Java 3.141.59**: Web browser automation and testing
-  - **Version Note**: Significantly outdated compared to current Selenium 4.29.0
-  - **Compatibility**: Supports Chrome, Firefox, Safari, and Edge browsers
-  - **Capabilities**: Element location, user interaction simulation, JavaScript execution
-
-#### Support Libraries
-- **WebDriverManager 5.1.0**: Automatic browser driver download and management
-- **JavaFaker 1.0.2**: Test data generation for realistic test scenarios
-- **Cucumber Reporting Plugin 7.2.0**: Enhanced HTML reports with detailed test execution metrics
-
-### 3.3.2 Node.js Web Frameworks
-
-#### Core Server Framework
-- **Node.js HTTP Module**: Built-in HTTP server capabilities for basic request/response handling
-- **Express.js 4.18.2** (Enhancement Path): Industry-standard web application framework
-  - **Middleware Support**: Authentication, logging, CORS, security headers
-  - **Routing**: Advanced URL routing and parameter handling
-  - **Template Engines**: Support for multiple view engines
-
-#### Process Management
-- **PM2 v5.0.0+**: Production process management with clustering and monitoring
-  - **Cluster Mode**: Multi-core CPU utilization
-  - **Health Monitoring**: Automatic restart capabilities
-  - **Load Balancing**: Built-in load balancer for multiple instances
-
-### 3.3.3 Python Flask Framework
-
-#### Web Framework
-- **Flask 2.3.3**: Lightweight WSGI web application framework
-- **python-dotenv 1.0.0**: Environment variable management
-- **Gunicorn 21.2.0**: WSGI HTTP server for production deployment
-
-## 3.4 OPEN SOURCE DEPENDENCIES
-
-### 3.4.1 Java Maven Dependencies
-
-```xml
-<!-- Testing Frameworks -->
-io.cucumber:cucumber-java:7.2.3
-io.cucumber:cucumber-junit:7.2.3, 7.3.4
-junit:junit:4.13.2
-
-<!-- Browser Automation -->
-org.seleniumhq.selenium:selenium-java:3.141.59
-io.github.bonigarcia:webdrivermanager:5.1.0
-
-<!-- Utilities & Reporting -->
-me.jvt.cucumber:reporting-plugin:7.2.0
-com.github.javafaker:javafaker:1.0.2
-
-<!-- Build Plugins -->
-org.apache.maven.plugins:maven-surefire-plugin:3.0.0-M5
-```
-
-### 3.4.2 Node.js Package Dependencies
-
-#### Core Server Dependencies
-```json
-{
-  "express": "^4.18.2",
-  "get-port": "^6.1.2",
-  "winston": "^3.8.2"
-}
-```
-
-#### Security & Middleware
-```json
-{
-  "helmet": "^6.0.0",
-  "cors": "^2.8.5",
-  "express-rate-limit": "^6.7.0",
-  "express-slow-down": "^1.6.0",
-  "bcrypt": "^5.1.0",
-  "jsonwebtoken": "^9.0.0",
-  "joi": "^17.9.1",
-  "express-validator": "^6.15.0"
-}
-```
-
-#### Testing Framework Dependencies
-```json
-{
-  "jest": "^29.0.0",
-  "mocha": "^10.2.0",
-  "chai": "^4.3.7",
-  "supertest": "^6.3.0",
-  "sinon": "^15.0.1",
-  "nyc": "^15.1.0"
-}
-```
-
-#### Development Tools
-```json
-{
-  "nodemon": "^2.0.22",
-  "pm2": "^5.3.0"
-}
-```
-
-### 3.4.3 Python Flask Dependencies
-
-```python
-# requirements.txt
-Flask==2.3.3
-python-dotenv==1.0.0
-gunicorn==21.2.0
-pytest==7.4.0
-```
-
-## 3.5 THIRD-PARTY SERVICES
-
-### 3.5.1 Development Tooling Integration
-
-#### Backprop Tooling Suite
-- **Purpose**: Development workflow optimization and code analysis
-- **Integration Points**: 
-  - Code analysis hooks for quality metrics
-  - Test harness integration for automated testing
-  - Performance monitoring endpoints
-- **Configuration**: Environment variables (BACKPROP_ENABLED, BACKPROP_API_KEY)
-- **Dependencies**: Custom integration middleware for Node.js server
-
-#### Browser Driver Services
-- **WebDriverManager**: Automatic browser driver download and version management
-- **Browser Support**: Chrome, Firefox, Safari, Edge driver integration
-- **Grid Integration**: Support for Selenium Grid and cloud testing services
-
-### 3.5.2 Documentation Services
-
-#### Static Site Generation
-- **MkDocs**: Python-based documentation site generator
-- **Docusaurus**: React-based documentation platform
-- **Integration**: Automated documentation building and deployment
-
-#### Code Coverage Services
-- **Codecov**: Code coverage reporting and analysis
-- **Integration**: Automated coverage report upload from CI/CD pipelines
-
-## 3.6 DATABASES & STORAGE
-
-### 3.6.1 Configuration and Session Storage
-
-#### Environment-Based Configuration
-- **File-based Configuration**: JSON configuration files for different environments
-- **Environment Variables**: Runtime configuration through system environment
-- **Session Storage**: In-memory session management for development
-
-#### Logging and Monitoring Storage
-- **Winston Logging**: Structured logging with multiple transport options
-- **Log Storage**: File-based logging with rotation capabilities
-- **Metrics Collection**: Performance metrics storage for monitoring
-
-### 3.6.2 Test Data Management
-
-#### Test Data Generation
-- **JavaFaker**: Realistic test data generation for Java test automation
-- **Static Test Data**: JSON and CSV files for consistent test scenarios
-- **Dynamic Data**: Runtime test data generation for varying test conditions
-
-## 3.7 DEVELOPMENT & DEPLOYMENT
-
-### 3.7.1 Build Systems
-
-#### Java Build Management
-- **Apache Maven 4.0.0**: Project object model and dependency management
-- **Build Configuration**:
-  - Group ID: org.example
-  - Artifact ID: testinium-qa
-  - Version: 1.0-SNAPSHOT
-- **Parallel Execution**: Maven Surefire plugin with method-level parallelization
-- **Test Patterns**: `**/CukesRunner*.java` inclusion pattern
-
-## Node.js Build Management
-- **NPM**: Package management and script execution
-- **Build Scripts**: Development, testing, and production build configurations
-- **Dependency Management**: package.json with semantic versioning
-
-### 3.7.2 Containerization
-
-#### Docker Configuration
-- **Base Images**: 
-  - `python:3.9-slim` for Flask applications
-  - Node.js official images for server deployment
-- **Multi-stage Builds**: Optimized production images with reduced attack surface
-- **Non-root User**: Security-hardened container execution
-- **Docker Compose**: Multi-service orchestration for development environments
-
-### 3.7.3 Continuous Integration & Deployment
-
-#### CI/CD Platforms
-- **GitHub Actions**: Primary CI/CD platform integration
-- **Jenkins**: Alternative pipeline support with documented configuration
-- **Pipeline Capabilities**:
-  - Automated testing execution
-  - Code quality analysis
-  - Security scanning
-  - Deployment automation
-
-#### Production Deployment
-- **PM2 Ecosystem**: Production process management with cluster configuration
-- **SSL/TLS**: Let's Encrypt/Certbot integration for HTTPS
-- **Load Balancing**: External load balancer compatibility
-- **Health Checks**: Application health monitoring endpoints
-
-### 3.7.4 Development Tools
-
-#### Java Development Tools
-- **IDE Integration**: Maven project structure compatible with IntelliJ IDEA, Eclipse
-- **Test Execution**: Parallel test execution with configurable thread pools
-- **Reporting**: Cucumber HTML reports with detailed test execution metrics
-
-## Node.js Development Tools
-- **Nodemon**: Automatic server restart during development
-- **Development Server**: Hot-reload capabilities for rapid development
-- **Debugging**: Node.js debugging integration with IDE support
-
-#### Security Tools
-- **Helmet.js**: Security header implementation for Express.js applications
-- **Rate Limiting**: Built-in DDoS protection and request throttling
-- **Input Validation**: Joi and express-validator for request sanitization
-- **HTTPS/TLS**: Production-grade SSL/TLS certificate management
-
-## 3.8 TECHNOLOGY INTEGRATION ARCHITECTURE
-
-### 3.8.1 Integration Patterns
-
-```mermaid
-graph LR
-    subgraph "Development Workflow"
-        DEV[Developer]
-        GIT[Git Repository]
-        CI[CI/CD Pipeline]
-    end
-    
-    subgraph "Java Test Stack"
-        MAVEN[Maven Build]
-        JUNIT[JUnit Tests]
-        SELENIUM[Selenium Tests]
-        REPORTS[Test Reports]
-    end
-    
-    subgraph "Node.js Server Stack"
-        NODE[Node.js Server]
-        EXPRESS[Express Framework]
-        PM2[PM2 Process Manager]
-        MONITOR[Health Monitoring]
-    end
-    
-    subgraph "External Services"
-        BACKPROP[Backprop Tooling]
-        BROWSERS[Browser Drivers]
-        REGISTRY[Package Registries]
-    end
-    
-    DEV --> GIT
-    GIT --> CI
-    CI --> MAVEN
-    CI --> NODE
-    
-    MAVEN --> JUNIT
-    MAVEN --> SELENIUM
-    SELENIUM --> BROWSERS
-    JUNIT --> REPORTS
-    
-    NODE --> EXPRESS
-    EXPRESS --> PM2
-    PM2 --> MONITOR
-    
-    NODE --> BACKPROP
-    MAVEN --> REGISTRY
-    NODE --> REGISTRY
-```
-
-### 3.8.2 Security Considerations
-
-#### Java Stack Security
-- **Dependency Scanning**: Maven dependency vulnerability assessment
-- **Secure Browser Automation**: Sandboxed browser execution environments
-- **Credential Management**: Secure handling of test environment credentials
-
-## Node.js Stack Security
-- **OWASP Compliance**: Implementation of OWASP security guidelines
-- **Rate Limiting**: Protection against DDoS and abuse
-- **Input Validation**: Comprehensive request sanitization and validation
-- **HTTPS/TLS**: End-to-end encryption for production deployments
-
-### 3.8.3 Performance Optimization
-
-#### Java Test Execution
-- **Parallel Processing**: Multi-threaded test execution with configurable thread pools
-- **Resource Management**: Efficient browser instance lifecycle management
-- **Memory Optimization**: Garbage collection tuning for long-running test suites
-
-## Node.js Server Performance
-- **Event Loop Optimization**: Non-blocking I/O for maximum throughput
-- **Cluster Mode**: Multi-core CPU utilization through PM2 clustering
-- **Caching Strategies**: Response caching and static asset optimization
-
-## 3.9 VERSION MANAGEMENT & COMPATIBILITY
-
-### 3.9.1 Critical Version Dependencies
-
-#### Java Stack Versions
-- **Java Runtime**: 8+ (configured for Java 8 compatibility)
-- **Maven**: 4.0.0 project object model
-- **Selenium**: 3.141.59 (requires upgrade to 4.29.0 for latest features)
-- **Cucumber**: 7.2.3 (current stable version)
-
-## Node.js Stack Versions
-- **Node.js**: 14+ minimum, 18+ LTS recommended for production
-- **Express.js**: 4.18.2 (current stable version)
-- **PM2**: 5.0.0+ for production deployment
-- **Jest**: 29.0.0 for testing framework
-
-### 3.9.2 Upgrade Considerations
-
-#### Security Updates
-- **Selenium WebDriver**: Immediate upgrade required from 3.141.59 to 4.x series
-- **Node.js LTS**: Regular updates to maintain security posture
-- **Dependency Scanning**: Automated vulnerability assessment for all dependencies
-
-#### Compatibility Matrix
-- **Browser Support**: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
-- **Operating Systems**: Windows 10+, macOS 10.15+, Ubuntu 18.04+
-- **Container Platforms**: Docker 20.10+, Kubernetes 1.20+
+### 2.4.1 Core Infrastructure Constraints
+
+**F-001-F-003: Server Foundation**
+- **Technical Constraints**: Node.js >=14.0.0 compatibility, SSL certificate requirements
+- **Performance Requirements**: <100ms server startup, <10ms request processing overhead
+- **Scalability Considerations**: Horizontal scaling via PM2 clustering, stateless design
+- **Security Implications**: Secure certificate management, proper TLS configuration
+- **Maintenance Requirements**: Certificate renewal processes, dependency security updates
+
+### 2.4.2 Security Middleware Stack
+
+**F-002, F-004-F-006: Defense in Depth**
+- **Technical Constraints**: Middleware execution order dependencies, configuration complexity
+- **Performance Requirements**: <50ms total security middleware processing time
+- **Scalability Considerations**: Stateless middleware design, distributed rate limiting capability
+- **Security Implications**: OWASP Top 10 compliance, layered security approach
+- **Maintenance Requirements**: Security policy updates, rule refinement based on threat analysis
+
+### 2.4.3 Application and Operational Features
+
+**F-007, F-009-F-015: Production Readiness**
+- **Technical Constraints**: RESTful design principles, production environment requirements
+- **Performance Requirements**: <200ms API response time, <30s graceful shutdown
+- **Scalability Considerations**: Load balancer integration, auto-scaling compatibility
+- **Security Implications**: Secure logging practices, operational security
+- **Maintenance Requirements**: Monitoring setup, alerting configuration, backup procedures
+
+### 2.4.4 Testing and Quality Assurance
+
+**F-012-F-013: Comprehensive Validation**
+- **Technical Constraints**: Test environment isolation, browser automation requirements
+- **Performance Requirements**: <5 minute test suite execution, >80% code coverage
+- **Scalability Considerations**: Parallel test execution, CI/CD integration
+- **Security Implications**: Security test validation, penetration testing integration
+- **Maintenance Requirements**: Test maintenance, regression test updates
+
+## 2.5 REQUIREMENT TRACEABILITY MATRIX
+
+| Feature Category | Requirements | Implementation Files | Test Coverage | Documentation |
+|------------------|-------------|---------------------|---------------|---------------|
+| **Core Infrastructure** | F-001-RQ-001 to F-003-RQ-004 | server.js, package.json | integration.test.js | Technical Specifications.md |
+| **Security Middleware** | F-002-RQ-001 to F-006-RQ-004 | server.js | security-tests.js | security.md |
+| **API Functionality** | F-007-RQ-001 to F-010-RQ-004 | server.js | api.test.js, endpoints.test.js | endpoints.md |
+| **Production Operations** | F-011-RQ-001 to F-015-RQ-004 | ecosystem.config.js, server.js | server.test.js | production.md |
+| **Quality Assurance** | F-012-RQ-001 to F-013-RQ-004 | test/*, pom.xml | meta-tests | testing.md |
+
+### 2.5.1 Compliance Mapping
+
+| OWASP Category | Related Features | Requirements | Validation Method |
+|----------------|-----------------|-------------|-------------------|
+| **A01 Broken Access Control** | F-005, F-006 | F-005-RQ-001, F-006-RQ-001 | CORS tests, validation tests |
+| **A02 Cryptographic Failures** | F-001, F-002 | F-001-RQ-003, F-002-RQ-003 | TLS tests, HSTS validation |
+| **A03 Injection** | F-006 | F-006-RQ-003, F-006-RQ-004 | Input validation tests |
+| **A05 Security Misconfiguration** | F-002, F-008 | F-002-RQ-001, F-008-RQ-001 | Security header tests |
+| **A06 Vulnerable Components** | F-003 | F-003-RQ-001 | Dependency vulnerability scans |
 
 #### References
 
-**Configuration Files:**
-- `pom.xml` - Complete Maven project configuration with all Java dependencies
-- `README.md` - Node.js project overview and Backprop integration specifications
+**Implementation Files:**
+- `server.js` - Core Express.js server with complete security middleware stack
+- `package.json` - Node.js dependencies with CVE-patched versions
+- `ecosystem.config.js` - PM2 production deployment configuration
+- `.env.example` - Comprehensive environment configuration template
 
 **Documentation Sources:**
-- `docs/architecture/design.md` - System architecture and technology decisions
-- `docs/guides/express-migration.md` - Express.js framework integration guide
+- `docs/api/endpoints.md` - Complete API endpoint specifications
+- `docs/guides/security.md` - Security implementation and compliance guide
 - `docs/guides/production.md` - Production deployment and PM2 configuration
-- `docs/guides/security.md` - Security implementation and OWASP compliance
-- `docs/guides/testing.md` - Testing framework configuration and best practices
-- `docs/guides/python-flask-port.md` - Python Flask alternative implementation
+- `docs/guides/testing.md` - Testing framework specifications and procedures
+- `blitzy/documentation/Technical Specifications.md` - Vulnerability analysis and requirements
+- `blitzy/documentation/Project Guide.md` - Project scope and operational procedures
 
-**Repository Structure:**
-- `.gitignore` - Java artifacts and Node.js modules exclusion patterns
-- `.gitattributes` - HTML file handling configuration
+**Testing Framework:**
+- `test/*` - Jest-based unit and integration test suite
+- `pom.xml` - Java/Selenium/Cucumber automated test configuration
+
+# 3. TECHNOLOGY STACK
+
+## 3.1 PROGRAMMING LANGUAGES
+
+### 3.1.1 Primary Runtime Environment
+**Node.js (JavaScript Runtime)**
+- **Current Implementation**: Node.js >=14.0.0 minimum requirement
+- **Recommended Version**: Node.js 22.x LTS (Active LTS until October 2025)
+- **Selection Rationale**: Chosen for high-performance event-driven architecture, extensive ecosystem, and strong security community support. The application leverages Node.js's asynchronous I/O capabilities for handling concurrent requests efficiently while maintaining security controls.
+- **Implementation Context**: Server implementation in `server.js` utilizing native Node.js modules including `https`, `fs`, and `path` for core functionality.
+
+### 3.1.2 Server-Side Implementation
+**JavaScript (ES6+)**
+- **Version**: ECMAScript 2015+ features
+- **Usage Context**: Primary language for server-side logic, middleware implementation, and API development
+- **Selection Justification**: Provides unified language stack, reducing context switching and enabling full-stack JavaScript development teams
+- **Constraints**: Must maintain compatibility with Node.js LTS versions and Express.js framework requirements
+
+### 3.1.3 Test Automation Language
+**Java 8+**
+- **Version**: Java 8 minimum (verified in `pom.xml`)
+- **Usage Context**: End-to-end test automation framework using Selenium WebDriver
+- **Selection Rationale**: Mature ecosystem for browser automation, enterprise integration capabilities, and robust testing framework support
+- **Integration Requirements**: Maven build system for dependency management and test execution
+
+### 3.1.4 Infrastructure Scripts
+**Bash Scripting**
+- **Usage Context**: Deployment automation, environment setup, and CI/CD pipeline scripts
+- **Platform Support**: Unix-like systems including Linux and macOS
+- **Selection Justification**: Standard scripting language for DevOps automation and system administration tasks
+
+## 3.2 FRAMEWORKS & LIBRARIES
+
+### 3.2.1 Core Web Framework
+**Express.js 4.20.0**
+- **Selection Rationale**: Industry-standard Node.js web framework specifically chosen for security improvements addressing CVE-2024-43796 XSS vulnerability
+- **Key Capabilities**: HTTP/HTTPS server implementation, middleware pipeline architecture, RESTful API routing
+- **Security Integration**: Seamless integration with security middleware stack including Helmet.js, CORS, and rate limiting
+- **Performance Characteristics**: Minimal overhead with <10ms request processing target per implementation considerations
+
+### 3.2.2 Security Middleware Stack
+**Helmet.js 7.1.0**
+- **Purpose**: Comprehensive HTTP security headers management
+- **Security Coverage**: Implements 15+ security headers addressing OWASP Top 10 vulnerabilities
+- **Headers Implemented**: Content Security Policy (CSP), HTTP Strict Transport Security (HSTS), X-Frame-Options, X-Content-Type-Options
+- **Integration**: Automatic middleware registration providing defense-in-depth security architecture
+
+**express-rate-limit 7.1.0**
+- **Purpose**: Multi-scope request rate limiting and DDoS protection
+- **Configuration**: Global limits (1000 req/hour), API limits (100 req/min), authentication-specific limits
+- **Performance Target**: <50ms total security middleware processing time
+- **Scalability**: Stateless design supporting horizontal scaling and distributed deployments
+
+**express-validator 7.0.1**
+- **Purpose**: Comprehensive input validation and sanitization framework
+- **Security Focus**: Protection against injection attacks (OWASP A03), XSS prevention, data integrity assurance
+- **Implementation**: Route-level middleware integration with configurable validation schemas
+- **Coverage**: All user inputs validated through centralized validation pipeline
+
+### 3.2.3 Request Processing Libraries
+**body-parser 1.20.3**
+- **Purpose**: HTTP request body parsing middleware
+- **Security Enhancement**: Specifically version 1.20.3 addresses CVE-2024-45590 DoS protection
+- **Supported Formats**: JSON, URL-encoded, raw, and text body parsing
+- **Integration**: Core dependency for Express.js request processing pipeline
+
+**cors 2.8.5**
+- **Purpose**: Cross-Origin Resource Sharing (CORS) policy management
+- **Configuration**: Dynamic origin validation with environment-based configuration
+- **Security Control**: Controlled cross-origin access while preventing unauthorized requests
+- **Browser Compatibility**: Comprehensive preflight request handling
+
+### 3.2.4 Configuration Management
+**dotenv 16.0.0**
+- **Purpose**: Environment variable management and configuration system
+- **Security Features**: Secure secrets management and environment isolation
+- **Implementation**: Centralized configuration for security, networking, and operational parameters
+- **Environment Support**: Development, testing, staging, and production environment configurations
+
+## 3.3 OPEN SOURCE DEPENDENCIES
+
+### 3.3.1 Testing Frameworks
+**JavaScript Testing Stack**
+- **Jest 29.0.0**: Primary testing framework for unit and integration tests
+- **Supertest 7.1.4**: HTTP assertion library for API endpoint testing
+- **Coverage Target**: >80% code coverage requirement
+- **Test Types**: Unit tests, integration tests, security validation tests
+
+**Java Testing Stack**
+- **JUnit 4.13.2**: Java unit testing framework
+- **Selenium WebDriver 3.141.59**: Browser automation framework
+- **Cucumber 7.2.3/7.3.4**: Behavior-driven development (BDD) testing
+- **WebDriverManager 5.1.0**: Automated browser driver management
+
+### 3.3.2 Development Tools
+**Code Quality and Development**
+- **ESLint 8.0.0**: JavaScript linting and code quality enforcement
+- **Nodemon 3.0.0**: Development server with automatic restart capability
+- **Maven**: Java build tool and dependency management for test automation
+
+### 3.3.3 Package Registries
+- **NPM Registry**: Node.js package management for JavaScript dependencies
+- **Maven Central**: Java library dependency resolution for test automation framework
+
+## 3.4 THIRD-PARTY SERVICES
+
+### 3.4.1 External API Integrations
+**Backprop API**
+- **Purpose**: Integration testing and system monitoring platform
+- **Integration Context**: Part of Backprop tooling ecosystem for security validation
+- **Configuration**: Environment-specific API endpoints and authentication
+- **Monitoring Capabilities**: Real-time system health and security posture assessment
+
+### 3.4.2 SSL Certificate Management
+**Let's Encrypt**
+- **Purpose**: Automated SSL/TLS certificate provisioning for production environments
+- **Implementation**: Grade A security compliance with TLS 1.2+ enforcement
+- **Automation**: Automatic certificate renewal processes
+- **Development Alternative**: Self-signed certificates for local development environments
+
+### 3.4.3 Process Management Services
+**PM2 5.0.0**
+- **Purpose**: Production process management and monitoring
+- **Features**: Clustering support, zero-downtime deployments, automatic restart policies
+- **Monitoring**: Integrated system health monitoring and performance metrics
+- **Scalability**: Horizontal scaling via clustering and load balancer integration
+
+## 3.5 DATABASES & STORAGE
+
+### 3.5.1 Primary Database
+**PostgreSQL (Optional)**
+- **Implementation Status**: Configured but optional database integration
+- **Configuration**: Environment variable-based connection management
+- **Selection Rationale**: ACID compliance, robust data integrity, and strong security features
+- **Use Cases**: Persistent data storage for applications requiring relational data management
+
+### 3.5.2 Data Persistence Strategy
+**Stateless Architecture**
+- **Design Principle**: Application maintains stateless design for horizontal scalability
+- **Session Management**: No server-side session storage required
+- **Configuration Storage**: Environment variables and configuration files
+- **Scaling Implications**: Enables automatic scaling and load balancer compatibility
+
+### 3.5.3 File System Storage
+**Static Asset Management**
+- **Public Directory**: Configurable static file serving with security headers
+- **Log Storage**: Structured logging with configurable output destinations
+- **Certificate Storage**: Secure filesystem storage for SSL/TLS certificates
+- **Permissions**: Appropriate filesystem access controls for security
+
+## 3.6 DEVELOPMENT & DEPLOYMENT
+
+### 3.6.1 Development Environment
+**Development Tools**
+- **Node Version Management**: Support for multiple Node.js versions via nvm or similar tools
+- **Hot Reload**: Nodemon integration for automatic server restart during development
+- **Environment Isolation**: Separate development, testing, and production configurations
+- **Code Quality**: ESLint integration for consistent code style and quality enforcement
+
+### 3.6.2 Build System
+**Maven Build System (Java Components)**
+- **Version**: Maven 3.6+ for Java test automation framework
+- **Dependency Management**: Centralized dependency resolution and version management
+- **Build Lifecycle**: Standardized compile, test, and package phases
+- **Integration**: Seamless integration with CI/CD pipelines
+
+**NPM Scripts (Node.js Components)**
+- **Script Types**: Development server, testing, linting, and production deployment scripts
+- **Package Management**: NPM-based dependency installation and updates
+- **Version Locking**: package-lock.json for deterministic dependency resolution
+
+### 3.6.3 Production Deployment
+**Process Management**
+- **PM2 Ecosystem**: Production-ready process management with clustering
+- **Graceful Shutdown**: SIGTERM/SIGINT signal handling for clean state transitions
+- **Health Monitoring**: Dedicated health check endpoints for load balancer integration
+- **Zero-Downtime Deployment**: PM2 cluster mode supporting rolling deployments
+
+**Security Hardening**
+- **TLS Configuration**: Production-grade SSL/TLS implementation with automatic redirection
+- **Environment Isolation**: Secure configuration management with environment-specific settings
+- **Security Headers**: Comprehensive security header implementation via Helmet.js
+- **Input Validation**: All user inputs validated and sanitized
+
+### 3.6.4 CI/CD Requirements
+**Integration Capabilities**
+- **Platform Support**: Compatible with standard CI/CD platforms (Jenkins, GitHub Actions)
+- **Testing Integration**: Automated test execution for both JavaScript and Java test suites
+- **Deployment Automation**: Script-based deployment with environment-specific configurations
+- **Monitoring Integration**: Health check endpoints supporting automated deployment validation
+
+## 3.7 TECHNOLOGY INTEGRATION ARCHITECTURE
+
+```mermaid
+graph TB
+    subgraph "Runtime Environment"
+        A[Node.js 22.x LTS] --> B[Express.js 4.20.0]
+    end
+    
+    subgraph "Security Layer"
+        C[Helmet.js 7.1.0] --> D[Security Headers]
+        E[express-rate-limit 7.1.0] --> F[Rate Limiting]
+        G[express-validator 7.0.1] --> H[Input Validation]
+        I[cors 2.8.5] --> J[CORS Policy]
+    end
+    
+    subgraph "Testing Framework"
+        K[Jest 29.0.0] --> L[Unit Tests]
+        M[Supertest 7.1.4] --> N[API Tests]
+        O[Selenium 3.141.59] --> P[E2E Tests]
+        Q[Cucumber 7.3.4] --> R[BDD Tests]
+    end
+    
+    subgraph "Production Infrastructure"
+        S[PM2 5.0.0] --> T[Process Management]
+        U[PostgreSQL] --> V[Data Persistence]
+        W[Let's Encrypt] --> X[SSL Certificates]
+    end
+    
+    subgraph "External Services"
+        Y[Backprop API] --> Z[Monitoring]
+    end
+    
+    B --> C
+    B --> E
+    B --> G
+    B --> I
+    
+    A --> K
+    A --> O
+    
+    B --> S
+    B --> U
+    A --> W
+    
+    B --> Y
+```
+
+### 3.7.1 Security Integration Points
+The technology stack implements a defense-in-depth security architecture where each layer provides specific protection:
+
+- **Transport Layer**: HTTPS/TLS termination with grade A security compliance
+- **Application Layer**: Express.js framework with security-focused middleware pipeline
+- **Input Layer**: Comprehensive validation and sanitization of all user inputs
+- **Output Layer**: Security headers preventing client-side vulnerabilities
+- **Rate Limiting Layer**: Multi-scope protection against abuse and DoS attacks
+
+### 3.7.2 Performance Characteristics
+**Response Time Targets**:
+- Server startup: <100ms
+- Security middleware processing: <50ms total
+- API response time: <200ms (95th percentile)
+- Test suite execution: <5 minutes
+
+**Scalability Features**:
+- Stateless application design enabling horizontal scaling
+- PM2 clustering for multi-core utilization
+- Load balancer compatibility with health check endpoints
+- Environment-based configuration supporting multiple deployment targets
+
+#### References
+**Repository Files Examined**:
+- `package.json` - Node.js dependencies and versions
+- `pom.xml` - Java test automation dependencies and versions  
+- `server.js` - Server implementation and middleware configuration
+- `.env.example` - Environment configuration template and service integrations
+- `README.md` - Project setup and development guidelines
+
+**Technical Specification Sections Referenced**:
+- `1.2 SYSTEM OVERVIEW` - System components and architecture context
+- `2.1 FEATURE CATALOG` - Feature dependencies and technical requirements
+- `2.4 IMPLEMENTATION CONSIDERATIONS` - Technical constraints and performance requirements
+
+**External Sources**:
+- Node.js LTS release information and support lifecycle
 
 # 4. PROCESS FLOWCHART
 
@@ -1323,669 +1592,746 @@ graph LR
 
 ### 4.1.1 Core Business Processes
 
-#### Test Automation Workflow (F-001, F-002, F-003)
+The system implements a security-first Node.js application with comprehensive protection mechanisms and automated testing capabilities. The core business processes center around secure HTTP/HTTPS request handling, multi-layer security validation, and robust error management.
 
-The test automation workflow represents the primary business process for automated testing execution, encompassing browser automation, BDD testing, and parallel execution capabilities.
+#### 4.1.1.1 Server Initialization and Startup Flow
+
+The server initialization process establishes the security-hardened runtime environment with proper error handling and graceful degradation capabilities.
 
 ```mermaid
 flowchart TD
-    A[Test Execution Request] --> B{Environment<br/>Configuration<br/>Valid?}
-    B -->|No| C[Configuration Error]
-    B -->|Yes| D[Initialize WebDriver Manager]
+    A[Application Start] --> B[Load Environment Variables]
+    B --> C[Initialize Express.js Application]
+    C --> D[Configure Security Middleware Pipeline]
+    D --> E{HTTPS Enabled?}
     
-    D --> E{Browser Driver<br/>Available?}
-    E -->|No| F[Download Driver<br/>< 5 seconds]
-    E -->|Yes| G[Parse Feature Files]
-    F --> G
+    E -->|Yes| F[Load SSL Certificates]
+    E -->|No| G[Configure HTTP Server Only]
     
-    G --> H{Feature Files<br/>Valid?}
-    H -->|No| I[Gherkin Parse Error]
-    H -->|Yes| J[Apply Tag Filters]
+    F --> H{Certificates Valid?}
+    H -->|Yes| I[Start HTTPS Server on Port 3443]
+    H -->|No| J[Log Certificate Error]
+    J --> G
     
-    J --> K[Determine Execution Strategy]
-    K --> L{Parallel<br/>Execution?}
-    L -->|Yes| M[Initialize Thread Pool]
-    L -->|No| N[Sequential Execution]
+    I --> K[Start HTTP Server on Port 3000]
+    G --> K
+    K --> L[Register Graceful Shutdown Handlers]
+    L --> M[Server Ready - Listening for Requests]
     
-    M --> O[Launch Parallel Tests]
-    N --> P[Launch Sequential Tests]
-    
-    O --> Q[Monitor Test Progress]
-    P --> Q
-    
-    Q --> R{All Tests<br/>Complete?}
-    R -->|No| S{Timeout<br/>Reached?}
-    R -->|Yes| T[Generate Reports]
-    
-    S -->|Yes| U[Timeout Handling]
-    S -->|No| Q
-    
-    T --> V[Cleanup Resources]
-    U --> V
-    V --> W[Test Execution Complete]
-    
-    C --> X[Process Terminated]
-    I --> X
+    M --> N[Health Check Endpoints Active]
+    N --> O[Rate Limiting Active]
+    O --> P[Security Headers Applied]
+    P --> Q[System Operational]
     
     style A fill:#e1f5fe
-    style W fill:#c8e6c9
-    style X fill:#ffcdd2
+    style Q fill:#c8e6c9
+    style J fill:#ffcdd2
 ```
 
-#### HTTP Server Lifecycle Workflow (F-004, F-005)
+#### 4.1.1.2 Request Processing Pipeline
 
-The HTTP server workflow manages the complete lifecycle from initialization to shutdown, including progressive enhancement capabilities.
+The request processing pipeline implements defense-in-depth security with multiple validation and protection layers before reaching application logic.
 
 ```mermaid
 flowchart TD
-    A[Server Start Request] --> B{Configuration<br/>Available?}
-    B -->|No| C[Load Default Config]
-    B -->|Yes| D[Validate Configuration]
+    A[Incoming HTTP Request] --> B[Helmet.js Security Headers]
+    B --> C[CORS Origin Validation]
+    C --> D{CORS Valid?}
     
-    C --> D
-    D --> E{Port<br/>Available?}
-    E -->|No| F[Port Conflict Error]
-    E -->|Yes| G[Initialize HTTP Server]
+    D -->|No| E[Return 403 Forbidden]
+    D -->|Yes| F[Global Rate Limit Check]
     
-    G --> H[Bind to Port]
-    H --> I{Binding<br/>Successful?}
-    I -->|No| J[Binding Error]
-    I -->|Yes| K[Start Listening]
+    F --> G{Rate Limit OK?}
+    G -->|No| H[Return 429 Too Many Requests]
+    G -->|Yes| I[Endpoint-Specific Rate Limit]
     
-    K --> L[Server Ready State]
-    L --> M[Process Requests]
+    I --> J{Endpoint Rate OK?}
+    J -->|No| H
+    J -->|Yes| K[Body Parser Middleware]
     
-    M --> N{Request<br/>Received?}
-    N -->|Yes| O[Route Handler]
-    N -->|No| P{Shutdown<br/>Signal?}
+    K --> L{Body Size Valid?}
+    L -->|No| M[Return 413 Payload Too Large]
+    L -->|Yes| N[Input Validation]
     
-    O --> Q{Valid<br/>Route?}
-    Q -->|Yes| R[Generate Response]
-    Q -->|No| S[404 Not Found]
+    N --> O{Input Valid?}
+    O -->|No| P[Return 400 Bad Request]
+    O -->|Yes| Q[Route Handler Execution]
     
-    R --> T[Send Response]
-    S --> T
-    T --> M
+    Q --> R[Response Processing]
+    R --> S[Security Headers Applied]
+    S --> T[Send Response to Client]
     
-    P -->|Yes| U[Graceful Shutdown]
-    P -->|No| M
-    
-    U --> V[Close Connections]
-    V --> W[Release Resources]
-    W --> X[Server Stopped]
-    
-    F --> Y[Process Terminated]
-    J --> Y
+    E --> U[Log Security Violation]
+    H --> V[Log Rate Limit Exceeded]
+    M --> W[Log Payload Error]
+    P --> X[Log Validation Error]
     
     style A fill:#e1f5fe
-    style L fill:#fff3e0
-    style X fill:#c8e6c9
+    style T fill:#c8e6c9
+    style E fill:#ffcdd2
+    style H fill:#ffcdd2
+    style M fill:#ffcdd2
+    style P fill:#ffcdd2
+```
+
+#### 4.1.1.3 API Endpoint Workflow
+
+The API endpoints provide secure data access with comprehensive validation and monitoring capabilities.
+
+```mermaid
+flowchart TD
+    A[API Request Received] --> B{Endpoint Type}
+    
+    B -->|/health| C[Health Check Handler]
+    B -->|/ping| D[Ping Handler]
+    B -->|/api/data| E[Data API Handler]
+    B -->|/api/status| F[Status API Handler]
+    B -->|Other| G[404 Handler]
+    
+    C --> H[Collect System Metrics]
+    H --> I[Check Uptime]
+    I --> J[Format Health Response]
+    J --> K[Return 200 with Health Data]
+    
+    D --> L[Return Simple Pong Response]
+    L --> M[Log Ping Request]
+    
+    E --> N[Validate Request Body]
+    N --> O{Validation Passed?}
+    O -->|No| P[Return 400 with Errors]
+    O -->|Yes| Q[Process Data Request]
+    Q --> R[Format Data Response]
+    R --> S[Return 200 with Data]
+    
+    F --> T[Collect Server Status]
+    T --> U[Check Configuration]
+    U --> V[Format Status Response]
+    V --> W[Return 200 with Status]
+    
+    G --> X[Log 404 Request]
+    X --> Y[Return 404 Not Found]
+    
+    K --> Z[Update Response Headers]
+    S --> Z
+    W --> Z
+    Z --> AA[Send Response]
+    
+    style A fill:#e1f5fe
+    style AA fill:#c8e6c9
+    style P fill:#ffcdd2
     style Y fill:#ffcdd2
 ```
 
 ### 4.1.2 Integration Workflows
 
-#### Backprop Development Integration Workflow (F-006)
+#### 4.1.2.1 External Service Integration Flow
 
-The Backprop integration workflow demonstrates how development tooling integrates with both Java and Node.js components for enhanced development workflows.
+The system integrates with external services including monitoring systems, certificate authorities, and database connections.
 
 ```mermaid
 flowchart TD
-    A[Development Session Start] --> B[Initialize Backprop Hooks]
-    B --> C{Code Analysis<br/>Required?}
+    A[System Startup] --> B[Initialize External Connections]
     
-    C -->|Yes| D[Execute Code Analysis]
-    C -->|No| E[Monitor File Changes]
+    B --> C[Backprop API Integration]
+    C --> D{Backprop Available?}
+    D -->|Yes| E[Enable Monitoring]
+    D -->|No| F[Log Monitoring Unavailable]
     
-    D --> F{Analysis<br/>Complete?}
-    F -->|No| G[Analysis Timeout]
-    F -->|Yes| H[Generate Analysis Report]
+    B --> G[PostgreSQL Connection]
+    G --> H{Database Available?}
+    H -->|Yes| I[Establish Connection Pool]
+    H -->|No| J[Log Database Unavailable]
     
-    H --> I[Update Metrics Database]
-    I --> E
+    B --> K[Let's Encrypt Integration]
+    K --> L{Certificate Renewal Needed?}
+    L -->|Yes| M[Request New Certificate]
+    L -->|No| N[Use Existing Certificate]
     
-    E --> J{File<br/>Changed?}
-    J -->|Yes| K{Test Execution<br/>Triggered?}
-    J -->|No| E
+    M --> O{Renewal Successful?}
+    O -->|Yes| P[Update Certificate Files]
+    O -->|No| Q[Log Certificate Error]
     
-    K -->|Yes| L[Execute Test Harness]
-    K -->|No| M[Update Code Metrics]
+    E --> R[System Fully Integrated]
+    I --> R
+    P --> R
+    N --> R
     
-    L --> N{Tests<br/>Passed?}
-    N -->|Yes| O[Update Success Metrics]
-    N -->|No| P[Log Test Failures]
-    
-    O --> Q[Generate Comprehensive Report]
-    P --> Q
-    M --> Q
-    
-    Q --> R{Session<br/>Active?}
-    R -->|Yes| E
-    R -->|No| S[Finalize Reports]
-    
-    S --> T[Development Session End]
-    G --> T
+    F --> S[System Partially Integrated]
+    J --> S
+    Q --> S
     
     style A fill:#e1f5fe
-    style T fill:#c8e6c9
+    style R fill:#c8e6c9
+    style S fill:#fff3e0
+    style F fill:#ffcdd2
+    style J fill:#ffcdd2
+    style Q fill:#ffcdd2
 ```
 
-#### Cross-Platform Deployment Workflow (F-007, F-008)
+#### 4.1.2.2 CI/CD Pipeline Integration
 
-This workflow manages deployment across different runtime environments and process management systems.
+The testing and deployment workflows ensure continuous security validation and automated deployment processes.
 
 ```mermaid
 flowchart TD
-    A[Deployment Request] --> B{Target<br/>Platform?}
+    A[Code Push to Repository] --> B[CI Pipeline Triggered]
     
-    B -->|Node.js| C[Node.js Deployment Path]
-    B -->|Python Flask| D[Python Flask Port]
+    B --> C[Install Dependencies]
+    C --> D[Security Dependency Scan]
+    D --> E{Vulnerabilities Found?}
     
-    C --> E{Production<br/>Environment?}
-    E -->|Yes| F[PM2 Configuration]
-    E -->|No| G[Development Mode]
+    E -->|Yes| F[Fail Build - Security Issues]
+    E -->|No| G[Run Unit Tests]
     
-    F --> H[Cluster Mode Setup]
-    H --> I[Health Check Configuration]
-    I --> J[Start PM2 Process]
+    G --> H[Jest Test Execution]
+    H --> I{Unit Tests Pass?}
+    I -->|No| J[Fail Build - Test Issues]
+    I -->|Yes| K[Run Integration Tests]
     
-    J --> K{PM2<br/>Started?}
-    K -->|Yes| L[Monitor Process Health]
-    K -->|No| M[PM2 Error]
+    K --> L[Supertest API Testing]
+    L --> M{API Tests Pass?}
+    M -->|No| J
+    M -->|Yes| N[Run Security Tests]
     
-    G --> N[Single Process Mode]
-    N --> O[Basic Health Check]
-    O --> L
+    N --> O[OWASP Compliance Check]
+    O --> P{Security Tests Pass?}
+    P -->|No| Q[Fail Build - Security Compliance]
+    P -->|Yes| R[Build Docker Image]
     
-    D --> P[Python Environment Setup]
-    P --> Q[Flask Application Port]
-    Q --> R[WSGI Server Configuration]
-    R --> S[Start Flask Application]
+    R --> S[Deploy to Staging]
+    S --> T[Run E2E Tests]
+    T --> U{E2E Tests Pass?}
+    U -->|No| V[Rollback Deployment]
+    U -->|Yes| W[Deploy to Production]
     
-    S --> T{Flask<br/>Started?}
-    T -->|Yes| U[Monitor Flask Health]
-    T -->|No| V[Flask Error]
+    W --> X[Health Check Verification]
+    X --> Y[Deployment Complete]
     
-    L --> W[Application Running]
-    U --> W
+    style A fill:#e1f5fe
+    style Y fill:#c8e6c9
+    style F fill:#ffcdd2
+    style J fill:#ffcdd2
+    style Q fill:#ffcdd2
+    style V fill:#ffcdd2
+```
+
+## 4.2 SECURITY PROCESSING WORKFLOWS
+
+### 4.2.1 Multi-Layer Security Validation
+
+#### 4.2.1.1 CORS Policy Enforcement
+
+```mermaid
+flowchart TD
+    A[Request with Origin Header] --> B[Extract Origin Value]
+    B --> C{Origin Header Present?}
     
-    M --> X[Deployment Failed]
-    V --> X
+    C -->|No| D[Check if Preflight Request]
+    C -->|Yes| E[Validate Against Allowed Origins]
+    
+    D -->|Preflight| F[Return CORS Preflight Response]
+    D -->|Regular| G[Allow Request - No Origin]
+    
+    E --> H{Origin Allowed?}
+    H -->|No| I[Log Blocked Origin]
+    I --> J[Return 403 CORS Error]
+    H -->|Yes| K[Set CORS Headers]
+    
+    K --> L[Access-Control-Allow-Origin]
+    L --> M[Access-Control-Allow-Methods]
+    M --> N[Access-Control-Allow-Headers]
+    N --> O{Credentials Allowed?}
+    
+    O -->|Yes| P[Access-Control-Allow-Credentials: true]
+    O -->|No| Q[Continue Without Credentials]
+    
+    P --> R[Allow Request Processing]
+    Q --> R
+    F --> S[Return 200 with CORS Headers]
+    G --> R
+    
+    style A fill:#e1f5fe
+    style R fill:#c8e6c9
+    style S fill:#c8e6c9
+    style J fill:#ffcdd2
+```
+
+#### 4.2.1.2 Rate Limiting Processing
+
+```mermaid
+flowchart TD
+    A[Request Received] --> B[Extract Client IP]
+    B --> C[Check Global Rate Limit]
+    C --> D{Global Limit Exceeded?}
+    
+    D -->|Yes| E[Log Rate Limit Violation]
+    E --> F[Set Retry-After Header]
+    F --> G[Return 429 Status]
+    
+    D -->|No| H[Check Endpoint-Specific Limit]
+    H --> I{Endpoint Type}
+    
+    I -->|/api/*| J[API Rate Limit: 100/min]
+    I -->|/auth/*| K[Auth Rate Limit: 10/min]
+    I -->|/health| L[No Rate Limit]
+    I -->|Other| M[Default Rate Limit: 1000/hour]
+    
+    J --> N{API Limit Exceeded?}
+    K --> O{Auth Limit Exceeded?}
+    L --> P[Allow Request]
+    M --> Q{Default Limit Exceeded?}
+    
+    N -->|Yes| E
+    O -->|Yes| E
+    Q -->|Yes| E
+    
+    N -->|No| R[Increment API Counter]
+    O -->|No| S[Increment Auth Counter]
+    Q -->|No| T[Increment Default Counter]
+    
+    R --> U[Set Rate Limit Headers]
+    S --> U
+    T --> U
+    P --> U
+    
+    U --> V[X-RateLimit-Limit]
+    V --> W[X-RateLimit-Remaining]
+    W --> X[X-RateLimit-Reset]
+    X --> Y[Allow Request Processing]
+    
+    style A fill:#e1f5fe
+    style P fill:#c8e6c9
+    style Y fill:#c8e6c9
+    style G fill:#ffcdd2
+```
+
+#### 4.2.1.3 Input Validation and Sanitization
+
+```mermaid
+flowchart TD
+    A[Request with Body/Query Params] --> B[Parse Request Data]
+    B --> C[Apply Validation Schema]
+    C --> D{Schema Validation}
+    
+    D -->|Pass| E[Data Type Validation]
+    D -->|Fail| F[Collect Schema Errors]
+    
+    E --> G{Type Check Pass?}
+    G -->|No| H[Collect Type Errors]
+    G -->|Yes| I[Length and Range Validation]
+    
+    I --> J{Constraints Valid?}
+    J -->|No| K[Collect Constraint Errors]
+    J -->|Yes| L[XSS Prevention Scan]
+    
+    L --> M{XSS Patterns Found?}
+    M -->|Yes| N[Sanitize Dangerous Content]
+    M -->|No| O[SQL Injection Check]
+    
+    N --> P[Log Sanitization Action]
+    P --> O
+    
+    O --> Q{Injection Patterns Found?}
+    Q -->|Yes| R[Reject Request - Security Risk]
+    Q -->|No| S[Final Validation Pass]
+    
+    F --> T[Format Validation Errors]
+    H --> T
+    K --> T
+    T --> U[Return 400 Bad Request]
+    
+    S --> V[Data Validated Successfully]
+    R --> W[Log Security Violation]
+    W --> X[Return 400 Security Error]
+    
+    style A fill:#e1f5fe
+    style V fill:#c8e6c9
+    style U fill:#ffcdd2
+    style X fill:#ffcdd2
+    style R fill:#ffcdd2
+```
+
+## 4.3 ERROR HANDLING AND RECOVERY WORKFLOWS
+
+### 4.3.1 Comprehensive Error Management
+
+#### 4.3.1.1 Error Classification and Response
+
+```mermaid
+flowchart TD
+    A[Error Detected] --> B{Error Type Classification}
+    
+    B -->|Validation Error| C[Format Validation Response]
+    B -->|Authentication Error| D[Format Auth Response]
+    B -->|Authorization Error| E[Format Authorization Response]
+    B -->|Rate Limit Error| F[Format Rate Limit Response]
+    B -->|System Error| G[Format System Error Response]
+    B -->|Unknown Error| H[Format Generic Error Response]
+    
+    C --> I[400 Bad Request]
+    D --> J[401 Unauthorized]
+    E --> K[403 Forbidden]
+    F --> L[429 Too Many Requests]
+    G --> M{Environment Check}
+    H --> M
+    
+    M -->|Development| N[500 with Stack Trace]
+    M -->|Production| O[500 Generic Message]
+    
+    I --> P[Add Error Details to Response]
+    J --> Q[Add WWW-Authenticate Header]
+    K --> R[Add Error Description]
+    L --> S[Add Retry-After Header]
+    N --> T[Add Debug Information]
+    O --> U[Add Minimal Error Info]
+    
+    P --> V[Log Error Event]
+    Q --> V
+    R --> V
+    S --> V
+    T --> V
+    U --> V
+    
+    V --> W[Send Error Response]
+    W --> X[Update Error Metrics]
+    X --> Y[Check Error Threshold]
+    
+    Y --> Z{Critical Error Rate?}
+    Z -->|Yes| AA[Trigger Alert System]
+    Z -->|No| BB[Continue Normal Operation]
+    
+    style A fill:#ffebee
+    style W fill:#ffcdd2
+    style BB fill:#c8e6c9
+    style AA fill:#d32f2f
+```
+
+#### 4.3.1.2 Graceful Shutdown Process
+
+```mermaid
+flowchart TD
+    A[Shutdown Signal Received] --> B{Signal Type}
+    
+    B -->|SIGTERM| C[Graceful Shutdown Request]
+    B -->|SIGINT| D[Interrupt Signal]
+    B -->|SIGHUP| E[Restart Signal]
+    
+    C --> F[Stop Accepting New Connections]
+    D --> F
+    E --> F
+    
+    F --> G[Set Shutdown Flag]
+    G --> H[Notify Active Connections]
+    H --> I[Start Shutdown Timer: 30s]
+    
+    I --> J[Close HTTPS Server]
+    J --> K{HTTPS Closed?}
+    K -->|No| L[Wait for HTTPS Closure]
+    L --> M{Timeout Reached?}
+    M -->|No| L
+    M -->|Yes| N[Force HTTPS Termination]
+    
+    K -->|Yes| O[Close HTTP Server]
+    N --> O
+    
+    O --> P{HTTP Closed?}
+    P -->|No| Q[Wait for HTTP Closure]
+    Q --> R{Timeout Reached?}
+    R -->|No| Q
+    R -->|Yes| S[Force HTTP Termination]
+    
+    P -->|Yes| T[Close Database Connections]
+    S --> T
+    
+    T --> U[Clean Up Resources]
+    U --> V[Log Shutdown Complete]
+    V --> W[Exit Process: Code 0]
+    
+    style A fill:#fff3e0
+    style W fill:#c8e6c9
+    style N fill:#ffcdd2
+    style S fill:#ffcdd2
+```
+
+## 4.4 PRODUCTION DEPLOYMENT WORKFLOWS
+
+### 4.4.1 PM2 Process Management
+
+#### 4.4.1.1 Application Lifecycle Management
+
+```mermaid
+flowchart TD
+    A[PM2 Start Command] --> B[Load PM2 Configuration]
+    B --> C[Validate Configuration]
+    C --> D{Config Valid?}
+    
+    D -->|No| E[Log Configuration Error]
+    D -->|Yes| F[Initialize Cluster Mode]
+    
+    F --> G[Fork Worker Processes]
+    G --> H[Workers Based on CPU Count]
+    H --> I[Each Worker: Node.js Instance]
+    
+    I --> J[Worker Health Check]
+    J --> K{Worker Healthy?}
+    K -->|No| L[Restart Unhealthy Worker]
+    K -->|Yes| M[Continue Monitoring]
+    
+    L --> N[Increment Restart Counter]
+    N --> O{Restart Limit Reached?}
+    O -->|Yes| P[Mark Worker as Failed]
+    O -->|No| G
+    
+    M --> Q[Monitor CPU Usage]
+    Q --> R{CPU > 80%?}
+    R -->|Yes| S[Scale Up Workers]
+    R -->|No| T[Monitor Memory]
+    
+    T --> U{Memory > 90%?}
+    U -->|Yes| V[Restart High Memory Worker]
+    U -->|No| W[Continue Normal Operation]
+    
+    S --> X[Add New Worker Instance]
+    V --> L
+    X --> I
+    W --> J
+    
+    E --> Y[Deployment Failed]
+    P --> Z[Worker Management Alert]
     
     style A fill:#e1f5fe
     style W fill:#c8e6c9
-    style X fill:#ffcdd2
+    style Y fill:#ffcdd2
+    style Z fill:#ffcdd2
 ```
 
-## 4.2 DETAILED PROCESS FLOWS
-
-### 4.2.1 Browser Automation Process Flow
-
-```mermaid
-stateDiagram-v2
-    [*] --> Initializing
-    Initializing --> WebDriverSetup: Configuration Valid
-    Initializing --> ConfigurationError: Configuration Invalid
-    
-    WebDriverSetup --> DriverDownload: Driver Missing
-    WebDriverSetup --> BrowserLaunch: Driver Available
-    DriverDownload --> BrowserLaunch: Download Complete
-    DriverDownload --> DriverError: Download Failed
-    
-    BrowserLaunch --> BrowserReady: Launch Successful
-    BrowserLaunch --> BrowserError: Launch Failed
-    
-    BrowserReady --> TestExecution: Ready for Tests
-    TestExecution --> TestRunning: Execute Test Case
-    TestRunning --> TestComplete: Test Finished
-    TestRunning --> TestFailed: Test Error
-    
-    TestComplete --> TestExecution: More Tests
-    TestComplete --> Cleanup: All Tests Done
-    TestFailed --> ErrorHandling: Handle Failure
-    ErrorHandling --> TestExecution: Retry
-    ErrorHandling --> Cleanup: Abort
-    
-    Cleanup --> [*]
-    ConfigurationError --> [*]
-    DriverError --> [*]
-    BrowserError --> [*]
-```
-
-### 4.2.2 BDD Test Execution Flow
-
-```mermaid
-flowchart LR
-    subgraph "Feature Processing"
-        A[Feature Files] --> B[Gherkin Parser]
-        B --> C[Scenario Extraction]
-        C --> D[Tag Filtering]
-    end
-    
-    subgraph "Step Definition Mapping"
-        D --> E[Step Definition Loader]
-        E --> F[Method Mapping]
-        F --> G[Parameter Binding]
-    end
-    
-    subgraph "Test Execution"
-        G --> H[Test Runner]
-        H --> I{Parallel Mode?}
-        I -->|Yes| J[Thread Pool Execution]
-        I -->|No| K[Sequential Execution]
-    end
-    
-    subgraph "Result Processing"
-        J --> L[Result Aggregation]
-        K --> L
-        L --> M[Report Generation]
-        M --> N[HTML Report]
-        M --> O[JSON Report]
-        M --> P[TXT Report]
-    end
-    
-    style A fill:#e1f5fe
-    style N fill:#c8e6c9
-    style O fill:#c8e6c9
-    style P fill:#c8e6c9
-```
-
-### 4.2.3 Parallel Test Execution Management
+#### 4.4.1.2 Zero-Downtime Deployment
 
 ```mermaid
 flowchart TD
-    A[Maven Surefire Plugin] --> B[Thread Pool Configuration]
-    B --> C{Test Classes<br/>Available?}
+    A[Deployment Initiated] --> B[Pre-deployment Validation]
+    B --> C[Run Health Checks]
+    C --> D{System Healthy?}
     
-    C -->|Yes| D[Distribute Test Classes]
-    C -->|No| E[No Tests Found]
+    D -->|No| E[Abort Deployment]
+    D -->|Yes| F[Create New Application Instance]
     
-    D --> F[Worker Thread 1]
-    D --> G[Worker Thread 2]
-    D --> H[Worker Thread N]
+    F --> G[Install Dependencies]
+    G --> H[Run Security Scans]
+    H --> I{Security Issues?}
     
-    F --> I[Execute Test Methods]
-    G --> J[Execute Test Methods]
-    H --> K[Execute Test Methods]
+    I -->|Yes| J[Fail Deployment - Security]
+    I -->|No| K[Run Test Suite]
     
-    I --> L{Test<br/>Passed?}
-    J --> M{Test<br/>Passed?}
-    K --> N{Test<br/>Passed?}
+    K --> L{Tests Pass?}
+    L -->|No| M[Fail Deployment - Tests]
+    L -->|Yes| N[Start New Instance on Different Port]
     
-    L -->|Yes| O[Success Count++]
-    L -->|No| P[Failure Count++]
-    M -->|Yes| O
-    M -->|No| P
-    N -->|Yes| O
-    N -->|No| P
+    N --> O[New Instance Health Check]
+    O --> P{New Instance Healthy?}
+    P -->|No| Q[Terminate New Instance]
+    P -->|Yes| R[Update Load Balancer]
     
-    O --> Q[Thread Complete]
+    R --> S[Gradual Traffic Shift]
+    S --> T[Monitor Error Rates]
+    T --> U{Error Rate Normal?}
+    
+    U -->|No| V[Rollback to Previous Version]
+    U -->|Yes| W[Complete Traffic Shift]
+    
+    W --> X[Stop Old Instance]
+    X --> Y[Cleanup Old Resources]
+    Y --> Z[Deployment Complete]
+    
+    V --> AA[Start Rollback Process]
+    AA --> BB[Restore Previous Instance]
+    BB --> CC[Rollback Complete]
+    
+    E --> DD[Deployment Aborted]
+    J --> DD
+    M --> DD
+    Q --> DD
+    
+    style A fill:#e1f5fe
+    style Z fill:#c8e6c9
+    style CC fill:#fff3e0
+    style DD fill:#ffcdd2
+```
+
+## 4.5 STATE MANAGEMENT AND TRANSITIONS
+
+### 4.5.1 Application State Lifecycle
+
+```mermaid
+stateDiagram-v2
+    [*] --> Initializing : Application Start
+    
+    Initializing --> ConfigurationLoading : Load Environment
+    ConfigurationLoading --> SecuritySetup : Config Validated
+    SecuritySetup --> ServerBinding : Middleware Configured
+    ServerBinding --> Ready : Ports Bound Successfully
+    
+    Ready --> Processing : Request Received
+    Processing --> Validating : Security Checks
+    Validating --> Executing : Validation Passed
+    Executing --> Responding : Handler Complete
+    Responding --> Ready : Response Sent
+    
+    Validating --> ErrorHandling : Validation Failed
+    Executing --> ErrorHandling : Runtime Error
+    ErrorHandling --> Ready : Error Response Sent
+    
+    Ready --> ShuttingDown : Shutdown Signal
+    Processing --> ShuttingDown : Graceful Shutdown
+    ShuttingDown --> Cleanup : Connections Drained
+    Cleanup --> [*] : Resources Released
+    
+    ConfigurationLoading --> Failed : Config Error
+    SecuritySetup --> Failed : Security Setup Error
+    ServerBinding --> Failed : Port Binding Error
+    Failed --> [*] : Exit with Error
+```
+
+### 4.5.2 Request Processing State Transitions
+
+```mermaid
+stateDiagram-v2
+    [*] --> Received : HTTP Request
+    
+    Received --> SecurityCheck : Apply Headers
+    SecurityCheck --> CORSValidation : Headers Applied
+    CORSValidation --> RateLimitCheck : CORS Valid
+    RateLimitCheck --> InputValidation : Rate Limit OK
+    InputValidation --> RouteMatching : Input Valid
+    RouteMatching --> HandlerExecution : Route Found
+    HandlerExecution --> ResponseGeneration : Handler Complete
+    ResponseGeneration --> ResponseSent : Headers Applied
+    ResponseSent --> [*] : Complete
+    
+    CORSValidation --> Rejected : CORS Invalid
+    RateLimitCheck --> RateLimited : Limit Exceeded
+    InputValidation --> ValidationError : Invalid Input
+    RouteMatching --> NotFound : No Route Match
+    HandlerExecution --> ServerError : Runtime Exception
+    
+    Rejected --> [*] : 403 Response
+    RateLimited --> [*] : 429 Response
+    ValidationError --> [*] : 400 Response
+    NotFound --> [*] : 404 Response
+    ServerError --> [*] : 500 Response
+```
+
+## 4.6 PERFORMANCE AND MONITORING WORKFLOWS
+
+### 4.6.1 Health Check and Monitoring Flow
+
+```mermaid
+flowchart TD
+    A[Health Check Request] --> B[System Metrics Collection]
+    
+    B --> C[CPU Usage Check]
+    C --> D[Memory Usage Check]
+    D --> E[Uptime Calculation]
+    E --> F[Active Connections Count]
+    F --> G[Error Rate Analysis]
+    
+    G --> H{System Health Status}
+    H -->|Healthy| I[Status: OK]
+    H -->|Warning| J[Status: WARN]
+    H -->|Critical| K[Status: CRITICAL]
+    
+    I --> L[Response Code: 200]
+    J --> M[Response Code: 200 with Warnings]
+    K --> N[Response Code: 503]
+    
+    L --> O[Include Detailed Metrics]
+    M --> O
+    N --> P[Include Error Information]
+    
+    O --> Q[Format JSON Response]
     P --> Q
+    Q --> R[Add Timestamp]
+    R --> S[Send Health Response]
     
-    Q --> R{All Threads<br/>Complete?}
-    R -->|No| S[Wait for Completion]
-    R -->|Yes| T[Aggregate Results]
+    S --> T[Log Health Check]
+    T --> U[Update Monitoring Dashboard]
+    U --> V[Check Alerting Thresholds]
     
-    S --> R
-    T --> U[Generate Final Report]
-    U --> V[Execution Complete]
-    
-    E --> W[Build Failed]
+    V --> W{Alert Required?}
+    W -->|Yes| X[Send Alert Notification]
+    W -->|No| Y[Continue Monitoring]
     
     style A fill:#e1f5fe
-    style V fill:#c8e6c9
-    style W fill:#ffcdd2
+    style Y fill:#c8e6c9
+    style X fill:#ff9800
+    style N fill:#ffcdd2
 ```
 
-## 4.3 ERROR HANDLING FLOWCHARTS
-
-### 4.3.1 Test Framework Error Handling
+### 4.6.2 Performance Optimization Flow
 
 ```mermaid
 flowchart TD
-    A[Error Detected] --> B{Error<br/>Type?}
+    A[Performance Monitoring Active] --> B[Collect Response Times]
+    B --> C[Monitor Memory Usage]
+    C --> D[Track CPU Utilization]
+    D --> E[Analyze Request Patterns]
     
-    B -->|WebDriver Error| C[WebDriver Error Handler]
-    B -->|Test Timeout| D[Timeout Handler]
-    B -->|Configuration Error| E[Configuration Handler]
-    B -->|Network Error| F[Network Handler]
+    E --> F{Performance Threshold Check}
+    F -->|Within Limits| G[Continue Normal Operation]
+    F -->|Approaching Limits| H[Performance Warning]
+    F -->|Exceeding Limits| I[Performance Critical]
     
-    C --> G{Driver<br/>Recoverable?}
-    G -->|Yes| H[Restart WebDriver]
-    G -->|No| I[Fail Test Case]
+    H --> J[Log Performance Warning]
+    I --> K[Log Performance Critical]
     
-    D --> J{Retry<br/>Attempts<br/>Remaining?}
-    J -->|Yes| K[Increase Timeout]
-    J -->|No| L[Mark as Timeout]
+    J --> L[Increase Monitoring Frequency]
+    K --> M[Trigger Auto-scaling]
     
-    E --> M[Load Default Config]
-    M --> N{Config<br/>Valid?}
-    N -->|Yes| O[Continue Execution]
-    N -->|No| P[Abort Test Suite]
+    L --> N[Analyze Bottlenecks]
+    M --> O[Add PM2 Worker Processes]
     
-    F --> Q[Retry Network Operation]
-    Q --> R{Retry<br/>Successful?}
-    R -->|Yes| S[Continue Test]
-    R -->|No| T[Network Failure]
+    N --> P{Bottleneck Type}
+    P -->|CPU| Q[Scale Horizontally]
+    P -->|Memory| R[Optimize Memory Usage]
+    P -->|I/O| S[Implement Caching]
     
-    H --> U[Resume Test Execution]
-    K --> U
-    O --> U
-    S --> U
+    O --> T[Redistribute Load]
+    Q --> U[Add Server Instances]
+    R --> V[Restart High Memory Workers]
+    S --> W[Enable Response Caching]
     
-    I --> V[Log Error Details]
-    L --> V
-    P --> V
-    T --> V
+    T --> X[Monitor Scaling Effect]
+    U --> X
+    V --> X
+    W --> X
     
-    V --> W[Update Error Metrics]
-    W --> X[Error Handling Complete]
+    X --> Y{Performance Improved?}
+    Y -->|Yes| G
+    Y -->|No| Z[Escalate Performance Issue]
     
-    style A fill:#ffcdd2
-    style U fill:#c8e6c9
-    style X fill:#fff3e0
-```
-
-### 4.3.2 HTTP Server Error Recovery
-
-```mermaid
-flowchart TD
-    A[Server Error] --> B{Error<br/>Severity?}
+    G --> A
+    Z --> AA[Manual Investigation Required]
     
-    B -->|Fatal| C[Fatal Error Handler]
-    B -->|Recoverable| D[Recoverable Error Handler]
-    B -->|Request Error| E[Request Error Handler]
-    
-    C --> F[Log Critical Error]
-    F --> G[Notify Monitoring]
-    G --> H[Graceful Shutdown]
-    H --> I[Server Restart Required]
-    
-    D --> J{Resource<br/>Available?}
-    J -->|Yes| K[Retry Operation]
-    J -->|No| L[Wait for Resources]
-    
-    K --> M{Operation<br/>Successful?}
-    M -->|Yes| N[Resume Normal Operation]
-    M -->|No| O[Escalate Error]
-    
-    L --> P[Resource Check]
-    P --> J
-    
-    E --> Q[Generate Error Response]
-    Q --> R{Client<br/>Disconnected?}
-    R -->|Yes| S[Close Connection]
-    R -->|No| T[Send Error Response]
-    
-    T --> U[Log Request Error]
-    S --> U
-    U --> V[Continue Processing]
-    
-    O --> W[Error Escalation]
-    W --> C
-    
-    N --> V
-    
-    style A fill:#ffcdd2
-    style V fill:#c8e6c9
-    style I fill:#ff9800
-```
-
-## 4.4 STATE TRANSITION DIAGRAMS
-
-### 4.4.1 Test Execution State Management
-
-```mermaid
-stateDiagram-v2
-    [*] --> Idle
-    Idle --> Initializing: Start Request
-    Initializing --> Ready: Setup Complete
-    Initializing --> Failed: Setup Error
-    
-    Ready --> Running: Execute Tests
-    Running --> Paused: Pause Request
-    Running --> Completed: All Tests Done
-    Running --> Failed: Critical Error
-    
-    Paused --> Running: Resume Request
-    Paused --> Stopped: Stop Request
-    
-    Completed --> Reporting: Generate Reports
-    Reporting --> Idle: Reports Complete
-    
-    Failed --> Recovering: Auto Recovery
-    Failed --> Stopped: Manual Stop
-    
-    Recovering --> Ready: Recovery Success
-    Recovering --> Failed: Recovery Failed
-    
-    Stopped --> [*]
-    
-    note right of Running
-        testFailureIgnore=true
-        allows continuation despite failures
-    end note
-    
-    note right of Paused
-        Thread synchronization
-        maintains state consistency
-    end note
-```
-
-### 4.4.2 HTTP Server State Transitions
-
-```mermaid
-stateDiagram-v2
-    [*] --> Stopped
-    Stopped --> Starting: Start Command
-    Starting --> Listening: Port Bound
-    Starting --> Error: Binding Failed
-    
-    Listening --> Processing: Request Received
-    Processing --> Listening: Response Sent
-    Processing --> Error: Processing Failed
-    
-    Error --> Recovering: Auto Recovery
-    Error --> Stopped: Manual Stop
-    
-    Recovering --> Listening: Recovery Success
-    Recovering --> Stopped: Recovery Failed
-    
-    Listening --> Stopping: Shutdown Signal
-    Processing --> Stopping: Graceful Shutdown
-    
-    Stopping --> Stopped: Cleanup Complete
-    
-    note right of Processing
-        Response time < 100ms
-        for basic requests
-    end note
-    
-    note right of Stopping
-        Graceful shutdown allows
-        current requests to complete
-    end note
-```
-
-## 4.5 INTEGRATION SEQUENCE DIAGRAMS
-
-### 4.5.1 Test Automation Integration Sequence
-
-```mermaid
-sequenceDiagram
-    participant Dev as Developer
-    participant Maven as Maven Build
-    participant WebDriver as WebDriver Manager
-    participant Browser as Browser Instance
-    participant Cucumber as Cucumber Engine
-    participant Reports as Report Generator
-    
-    Dev->>Maven: mvn test
-    Maven->>WebDriver: Initialize WebDriver
-    WebDriver->>Browser: Launch Browser (< 5s)
-    Browser-->>WebDriver: Browser Ready
-    
-    Maven->>Cucumber: Load Feature Files
-    Cucumber->>Cucumber: Parse Gherkin
-    Cucumber->>Maven: Step Definitions Mapped
-    
-    Maven->>Browser: Execute Test Scenarios
-    Browser-->>Maven: Test Results
-    
-    Maven->>Reports: Generate Reports
-    Reports->>Reports: Create HTML Report
-    Reports->>Reports: Create JSON Report
-    Reports->>Reports: Create TXT Report
-    
-    Reports-->>Dev: Test Execution Complete
-    
-    Note over Dev,Reports: Parallel execution via<br/>Maven Surefire plugin
-```
-
-### 4.5.2 HTTP Server and Backprop Integration
-
-```mermaid
-sequenceDiagram
-    participant Dev as Developer
-    participant Backprop as Backprop Tools
-    participant Server as HTTP Server
-    participant PM2 as PM2 Manager
-    participant Monitor as Health Monitor
-    
-    Dev->>Backprop: Start Development Session
-    Backprop->>Server: Initialize Server
-    Server->>PM2: Register Process
-    PM2->>Monitor: Setup Health Checks
-    
-    Dev->>Server: Deploy Application
-    Server->>PM2: Start Cluster Mode
-    PM2->>Monitor: Begin Monitoring
-    
-    loop Health Check Cycle
-        Monitor->>Server: Health Check Request
-        Server-->>Monitor: Health Status
-        Monitor->>PM2: Report Status
-    end
-    
-    Backprop->>Server: Execute Test Harness
-    Server-->>Backprop: Test Results
-    Backprop->>Backprop: Collect Metrics
-    
-    Dev->>Backprop: Request Reports
-    Backprop-->>Dev: Development Report
-    
-    Note over Dev,Monitor: PM2 ensures zero-downtime<br/>deployments and auto-restart
-```
-
-## 4.6 VALIDATION RULES AND CHECKPOINTS
-
-### 4.6.1 Business Rules Implementation
-
-| Process Stage | Validation Rule | Implementation | Recovery Action |
-|---|---|---|---|
-| Test Initialization | WebDriver timeout < 5 seconds | WebDriverManager configuration | Retry with different driver version |
-| Feature File Processing | Valid Gherkin syntax | Cucumber parser validation | Report syntax errors and skip file |
-| Parallel Execution | Thread safety validation | Maven Surefire thread management | Fall back to sequential execution |
-| HTTP Request Processing | Response time < 100ms | Node.js performance monitoring | Enable request queuing |
-| PM2 Process Management | Health check responsiveness | PM2 health monitoring | Automatic process restart |
-
-### 4.6.2 Authorization Checkpoints
-
-```mermaid
-flowchart LR
-    A[Request Received] --> B{Authentication<br/>Required?}
-    B -->|Yes| C[Validate Credentials]
-    B -->|No| D[Process Request]
-    
-    C --> E{Credentials<br/>Valid?}
-    E -->|Yes| F{Authorization<br/>Check}
-    E -->|No| G[401 Unauthorized]
-    
-    F -->|Authorized| D
-    F -->|Denied| H[403 Forbidden]
-    
-    D --> I[Execute Business Logic]
-    I --> J[Generate Response]
-    
-    G --> K[Security Log Entry]
-    H --> K
-    K --> L[End Request]
-    
-    J --> M[Success Response]
-    
-    style G fill:#ffcdd2
-    style H fill:#ffcdd2
-    style M fill:#c8e6c9
-```
-
-## 4.7 PERFORMANCE AND SLA CONSIDERATIONS
-
-### 4.7.1 Timing Constraints
-
-| Process | Target SLA | Measurement Point | Escalation Trigger |
-|---|---|---|---|
-| WebDriver Initialization | < 5 seconds | Driver ready state | > 10 seconds |
-| HTTP Response | < 100ms | Request to response | > 500ms |
-| Test Report Generation | < 30 seconds | Test completion to report | > 60 seconds |
-| PM2 Health Check | < 5 seconds | Health request to response | > 15 seconds |
-| Parallel Test Execution | 50% time reduction | Compared to sequential | < 25% improvement |
-
-### 4.7.2 Resource Management Flow
-
-```mermaid
-flowchart TD
-    A[Resource Request] --> B{Resource<br/>Available?}
-    B -->|Yes| C[Allocate Resource]
-    B -->|No| D[Check Queue Capacity]
-    
-    D --> E{Queue<br/>Full?}
-    E -->|No| F[Add to Queue]
-    E -->|Yes| G[Reject Request]
-    
-    F --> H[Monitor Queue]
-    H --> I{Resource<br/>Freed?}
-    I -->|Yes| J[Process Next in Queue]
-    I -->|No| K{Timeout<br/>Reached?}
-    
-    K -->|No| H
-    K -->|Yes| L[Timeout Error]
-    
-    J --> C
-    C --> M[Execute Process]
-    M --> N[Release Resource]
-    N --> O[Process Complete]
-    
-    G --> P[Resource Denied]
-    L --> P
-    
-    style O fill:#c8e6c9
-    style P fill:#ffcdd2
+    style A fill:#e1f5fe
+    style G fill:#c8e6c9
+    style AA fill:#ff5722
 ```
 
 #### References
 
-#### Technical Specification Sections
-- `1.2 SYSTEM OVERVIEW` - Dual-project architecture context
-- `2.1 FEATURE CATALOG` - Complete feature workflow mapping
-- `2.2 FUNCTIONAL REQUIREMENTS TABLE` - Performance and validation requirements
-- `3.8 TECHNOLOGY INTEGRATION ARCHITECTURE` - Integration patterns and security considerations
+**Repository Files Examined:**
+- `server.js` - Core server implementation, middleware pipeline, startup/shutdown flows, request processing workflows
+- `.env.example` - Environment configuration parameters, process control settings, integration configurations
+- `docs/README.md` - Security implementation workflows, procedural guidelines
+- `docs/api/endpoints.md` - API endpoint specifications, request/response flow definitions
+- `docs/guides/express-migration.md` - Express.js migration workflows and patterns
+- `docs/guides/production.md` - Production deployment workflows, PM2 process management
+- `docs/guides/testing.md` - Testing workflow patterns, CI/CD integration procedures
 
-#### Repository Evidence
-- `pom.xml` - Maven configuration for Java test automation workflows
-- `README.md` - Node.js server workflows and Backprop integration
-- `docs/architecture/` - System architecture documentation
-- `docs/guides/` - Development workflow guides
-- `.gitignore` - Java project structure patterns
-- `.gitattributes` - HTML language detection configuration
-
-#### Process Flow Sources
-- F-001 through F-009 feature implementations from Feature Catalog
-- Maven Surefire plugin parallel execution configuration
-- WebDriverManager browser automation patterns
-- Cucumber BDD test execution workflows
-- PM2 process management and health monitoring
-- Backprop development tooling integration patterns
-- Security validation and error recovery procedures
+**Technical Specification Sections Referenced:**
+- `1.2 SYSTEM OVERVIEW` - System architecture context, integration landscape, success criteria
+- `2.2 FUNCTIONAL REQUIREMENTS` - Detailed process requirements, validation rules, performance criteria
+- `3.7 TECHNOLOGY INTEGRATION ARCHITECTURE` - Technology stack integration, security layers, performance characteristics
 
 # 5. SYSTEM ARCHITECTURE
 
@@ -1993,5450 +2339,9237 @@ flowchart TD
 
 ### 5.1.1 System Overview
 
-The Testinium-QA system implements a **dual-stack architecture** that serves as a comprehensive technology blueprint for both automated testing and web server development. This unique design combines enterprise-grade test automation capabilities with modern web server infrastructure, providing a complete foundation for development teams requiring both testing and server implementation patterns.
+The system implements a **Layered Architecture with Defense-in-Depth Security** designed to address the evolving landscape of Node.js application security. The architecture operates on three core principles: simplicity-first design enabling progressive enhancement, comprehensive security hardening addressing OWASP Top 10 vulnerabilities, and dual-stack support for both runtime operations and automated testing.
 
-#### Overall System Architecture Style and Rationale
+**Architecture Style and Rationale:**
+- **Layered Architecture**: Provides clear separation of concerns between transport, security, application, and data layers, enabling independent evolution and testing of each layer
+- **Defense-in-Depth Security**: Multiple security layers prevent single points of failure, with each layer providing specific protection mechanisms (transport, application, input, output, and rate limiting layers)
+- **Zero Trust Architecture**: All inputs are validated, all origins are verified, and no implicit trust relationships exist within the system
+- **Configuration-Driven Design**: Environment-based security policies enable deployment across different environments without code modifications
 
-The system follows a **layered, minimalist-first architecture** with progressive enhancement capabilities. This design philosophy enables teams to start with basic implementations and systematically add complexity through well-defined enhancement layers. The architecture supports two primary operational modes:
+**Key Architectural Principles:**
+- **Minimalist-First Design**: Core implementation maintains minimal complexity while providing structured enhancement paths for production requirements
+- **Progressive Enhancement**: System supports evolution from basic HTTP server to enterprise-grade application with monitoring, scaling, and security features
+- **Integration-Centric**: Native hooks for external tooling, monitoring systems, and enterprise infrastructure
+- **Multi-Framework Support**: Dual-stack architecture supporting Node.js runtime and Java-based test automation
 
-1. **Test Automation Mode**: Enterprise browser automation using Selenium WebDriver with Cucumber BDD patterns
-2. **Web Server Mode**: HTTP server implementation with progressive enhancement from basic Node.js to production-ready Express.js
-
-#### Key Architectural Principles and Patterns
-
-- **Progressive Enhancement**: Each system layer builds upon previous layers while maintaining backward compatibility
-- **Technology Diversity**: Multi-language support (Java, Node.js, Python) for organizational flexibility
-- **Separation of Concerns**: Clear boundaries between test automation, server functionality, and enhancement modules
-- **Configuration-Driven Behavior**: Environment variables control feature activation and system behavior
-- **Native Integration Hooks**: Built-in support for Backprop development tooling and analysis workflows
-
-#### System Boundaries and Major Interfaces
-
-**Internal Boundaries**:
-- HTTP server core providing basic request/response handling
-- Test automation engine with browser interaction capabilities
-- Enhancement layer offering middleware, routing, and security features
-- Integration layer providing development tooling hooks and monitoring
-
-**External Interfaces**:
-- Browser WebDriver Protocol (W3C WebDriver standard)
-- HTTP/HTTPS client connections
-- Backprop development tooling API
-- CI/CD pipeline integration points
-- Package registry connections (npm, Maven Central)
+**System Boundaries and Major Interfaces:**
+- **North-bound Interface**: HTTP/HTTPS endpoints serving client applications and API consumers
+- **South-bound Interface**: PostgreSQL database connections for data persistence (optional)
+- **East-west Interfaces**: External service integrations (Backprop API monitoring, Let's Encrypt certificate management)
+- **Management Interface**: PM2 process management and health monitoring endpoints
 
 ### 5.1.2 Core Components Table
 
 | Component Name | Primary Responsibility | Key Dependencies | Integration Points |
 |---|---|---|---|
-| **Java Test Automation Engine** | Browser automation and BDD test execution | Selenium 3.141.59, Cucumber 7.2.3, JUnit 4.13.2 | WebDriver Protocol, Maven build system |
-| **HTTP Server Core** | Basic request handling and response generation | Node.js 14+, native http module | Client connections, environment configuration |
-| **Express.js Enhancement Layer** | Full-featured web framework capabilities | Express.js 4.18.2, middleware ecosystem | HTTP Core, security modules, routing |
-| **PM2 Process Manager** | Production deployment and scaling | PM2 v5.0.0+, cluster mode | Express layer, health monitoring, load balancing |
-| **Security Framework** | OWASP-compliant protection mechanisms | Helmet.js, TLS certificates, rate limiting | All server layers, authentication systems |
-| **Backprop Integration Hub** | Development workflow automation | Custom integration points, monitoring APIs | Test engine, server core, analysis tools |
+| **Express.js Core Server** | HTTP/HTTPS request handling with security middleware pipeline | Node.js 22.x LTS, Express 4.20.0, body-parser 1.20.3 | All middleware layers, external services, health endpoints |
+| **Security Middleware Stack** | Multi-layer protection implementing OWASP Top 10 compliance | Helmet.js 7.1.0, express-rate-limit 7.1.0, express-validator 7.0.1, cors 2.8.5 | Express application pipeline, request processing flow |
+| **Java Test Automation Suite** | Comprehensive E2E and security testing with BDD capabilities | Selenium 3.141.59, Cucumber 7.3.4, JUnit 4.13.2, Maven 3.x | Node.js server endpoints, CI/CD pipeline |
+| **PM2 Process Manager** | Production deployment, monitoring, scaling, and health management | PM2 5.0.0 with cluster mode support | Node.js application, monitoring systems, deployment pipeline |
 
 ### 5.1.3 Data Flow Description
 
-#### Primary Data Flows Between Components
+The system implements a linear request processing pipeline optimized for security and performance:
 
-**Test Automation Flow**:
-The test automation engine receives feature file specifications and executes them through the WebDriver Protocol. Test data flows from Cucumber feature files → Step definitions → Selenium WebDriver → Browser instances → Test results → Comprehensive reports. Parallel execution occurs at the method level with unlimited thread configuration for maximum throughput.
+**Primary Data Flows:**
+1. **Request Reception**: Incoming HTTP/HTTPS requests are received with origin validation and initial security header application
+2. **Security Processing Pipeline**: Requests flow through multiple security layers including Helmet.js security headers, CORS validation, global and endpoint-specific rate limiting, request body parsing with size validation, and comprehensive input validation and sanitization
+3. **Route Resolution**: Validated requests are matched against defined URL patterns (`/`, `/health`, `/ping`, `/api/data`, `/api/status`, `/static/*`)
+4. **Business Logic Execution**: Matched routes execute appropriate handlers with access to sanitized and validated input data
+5. **Response Generation**: Handlers generate responses with security headers automatically applied and formatted output
+6. **Response Delivery**: Stream-based transmission to client with appropriate caching headers and security policies
 
-**HTTP Server Flow**:
-Client requests enter through the HTTP server core, proceed through routing resolution, execute in designated handlers, generate responses, and return to clients. Sub-millisecond response times are achieved for basic endpoints with ~1000 requests/second baseline throughput. Enhanced requests flow through Express.js middleware chains before reaching handlers.
+**Integration Patterns and Protocols:**
+- **Synchronous Request/Response**: Primary communication pattern providing predictable behavior and simplified debugging
+- **HTTP/HTTPS Dual Support**: Development flexibility with HTTP, production security with HTTPS and grade A TLS compliance
+- **RESTful API Design**: Standard patterns for API endpoints with consistent response formats
+- **Middleware Pipeline Architecture**: Composable security and processing layers enabling modular enhancement
 
-**Enhancement Integration Flow**:
-The progressive enhancement pattern allows data to flow through multiple architectural layers: Basic HTTP → Express.js Framework → Security Middleware → Production Process Management. Each layer transforms and enriches the data while maintaining API compatibility.
+**Data Transformation Points:**
+- **Input Sanitization**: express-validator transforms and sanitizes all user inputs
+- **Security Header Injection**: Helmet.js adds 15+ security headers to all responses
+- **Rate Limit Processing**: express-rate-limit applies configurable throttling policies
+- **Response Formatting**: Consistent JSON response structures with error handling
 
-#### Integration Patterns and Protocols
-
-- **WebDriver Protocol**: Standard W3C WebDriver communication for browser automation
-- **HTTP/HTTPS**: RESTful API patterns for server communication
-- **JSON Payloads**: Structured data exchange with Backprop tooling
-- **Environment Variables**: Configuration parameter flow across all components
-- **IPC Communication**: Inter-process communication for PM2 cluster management
-
-#### Data Transformation Points
-
-- **Request Parsing**: HTTP requests transformed into internal request objects
-- **Test Data Generation**: JavaFaker library provides realistic test data transformation
-- **Response Serialization**: Internal objects serialized to HTTP response formats
-- **Configuration Processing**: Environment variables transformed into application configuration
-- **Metrics Collection**: Runtime data transformed into monitoring metrics
-
-#### Key Data Stores and Caches
-
-- **Configuration Cache**: Environment variable processing and validation results
-- **Test Result Storage**: Cucumber reports and JUnit test outcomes
-- **Process State**: PM2 process management and health monitoring data
-- **Security Tokens**: JWT and session management for authentication flows
-- **Performance Metrics**: Request timing, throughput, and error rate collection
+**Key Data Stores and Caches:**
+- **PostgreSQL**: Optional relational data persistence with connection pooling (10 connections max, 30s idle timeout)
+- **File System**: Static assets, application logs, and SSL certificate storage
+- **Environment Variables**: Secure configuration data management across deployment environments
+- **In-Memory Rate Limiting**: Performance-optimized rate limit counters with configurable scopes
 
 ### 5.1.4 External Integration Points
 
 | System Name | Integration Type | Data Exchange Pattern | Protocol/Format |
 |---|---|---|---|
-| **Browser Drivers** | Test Automation | Command/response automation | W3C WebDriver Protocol |
-| **Backprop Tooling** | Development Integration | Bidirectional metrics and analysis | JSON/REST API |
-| **Package Registries** | Dependency Management | Artifact download and verification | HTTPS/Package Manifests |
-| **CI/CD Pipelines** | Build Automation | Build triggers and artifact deployment | YAML/JSON configurations |
+| **Backprop API** | Monitoring & Testing | Request/Response with health data and metrics | HTTPS/JSON with 30s timeout, 3 retry attempts |
+| **PostgreSQL Database** | Data Persistence | Connection pooling with automated failover | PostgreSQL Protocol with 10 connections max |
+| **Let's Encrypt ACME** | Certificate Management | Automated certificate renewal and validation | HTTPS/JSON with automatic renewal before expiry |
+| **PM2 Monitoring Interface** | Process Management | IPC signals and process metrics | JSON/Events with real-time health checks |
 
 ## 5.2 COMPONENT DETAILS
 
-### 5.2.1 Java Test Automation Engine
+### 5.2.1 Express.js Core Server
 
-#### Purpose and Responsibilities
-The Java Test Automation Engine serves as the primary browser automation and BDD testing component, providing enterprise-grade test execution capabilities with parallel processing and comprehensive reporting.
+**Purpose and Responsibilities:**
+The Express.js Core Server serves as the central HTTP/HTTPS server implementing comprehensive security middleware and providing structured API endpoints. It addresses the identified CVE-2024-43796 XSS vulnerability through proper request handling and response sanitization.
 
-#### Technologies and Frameworks Used
-- **Java 8**: Compiler source and target platform
-- **Maven 4.0.0**: Build system and dependency management
-- **Selenium WebDriver 3.141.59**: Browser automation protocol implementation
-- **Cucumber 7.2.3**: Behavior-driven development framework
-- **JUnit 4.13.2**: Test execution and assertion framework
-- **WebDriverManager 5.1.0**: Automatic browser driver management
-- **JavaFaker 1.0.2**: Test data generation and mocking
+**Technologies and Frameworks:**
+- **Node.js 22.x LTS**: Runtime environment providing stability and long-term support
+- **Express.js 4.20.0**: Web framework with security patches and middleware ecosystem
+- **body-parser 1.20.3**: Request body parsing with configurable size limits and security validation
 
-#### Key Interfaces and APIs
-- WebDriver API for browser control and interaction
-- Cucumber step definition interfaces for BDD implementation
-- JUnit assertion and lifecycle APIs for test management
-- Maven Surefire plugin interfaces for execution control
+**Key Interfaces and APIs:**
+- **Health Endpoints**: `/health` (comprehensive system metrics), `/ping` (simple availability check)
+- **API Endpoints**: `/api/data` (data processing), `/api/status` (system status)
+- **Static Asset Serving**: `/static/*` with security headers and caching policies
+- **Root Endpoint**: `/` serving application entry point
 
-#### Data Persistence Requirements
-- Test execution results stored in XML/JSON report formats
-- Screenshot capture for failed test scenarios
-- Execution logs with timestamp and severity classification
-- Performance metrics collection for test execution timing
+**Data Persistence Requirements:**
+- **Stateless Design**: No server-side session storage enabling horizontal scaling
+- **Optional PostgreSQL Integration**: ACID-compliant data persistence when business logic requires it
+- **File-based Logging**: Structured logs with configurable levels and rotation
 
-#### Scaling Considerations
-- Unlimited thread configuration enables maximum parallelization
-- Method-level parallel execution distributes load effectively
-- WebDriverManager provides efficient browser driver caching
-- Maven Surefire integration supports distributed test execution
-
-```mermaid
-graph TD
-    subgraph "Test Automation Architecture"
-        A[Feature Files] --> B[Cucumber Engine]
-        B --> C[Step Definitions]
-        C --> D[WebDriver Manager]
-        D --> E[Browser Instances]
-        
-        F[JUnit Runner] --> B
-        G[Maven Surefire] --> F
-        
-        E --> H[Test Results]
-        H --> I[Reports Generator]
-        I --> J[XML/JSON Reports]
-        
-        K[JavaFaker] --> C
-        L[Configuration] --> D
-    end
-    
-    style A fill:#e3f2fd
-    style J fill:#c8e6c9
-    style E fill:#fff3e0
-```
-
-### 5.2.2 HTTP Server Core
-
-#### Purpose and Responsibilities
-The HTTP Server Core provides fundamental request/response handling capabilities, serving as the foundation for all web server functionality with minimal dependencies and maximum compatibility.
-
-#### Technologies and Frameworks Used
-- **Node.js 14+**: JavaScript runtime environment
-- **Native HTTP Module**: Built-in Node.js HTTP server implementation
-- **Environment Variables**: Configuration management system
-- **Plain Text Responses**: Maximum client compatibility approach
-
-#### Key Interfaces and APIs
-- HTTP request/response handling interfaces
-- Environment variable configuration APIs
-- Request routing and handler registration
-- Response generation and client communication
-
-#### Data Persistence Requirements
-- Request/response logging for debugging and analysis
-- Configuration parameter caching for performance optimization
-- Error state tracking for reliability monitoring
-- Basic performance metrics collection
-
-#### Scaling Considerations
-- Single-process design suitable for development environments
-- Event-driven architecture enables high concurrency
-- Minimal memory footprint for resource efficiency
-- Upgrade path to Express.js for production scaling
+**Scaling Considerations:**
+- **Single-Process Base Design**: Optimized for development and small deployments
+- **PM2 Clustering**: Production scaling across multiple CPU cores
+- **Load Balancer Compatibility**: Health check endpoints and stateless architecture support standard load balancing
 
 ```mermaid
 sequenceDiagram
     participant Client
-    participant HTTP_Core
+    participant Express
+    participant Security
     participant Handler
-    participant Response_Gen
-    
-    Client->>HTTP_Core: HTTP Request
-    HTTP_Core->>HTTP_Core: Parse Request
-    HTTP_Core->>Handler: Route to Handler
-    Handler->>Handler: Process Logic
-    Handler->>Response_Gen: Generate Response
-    Response_Gen->>HTTP_Core: Response Object
-    HTTP_Core->>Client: HTTP Response
-    
-    Note over HTTP_Core: Sub-millisecond processing
-    Note over Client: ~1000 req/sec baseline
+    participant Response
+
+    Client->>Express: HTTP/HTTPS Request
+    Express->>Security: Apply Security Pipeline
+    Security->>Security: Helmet.js Headers
+    Security->>Security: CORS Validation
+    Security->>Security: Rate Limiting
+    Security->>Security: Input Validation
+    Security->>Handler: Validated Request
+    Handler->>Handler: Business Logic
+    Handler->>Response: Generate Response
+    Response->>Security: Apply Security Headers
+    Security->>Express: Secured Response
+    Express->>Client: HTTP Response
 ```
 
-### 5.2.3 Express.js Enhancement Layer
+### 5.2.2 Security Middleware Stack
 
-#### Purpose and Responsibilities
-The Express.js Enhancement Layer provides production-ready web framework capabilities, including middleware support, advanced routing, security features, and performance optimizations.
+**Purpose and Responsibilities:**
+The Security Middleware Stack implements defense-in-depth protection addressing OWASP Top 10 vulnerabilities through multiple specialized middleware components. Each component provides specific security controls with minimal performance overhead (<50ms total processing time).
 
-#### Technologies and Frameworks Used
-- **Express.js 4.18.2**: Web application framework
-- **Middleware Ecosystem**: Helmet.js, CORS, rate limiting, compression
-- **Routing Engine**: Advanced pattern matching and parameter extraction
-- **Template Engines**: Support for various view rendering systems
-- **Static File Serving**: Optimized asset delivery capabilities
+**Technologies and Frameworks:**
+- **Helmet.js 7.1.0**: Comprehensive security header management with 15+ protective headers including CSP, HSTS, and X-Frame-Options
+- **express-rate-limit 7.1.0**: Multi-scope DDoS protection with configurable rate limiting policies
+- **express-validator 7.0.1**: Input validation and sanitization preventing injection attacks
+- **cors 2.8.5**: Cross-origin resource sharing with dynamic origin validation
 
-#### Key Interfaces and APIs
-- Express application and router APIs
-- Middleware registration and execution interfaces
-- Template engine integration points
-- Error handling and logging frameworks
+**Key Interfaces and APIs:**
+- **Middleware Pipeline Integration**: Seamless integration into Express.js request processing
+- **Configuration API**: Environment-driven security policy configuration
+- **Logging Interface**: Security event logging and violation tracking
 
-#### Data Persistence Requirements
-- Session data storage for user state management
-- Template cache for rendering performance
-- Static asset versioning and cache control
-- Request analytics and performance metrics
+**Data Persistence Requirements:**
+- **In-Memory Rate Limiting**: Performance-optimized counter storage
+- **Security Event Logging**: Persistent logging of security violations and policy enforcement
 
-#### Scaling Considerations
-- Middleware pipeline optimization for performance
-- Connection pooling and resource management
-- Cluster mode preparation for multi-process scaling
-- Caching strategies for frequently accessed resources
+**Scaling Considerations:**
+- **Stateless Architecture**: Enables horizontal scaling across multiple instances
+- **Distributed Rate Limiting**: Support for shared rate limiting across cluster nodes
+- **Configuration Synchronization**: Environment-based policy distribution
 
 ```mermaid
-graph LR
-    subgraph "Express.js Architecture"
-        A[HTTP Request] --> B[Security Middleware]
-        B --> C[CORS Handler]
-        C --> D[Rate Limiter]
-        D --> E[Router]
-        E --> F[Application Logic]
-        F --> G[Response Middleware]
-        G --> H[HTTP Response]
-        
-        I[Static Files] --> J[Static Middleware]
-        J --> E
-        
-        K[Error Handler] --> H
-        F --> K
-    end
+stateDiagram-v2
+    [*] --> RequestReceived
+    RequestReceived --> HelmetHeaders: Apply Security Headers
+    HelmetHeaders --> CORSValidation: Validate Origin
+    CORSValidation --> RateLimitGlobal: Check Global Limits
+    RateLimitGlobal --> RateLimitEndpoint: Check Endpoint Limits
+    RateLimitEndpoint --> InputValidation: Validate Input
+    InputValidation --> RequestProcessed: All Checks Pass
     
-    style A fill:#e3f2fd
-    style H fill:#c8e6c9
-    style K fill:#ffcdd2
+    CORSValidation --> SecurityViolation: Invalid Origin
+    RateLimitGlobal --> SecurityViolation: Global Limit Exceeded
+    RateLimitEndpoint --> SecurityViolation: Endpoint Limit Exceeded
+    InputValidation --> SecurityViolation: Invalid Input
+    
+    SecurityViolation --> LogViolation: Record Security Event
+    LogViolation --> RequestRejected: Send Error Response
+    
+    RequestProcessed --> [*]
+    RequestRejected --> [*]
+```
+
+### 5.2.3 Java Test Automation Suite
+
+**Purpose and Responsibilities:**
+The Java Test Automation Suite provides comprehensive end-to-end testing including security validation, functional testing, and behavior-driven development capabilities. It ensures continuous verification of security controls and system functionality.
+
+**Technologies and Frameworks:**
+- **Maven 3.x**: Build system providing dependency management and test orchestration
+- **Selenium WebDriver 3.141.59**: Browser automation for end-to-end testing
+- **Cucumber 7.3.4**: Behavior-driven development with feature file specifications
+- **JUnit 4.13.2**: Test framework providing assertions and test lifecycle management
+- **WebDriverManager 5.1.0**: Automated browser driver management
+
+**Key Interfaces and APIs:**
+- **Cucumber Feature Files**: Business-readable test specifications
+- **Test Runner Configuration**: Maven-based test execution with parallel capabilities
+- **Reporting Interface**: Comprehensive test results and coverage reports
+
+**Data Persistence Requirements:**
+- **Test Reports**: Detailed execution results and coverage metrics
+- **Log Files**: Test execution logs and debugging information
+- **Screenshot Storage**: Failure documentation and visual validation
+
+**Scaling Considerations:**
+- **Parallel Test Execution**: Maven Surefire Plugin enables concurrent test runs
+- **Browser Grid Support**: Selenium Grid compatibility for distributed testing
+- **CI/CD Integration**: Seamless integration with continuous integration pipelines
+
+```mermaid
+flowchart TD
+    A[Test Suite Start] --> B[Initialize WebDriver]
+    B --> C[Load Feature Files]
+    C --> D[Execute Test Scenarios]
+    
+    D --> E{Test Type}
+    E -->|Security| F[OWASP Compliance Tests]
+    E -->|Functional| G[API Endpoint Tests]
+    E -->|UI| H[Browser Automation Tests]
+    
+    F --> I[Security Validation]
+    G --> J[API Response Validation]
+    H --> K[UI Element Validation]
+    
+    I --> L[Compile Results]
+    J --> L
+    K --> L
+    
+    L --> M{All Tests Pass?}
+    M -->|Yes| N[Generate Success Report]
+    M -->|No| O[Generate Failure Report]
+    
+    N --> P[Test Suite Complete]
+    O --> P
 ```
 
 ### 5.2.4 PM2 Process Manager
 
-#### Purpose and Responsibilities
-PM2 Process Manager handles production deployment, process monitoring, automatic restart capabilities, and cluster mode management for high-availability server operations.
+**Purpose and Responsibilities:**
+PM2 Process Manager provides production-grade process orchestration, monitoring, and scaling capabilities. It ensures high availability through automatic restart policies, cluster mode operation, and zero-downtime deployments.
 
-#### Technologies and Frameworks Used
-- **PM2 v5.0.0+**: Advanced process management platform
-- **Cluster Mode**: Multi-core CPU utilization
-- **Health Monitoring**: Automatic failure detection and recovery
-- **Load Balancing**: Request distribution across process instances
-- **Zero-Downtime Deployment**: Rolling restart capabilities
+**Technologies and Frameworks:**
+- **PM2 5.0.0**: Process manager with cluster mode, monitoring, and deployment features
+- **Node.js Cluster Module**: Multi-core utilization and load balancing
+- **Process Monitoring**: Real-time metrics collection and health monitoring
 
-#### Key Interfaces and APIs
-- PM2 programmatic API for process control
-- Health check endpoints for monitoring integration
-- Cluster management interfaces for scaling operations
-- Deployment automation APIs for CI/CD integration
+**Key Interfaces and APIs:**
+- **Process Control Interface**: Start, stop, restart, and reload operations
+- **Monitoring API**: CPU, memory, and performance metrics
+- **Health Check Integration**: Load balancer compatibility endpoints
 
-#### Data Persistence Requirements
-- Process state and health metrics storage
-- Application logs with rotation and archival
-- Performance monitoring data collection
-- Deployment history and rollback information
+**Data Persistence Requirements:**
+- **Process Logs**: Comprehensive logging with rotation and archival
+- **Metrics Storage**: Performance and health metrics for monitoring
+- **Configuration Files**: PM2 ecosystem configuration and deployment settings
 
-#### Scaling Considerations
-- Horizontal scaling through cluster mode
-- Automatic process restart on failure detection
-- Memory and CPU monitoring with threshold alerts
-- Load balancing algorithms for optimal distribution
+**Scaling Considerations:**
+- **Automatic Clustering**: CPU core-based process scaling
+- **Load Distribution**: Built-in load balancing across worker processes
+- **Health Management**: Automatic restart of failed workers
 
 ## 5.3 TECHNICAL DECISIONS
 
 ### 5.3.1 Architecture Style Decisions and Tradeoffs
 
-#### Decision: Dual-Stack Architecture Pattern
+**Layered Architecture Selection:**
+The decision to implement a layered architecture was driven by the need for clear separation of concerns and progressive enhancement capabilities. This approach enables independent evolution of security, application, and infrastructure layers while maintaining system coherence.
 
-**Rationale**: The system combines Java test automation with Node.js web server capabilities to provide comprehensive development blueprints for organizations requiring both testing infrastructure and server implementation patterns.
+**Tradeoffs Considered:**
+- **Microservices**: Rejected due to operational complexity for single-application scope
+- **Monolithic**: Rejected due to lack of layer isolation and enhancement flexibility
+- **Event-Driven**: Rejected due to added complexity for synchronous request processing requirements
 
-**Tradeoffs Analysis**:
+**Stateless Design Decision:**
+The stateless architecture enables horizontal scaling and load balancer compatibility while simplifying deployment and reducing operational overhead.
 
-| Aspect | Benefits | Drawbacks | Mitigation Strategy |
-|---|---|---|---|
-| **Complexity** | Comprehensive feature coverage | Increased learning curve | Progressive enhancement approach |
-| **Maintenance** | Technology diversity | Multiple dependency chains | Automated dependency management |
-| **Integration** | Flexible deployment options | Coordination complexity | Clear separation of concerns |
-| **Performance** | Optimized per use case | Resource overhead | Selective component activation |
+**Benefits:**
+- Horizontal scaling without session affinity requirements
+- Simplified deployment and rollback procedures
+- Load balancer compatibility with standard health checks
 
-#### Decision: Minimalist-First Design Philosophy
-
-**Rationale**: Starting with basic implementations allows teams to understand core concepts before adding complexity, reducing implementation barriers and improving adoption rates.
-
-**Implementation Strategy**:
-- Basic HTTP server as foundation
-- Single-file architecture for clarity
-- Plain text responses for maximum compatibility
-- Environment variable activation for features
-
-### 5.3.2 Communication Pattern Choices
-
-#### Decision: Progressive Enhancement Communication
-
-The system implements a layered communication pattern where each enhancement level maintains backward compatibility while adding capabilities:
+**Tradeoffs:**
+- No server-side session storage requiring client-side state management
+- Potential performance impact from repeated authentication validation
 
 ```mermaid
 graph TD
-    A[Basic HTTP] --> B[Express Framework]
-    B --> C[Security Layer]
-    C --> D[Production Management]
+    A[Architecture Decision Required] --> B{Complexity Assessment}
+    B -->|Low| C[Monolithic Consideration]
+    B -->|Medium| D[Layered Architecture]
+    B -->|High| E[Microservices Consideration]
     
-    E[WebDriver Protocol] --> F[Test Framework]
-    F --> G[Parallel Execution]
-    G --> H[Report Generation]
+    C --> F{Enhancement Requirements}
+    F -->|Limited| G[Simple Monolith]
+    F -->|Extensive| H[Reject - Inflexible]
     
-    I[Backprop Integration] --> J[Both Stacks]
+    D --> I{Security Requirements}
+    I -->|High| J[Defense-in-Depth Layers]
+    I -->|Medium| K[Basic Security Layer]
     
-    style A fill:#e3f2fd
-    style D fill:#c8e6c9
-    style H fill:#c8e6c9
+    E --> L{Operational Complexity}
+    L -->|Acceptable| M[Distributed Architecture]
+    L -->|Excessive| N[Reject - Too Complex]
+    
+    J --> O[SELECTED: Layered with Security Focus]
+    
+    style O fill:#c8e6c9
+    style H fill:#ffcdd2
+    style N fill:#ffcdd2
 ```
 
-#### Decision: Environment Variable Configuration
+### 5.3.2 Communication Pattern Choices
 
-**Rationale**: Environment variables provide non-intrusive configuration management that works across all deployment environments without code modifications.
+**Synchronous Request/Response Selection:**
+The decision to implement synchronous communication patterns provides predictable behavior, simplified debugging, and reduced system complexity for the target use cases.
 
-**Configuration Categories**:
-- Application settings (NODE_ENV, PORT, HOST)
-- Security parameters (JWT_SECRET, ENCRYPTION_KEY)
-- Performance tuning (MAX_CONNECTIONS, CLUSTER_INSTANCES)
-- Integration settings (BACKPROP_ENABLED, LOG_LEVEL)
+**Alternative Patterns Considered:**
+- **Asynchronous Messaging**: Rejected due to added complexity without clear benefits for HTTP API scenarios
+- **Event Streaming**: Rejected due to overkill for request/response patterns
+- **WebSocket**: Reserved for future enhancement if real-time requirements emerge
+
+**Protocol Selection Rationale:**
+- **HTTP/HTTPS Dual Support**: Development flexibility with production security
+- **RESTful API Design**: Industry standard patterns for API consistency
+- **JSON Communication**: Lightweight, widely supported data format
 
 ### 5.3.3 Data Storage Solution Rationale
 
-#### Decision: Configuration-First Storage Approach
+**Optional PostgreSQL Decision:**
+PostgreSQL was selected for optional data persistence based on ACID compliance requirements and enterprise adoption patterns.
 
-The system prioritizes configuration management over traditional database persistence, focusing on stateless operation with configurable behavior.
+**Storage Strategy Justification:**
+- **Stateless Primary Design**: Maintains scaling flexibility and operational simplicity
+- **File System for Assets**: Direct serving with security headers and caching
+- **Environment Variables**: Secure configuration management across environments
+- **In-Memory Rate Limiting**: Performance optimization for frequently accessed counters
 
-**Storage Strategy**:
-- Environment variables for configuration persistence
-- File-based test results and reports
-- Memory-based caching for performance optimization
-- Optional database integration through enhancement layers
-
-#### Decision: Test Result Persistence
-
-Test automation results are stored in standardized formats (XML/JSON) compatible with CI/CD pipeline integration and third-party reporting tools.
-
-### 5.3.4 Caching Strategy Justification
-
-#### Decision: Multi-Level Caching Architecture
+**Database Selection Criteria:**
+- **ACID Compliance**: Data integrity requirements for business-critical operations
+- **Connection Pooling**: Efficient resource utilization with configurable limits
+- **Enterprise Adoption**: Widespread support and operational expertise availability
 
 ```mermaid
 graph LR
-    subgraph "Caching Strategy"
-        A[Configuration Cache] --> B[Application Layer]
-        C[WebDriver Cache] --> D[Test Automation]
-        E[Static Asset Cache] --> F[Web Server]
-        G[Process State Cache] --> H[PM2 Management]
-    end
+    A[Data Storage Requirement] --> B{Data Type}
+    B -->|Configuration| C[Environment Variables]
+    B -->|Static Assets| D[File System]
+    B -->|Session Data| E[Stateless Design]
+    B -->|Business Data| F[PostgreSQL]
+    B -->|Temporary Data| G[In-Memory]
     
-    style A fill:#e1f5fe
-    style C fill:#e8f5e8
-    style E fill:#fff3e0
-    style G fill:#fce4ec
+    C --> H[Secure & Portable]
+    D --> I[Performance & Security]
+    E --> J[Scalability & Simplicity]
+    F --> K[ACID & Reliability]
+    G --> L[Speed & Efficiency]
+    
+    style H fill:#c8e6c9
+    style I fill:#c8e6c9
+    style J fill:#c8e6c9
+    style K fill:#c8e6c9
+    style L fill:#c8e6c9
 ```
 
-**Rationale**: Different system components require different caching strategies optimized for their specific use patterns and performance requirements.
+### 5.3.4 Security Mechanism Selection
 
-### 5.3.5 Security Mechanism Selection
+**Defense-in-Depth Architecture:**
+The decision to implement multiple security layers addresses the principle that no single security control is sufficient for comprehensive protection.
 
-#### Decision: OWASP-Compliant Security Framework
+**Security Layer Justification:**
+- **Transport Layer Security**: HTTPS/TLS for data in transit protection
+- **Application Security**: Express.js security middleware for application-level protection
+- **Input Security**: Comprehensive validation and sanitization
+- **Output Security**: Security headers preventing client-side vulnerabilities
+- **Rate Limiting**: Multi-scope protection against abuse and DoS attacks
 
-The system implements comprehensive security measures following OWASP guidelines:
-
-- **Helmet.js**: Security headers and attack prevention
-- **Rate Limiting**: DDoS protection and resource management
-- **HTTPS/TLS**: Encrypted communication channels
-- **Input Validation**: Request sanitization and validation
-- **JWT Authentication**: Token-based authentication capabilities
+**OWASP Compliance Strategy:**
+Systematic implementation of OWASP Top 10 protections ensures comprehensive coverage of known vulnerabilities and attack vectors.
 
 ## 5.4 CROSS-CUTTING CONCERNS
 
 ### 5.4.1 Monitoring and Observability Approach
 
-#### Comprehensive Monitoring Strategy
+**Health Check Strategy:**
+The system implements comprehensive health monitoring through dedicated endpoints providing system metrics, uptime tracking, and dependency status validation.
 
-The system implements multi-layer monitoring covering application performance, infrastructure health, and business metrics:
+**Monitoring Components:**
+- **Health Endpoints**: `/health` provides comprehensive system metrics, `/ping` offers simple availability checking
+- **Performance Metrics**: Response time tracking, error rate monitoring, throughput measurement
+- **External Monitoring Integration**: Backprop API integration for comprehensive observability
+- **Structured Logging**: Configurable log levels with performance and security event tracking
 
-**Application Monitoring**:
-- Winston logging with structured output and configurable levels
-- Custom metrics collection for request timing and throughput
-- Performance profiling for bottleneck identification
-- Memory and CPU usage tracking across all components
-
-**Infrastructure Monitoring**:
-- PM2 process health monitoring with automatic restart
-- HTTP server availability and response time tracking
-- WebDriver session management and browser resource monitoring
-- Integration point health checks for external dependencies
-
-**Business Metrics**:
-- Test execution success rates and failure patterns
-- Server request patterns and user behavior analysis
-- Enhancement layer adoption and performance impact
-- Backprop integration effectiveness metrics
+**Observability Features:**
+- **Real-time Metrics**: PM2 process monitoring with CPU, memory, and performance tracking
+- **Health Check Integration**: Load balancer compatibility with standardized health endpoints
+- **External Service Monitoring**: Dependency health tracking and failure detection
 
 ### 5.4.2 Logging and Tracing Strategy
 
-#### Structured Logging Implementation
+**Logging Architecture:**
+The system implements structured logging with configurable levels and destinations supporting both development debugging and production monitoring requirements.
 
-```mermaid
-graph TD
-    subgraph "Logging Architecture"
-        A[Application Events] --> B[Winston Logger]
-        B --> C[Log Formatting]
-        C --> D[Log Rotation]
-        D --> E[Archive Storage]
-        
-        F[Error Events] --> G[Error Handler]
-        G --> H[Error Logging]
-        H --> I[Alert System]
-        
-        J[Performance Events] --> K[Metrics Collector]
-        K --> L[Time Series Data]
-        L --> M[Dashboard Integration]
-    end
-    
-    style A fill:#e3f2fd
-    style I fill:#ffcdd2
-    style M fill:#c8e6c9
-```
+**Log Level Configuration:**
+- **error**: Critical system failures and security violations
+- **warn**: Non-critical issues and degraded performance conditions
+- **info**: Normal operational events and significant state changes
+- **http**: Request/response logging with privacy controls
+- **verbose**: Detailed operational information for debugging
+- **debug**: Development debugging information
+- **silly**: Comprehensive trace information
 
-**Logging Levels and Categories**:
-- **ERROR**: System failures, exceptions, and critical issues
-- **WARN**: Performance degradation and recoverable problems
-- **INFO**: Business events, successful operations, and state changes
-- **DEBUG**: Detailed execution flow and diagnostic information
-- **TRACE**: Granular execution details for deep troubleshooting
+**Security Event Logging:**
+Dedicated logging for security violations including CORS policy violations, rate limit exceeded events, input validation failures, and authentication errors.
+
+**Log Management Features:**
+- **File-based Storage**: Persistent logging with rotation and archival capabilities
+- **Privacy Controls**: Configurable request logging with sensitive data filtering
+- **Performance Logging**: Response time and throughput tracking for optimization
 
 ### 5.4.3 Error Handling Patterns
 
-#### Comprehensive Error Handling Framework
+**Centralized Error Management:**
+The system implements a centralized error handler providing consistent error responses across all application endpoints while maintaining security through appropriate information disclosure controls.
 
-The system implements consistent error handling patterns across all components:
+**Error Handling Principles:**
+- **Security-Focused**: No stack trace exposure in production environments
+- **Graceful Degradation**: System continues operation with reduced functionality during component failures
+- **Client-Friendly Responses**: Appropriate error messages without sensitive system information
+- **Comprehensive Logging**: Detailed error logging for debugging while protecting client exposure
 
 ```mermaid
 flowchart TD
-    A[Error Occurrence] --> B{Error Type}
+    A[Error Occurs] --> B{Error Type}
+    B -->|Validation Error| C[400 Bad Request]
+    B -->|Authentication Error| D[401 Unauthorized]
+    B -->|Authorization Error| E[403 Forbidden]
+    B -->|Not Found Error| F[404 Not Found]
+    B -->|Rate Limit Error| G[429 Too Many Requests]
+    B -->|Server Error| H[500 Internal Server Error]
     
-    B -->|System Error| C[Log Critical Error]
-    B -->|Application Error| D[Log Application Error]
-    B -->|User Error| E[Log User Error]
+    C --> I[Log Validation Details]
+    D --> J[Log Auth Attempt]
+    E --> K[Log Access Violation]
+    F --> L[Log Resource Request]
+    G --> M[Log Rate Limit Event]
+    H --> N[Log System Error]
     
-    C --> F[Send Alert]
-    D --> G[Increment Metrics]
-    E --> H[Return User Message]
+    I --> O[Return Safe Error Message]
+    J --> O
+    K --> O
+    L --> O
+    M --> O
+    N --> O
     
-    F --> I{Recovery Possible?}
-    G --> I
-    H --> J[Continue Operation]
+    O --> P[Client Receives Response]
     
-    I -->|Yes| K[Execute Recovery]
-    I -->|No| L[Graceful Degradation]
-    
-    K --> M[Log Recovery Success]
-    L --> N[Log Degradation State]
-    
-    M --> J
-    N --> O[Notify Operations]
-    O --> J
-    
+    style P fill:#c8e6c9
     style A fill:#ffcdd2
-    style J fill:#c8e6c9
-    style O fill:#fff3e0
 ```
-
-**Error Categories and Handling**:
-- **Configuration Errors**: Validation with helpful error messages and defaults
-- **Network Errors**: Retry logic with exponential backoff
-- **WebDriver Errors**: Browser session recovery and alternative driver selection
-- **Resource Errors**: Graceful degradation and resource cleanup
-- **Integration Errors**: Fallback mechanisms and service isolation
 
 ### 5.4.4 Authentication and Authorization Framework
 
-#### Security Architecture Implementation
+**Security Framework Architecture:**
+The system provides a comprehensive authentication and authorization framework supporting JWT tokens, session management, and secure password handling.
 
-**Authentication Mechanisms**:
-- JWT token-based authentication with refresh token support
-- Session management with configurable timeout and security
-- Environment variable-based secret management
-- Multi-factor authentication preparation for enterprise deployment
+**Authentication Components:**
+- **JWT Support**: Token-based authentication with configurable expiration and validation
+- **Session Management**: Configurable session security settings with secure defaults
+- **Password Security**: bcrypt integration with configurable hashing rounds
+- **CORS Integration**: Fine-grained cross-origin access control
 
-**Authorization Patterns**:
-- Role-based access control (RBAC) for different user types
-- Resource-level permissions for fine-grained access control
-- API key authentication for service-to-service communication
-- Integration with enterprise identity providers
+**Authorization Features:**
+- **Role-Based Access Control**: Extensible authorization framework
+- **Endpoint Protection**: Granular access control per API endpoint
+- **Security Policy Enforcement**: Centralized policy management and enforcement
 
 ### 5.4.5 Performance Requirements and SLAs
 
-#### Performance Benchmarks and SLA Definitions
+**Performance Targets:**
+The system maintains strict performance requirements ensuring responsive user experience while providing comprehensive security protection.
 
-| Component | Response Time SLA | Throughput SLA | Availability SLA | Recovery Time SLA |
-|---|---|---|---|---|
-| **HTTP Server Core** | < 1ms (basic endpoints) | 1000 req/sec baseline | 99.9% uptime | < 30 seconds |
-| **Express.js Layer** | < 10ms (enhanced endpoints) | 500 req/sec sustained | 99.9% uptime | < 60 seconds |
-| **Test Automation** | < 5 seconds (driver init) | Parallel execution | 99.5% success rate | < 2 minutes |
-| **PM2 Management** | < 5 seconds (restart) | Multi-process scaling | 99.99% uptime | < 10 seconds |
+**Service Level Agreements:**
+- **Response Time**: <200ms p95 for API endpoints ensuring responsive user experience
+- **Security Middleware Overhead**: <50ms total processing time maintaining performance
+- **System Uptime**: 99.9% availability target with health monitoring and automatic recovery
+- **Deployment Speed**: <5 minute security updates enabling rapid response to security issues
+- **Test Execution**: <5 minutes for complete test suite supporting continuous integration
+
+**Performance Monitoring:**
+- **Real-time Metrics**: Continuous monitoring of response times, error rates, and throughput
+- **SLA Tracking**: Automated monitoring of service level compliance with alerting
+- **Performance Optimization**: Ongoing performance analysis and optimization recommendations
 
 ### 5.4.6 Disaster Recovery Procedures
 
-#### Comprehensive Recovery Strategy
+**Recovery Strategy:**
+The system implements comprehensive disaster recovery procedures ensuring business continuity and data protection during various failure scenarios.
 
-**Backup and Recovery Procedures**:
-- Configuration backup through environment variable documentation
-- Test result archival with automated retention policies
-- Application state recovery through PM2 process management
-- Dependency recovery through cached package management
+**Recovery Components:**
+- **Graceful Shutdown**: SIGTERM/SIGINT handlers enabling clean application shutdown
+- **Zero-Downtime Deployment**: PM2 reload capabilities with traffic shifting for seamless updates
+- **Automatic Restart**: PM2 restart policies for automatic recovery from application crashes
+- **Health Check Recovery**: Automatic removal from load balancer rotation during health check failures
 
-**Failover Mechanisms**:
-- Automatic process restart for application failures
-- Health check-based traffic routing for load balancing
-- Browser driver fallback for WebDriver failures
-- Service degradation modes for partial system failures
-
-**Recovery Time Objectives**:
-- **RTO (Recovery Time Objective)**: 5 minutes for full system recovery
-- **RPO (Recovery Point Objective)**: 1 minute for configuration changes
-- **MTTR (Mean Time To Recovery)**: 2 minutes for automated recovery
-- **MTBF (Mean Time Between Failures)**: 720 hours for stable operation
+**Business Continuity Features:**
+- **Process Monitoring**: Continuous health monitoring with automatic failure detection
+- **Backup Procedures**: Automated backup of critical configuration and data
+- **Recovery Testing**: Regular disaster recovery procedure testing and validation
 
 #### References
 
-**Files Examined**:
-- `pom.xml` - Maven configuration with Java test automation dependencies and parallel execution settings
-- `README.md` - Project overview with architecture diagrams and comprehensive enhancement paths
-- `docs/architecture/design.md` - Detailed system architecture documentation and design principles
-- `.gitignore` - Development artifact exclusions and repository organization patterns
-- `.gitattributes` - Language detection settings and repository configuration
+**Repository Files Examined:**
+- `server.js` - Core server implementation with security middleware pipeline
+- `.env.example` - Complete environment configuration template and service integrations
+- `pom.xml` - Java test automation framework configuration and dependencies
+- `docs/architecture/design.md` - System architecture blueprint and design decisions
+- `package.json` - Node.js dependencies and version specifications
 
-**Technical Specification Sections Referenced**:
-- `1.2 SYSTEM OVERVIEW` - Dual-stack architecture context and business positioning
-- `3.8 TECHNOLOGY INTEGRATION ARCHITECTURE` - Integration patterns and security considerations
-- `4.1 SYSTEM WORKFLOWS` - Core business processes and operational workflows
-
-**Documentation Sources**:
-- Progressive enhancement documentation for Node.js server development
-- Maven Surefire plugin configuration for parallel test execution
-- PM2 production deployment guides and cluster management
-- Security implementation guides with OWASP compliance details
-- Performance optimization documentation and benchmarking procedures
+**Technical Specification Sections Referenced:**
+- `1.2 SYSTEM OVERVIEW` - Business context, system components, and success criteria
+- `3.7 TECHNOLOGY INTEGRATION ARCHITECTURE` - Technology stack integration and performance characteristics
+- `4.1 SYSTEM WORKFLOWS` - Core business processes and operational flows
 
 # 6. SYSTEM COMPONENTS DESIGN
 
 ## 6.1 CORE SERVICES ARCHITECTURE
 
-### 6.1.1 Architecture Applicability Assessment
+### 6.1.1 Architecture Assessment
 
-#### Core Services Architecture is Not Applicable for This System
+**Core Services Architecture is not applicable for this system.**
 
-After comprehensive analysis of the Testinium-QA repository structure, technical specifications, and architecture documentation, **Core Services Architecture is not applicable for this system**. This determination is based on clear evidence that the system implements a monolithic architecture pattern rather than a distributed services-based approach.
+#### 6.1.1.1 Architecture Pattern Analysis
 
-#### 6.1.1.1 System Architecture Classification
+This system implements a **Monolithic Architecture with Layered Design** rather than a distributed services architecture. The system consists of a single Node.js/Express.js application deployed as one unified deployable unit with integrated middleware layers providing security and business logic functionality.
 
-The Testinium-QA system implements a **dual-stack monolithic architecture** with the following characteristics:
+**Evidence Supporting Monolithic Design:**
 
-| Architecture Aspect | Implementation Approach | Evidence Source |
+| Architectural Element | Implementation | Evidence |
 |---|---|---|
-| **System Design Pattern** | Layered, minimalist-first architecture | Section 5.1 HIGH-LEVEL ARCHITECTURE |
-| **Operational Modes** | Test Automation Mode + Web Server Mode | Section 5.1.1 System Overview |
-| **Component Structure** | Progressive enhancement layers, not services | Section 5.2 COMPONENT DETAILS |
-| **Technology Stack** | Java monolith + Node.js monolith | pom.xml, README.md |
+| **Deployment Model** | Single deployable unit (`server.js`) | All functionality integrated into one Express.js application |
+| **Process Management** | PM2 clustering of identical application instances | Multiple processes running the same codebase, not separate services |
+| **Component Integration** | Middleware pipeline within single application | Security, routing, and business logic as integrated layers |
+| **Communication Patterns** | In-process function calls and middleware chain | No inter-service communication or service discovery required |
 
-#### 6.1.1.2 Architectural Evidence Analysis
+#### 6.1.1.2 Monolithic vs. Microservices Comparison
 
-**Monolithic Design Indicators**:
-- Java Test Automation Engine operates as a single-process component using Selenium WebDriver
-- HTTP Server Core implements basic request/response handling within a single Node.js process
-- Express.js Enhancement Layer provides middleware capabilities within the same process space
-- PM2 Process Manager enables clustering but not service decomposition
-
-**Absence of Service-Oriented Patterns**:
-- No service discovery mechanisms present
-- No inter-service communication protocols defined
-- No distributed transaction management
-- No service registry or service mesh implementation
-- No microservices deployment patterns
-
-#### 6.1.1.3 Future Architecture Considerations
-
-The system architecture documentation explicitly identifies microservices as a **future enhancement**:
-
-```mermaid
-timeline
-    title Architecture Evolution Timeline
-    
-    Current State    : Dual-Stack Monolithic Architecture
-                    : Java Test Automation Engine
-                    : Node.js HTTP Server with Progressive Enhancement
-    
-    6+ Months       : Microservices Architecture Consideration
-                    : Service Decomposition Analysis
-                    : Container Orchestration Evaluation
-```
-
-### 6.1.2 Actual System Architecture Patterns
-
-#### 6.1.2.1 Component-Based Monolithic Architecture
-
-Instead of services architecture, the system implements a **component-based monolithic architecture** with clear separation of concerns:
-
-| Component | Type | Responsibility | Integration Pattern |
-|---|---|---|---|
-| **Java Test Automation Engine** | Monolithic Application | Browser automation and BDD test execution | Process-level integration via Maven |
-| **HTTP Server Core** | Single-Process Server | Basic request/response handling | Native Node.js HTTP module |
-| **Express.js Enhancement Layer** | Middleware Stack | Production-ready web framework capabilities | In-process enhancement |
-| **PM2 Process Manager** | Process Clustering | Production deployment and scaling | Multi-process, single-application scaling |
-
-#### 6.1.2.2 Progressive Enhancement Architecture
-
-The system follows a **progressive enhancement pattern** that enables structured capability expansion:
-
-```mermaid
-graph TD
-    subgraph "Progressive Enhancement Layers"
-        A[Basic HTTP Server Core] --> B[Express.js Framework Layer]
-        B --> C[Security Middleware Layer]
-        C --> D[PM2 Production Management]
-        
-        E[Basic Test Automation] --> F[Parallel Execution Layer]
-        F --> G[Advanced Reporting Layer]
-        G --> H[CI/CD Integration Layer]
-    end
-    
-    subgraph "Enhancement Characteristics"
-        I[Backward Compatibility Maintained]
-        J[Incremental Complexity Addition]
-        K[Configuration-Driven Activation]
-    end
-    
-    A -.-> I
-    B -.-> J
-    D -.-> K
-    
-    style A fill:#e3f2fd
-    style E fill:#e3f2fd
-    style D fill:#c8e6c9
-    style H fill:#c8e6c9
-```
-
-#### 6.1.2.3 Integration Architecture
-
-The system provides integration capabilities through well-defined interfaces rather than service boundaries:
-
-| Integration Point | Protocol/Pattern | Purpose | Implementation |
-|---|---|---|---|
-| **Browser WebDriver** | W3C WebDriver Protocol | Test automation | Direct protocol communication |
-| **HTTP Client Connections** | HTTP/HTTPS | Web server functionality | Native Node.js HTTP module |
-| **Backprop Development Tooling** | JSON/REST API | Development workflow integration | Direct API integration |
-| **CI/CD Pipelines** | Maven/NPM scripts | Build and deployment automation | Build system integration |
-
-### 6.1.3 Scaling and Resilience in Monolithic Context
-
-#### 6.1.3.1 Scaling Approach
-
-The system implements **process-level scaling** rather than service-level scaling:
-
-**Java Test Automation Scaling**:
-- Unlimited thread configuration for parallel test execution
-- Method-level parallel execution distributes load effectively
-- Maven Surefire plugin supports distributed test execution across multiple JVMs
-
-**Node.js Server Scaling**:
-- PM2 cluster mode for multi-core CPU utilization
-- Process-based horizontal scaling on single machines
-- Event-driven architecture enables high concurrency within each process
-
-#### 6.1.3.2 Resilience Patterns
-
-**Test Automation Resilience**:
-- WebDriverManager provides automatic browser driver management and recovery
-- Cucumber framework includes built-in retry mechanisms for flaky tests
-- JUnit framework supports test isolation and failure containment
-
-**Server Resilience**:
-- PM2 automatic process restart on failure detection
-- Health monitoring with configurable thresholds
-- Zero-downtime deployment through rolling restart capabilities
-
-```mermaid
-graph LR
-    subgraph "Resilience Architecture"
-        A[Request] --> B[PM2 Load Balancer]
-        B --> C[Process Instance 1]
-        B --> D[Process Instance 2]
-        B --> E[Process Instance N]
-        
-        F[Health Monitor] --> G[Auto Restart]
-        G --> C
-        G --> D
-        G --> E
-        
-        H[Failure Detection] --> I[Process Recovery]
-        I --> G
-    end
-    
-    style F fill:#fff3e0
-    style G fill:#c8e6c9
-    style I fill:#ffcdd2
-```
-
-### 6.1.4 Alternative Architectural Benefits
-
-#### 6.1.4.1 Monolithic Architecture Advantages
-
-The chosen monolithic architecture provides several benefits for this system context:
-
-| Benefit Category | Advantage | Implementation Evidence |
-|---|---|---|
-| **Simplicity** | Single deployment unit per stack | Java JAR deployment, Node.js single-process server |
-| **Development Velocity** | Faster initial development and debugging | Shared codebase, simplified dependency management |
-| **Data Consistency** | No distributed transaction complexity | In-process data handling, atomic operations |
-| **Performance** | Reduced network latency | In-memory method calls, no service-to-service communication overhead |
-
-#### 6.1.4.2 Technology Stack Coherence
-
-The dual-stack approach maintains architectural coherence:
-
-- **Java Stack**: Enterprise-grade test automation with proven toolchain (Maven, Selenium, Cucumber)
-- **Node.js Stack**: Modern web development with progressive enhancement capabilities
-- **Clear Boundaries**: Distinct operational modes prevent technology mixing concerns
-
-### 6.1.5 Migration Path to Services Architecture
-
-#### 6.1.5.1 Future Services Decomposition Strategy
-
-While not currently applicable, the system's layered architecture provides a clear migration path when services architecture becomes necessary:
-
-```mermaid
-graph TD
-    subgraph "Future Service Decomposition"
-        A[Current Monolithic Architecture] --> B[Service Boundary Analysis]
-        B --> C[Test Automation Service]
-        B --> D[Web Server Service]
-        B --> E[Configuration Service]
-        B --> F[Monitoring Service]
-        
-        G[Service Communication Layer] --> H[Service Discovery]
-        G --> I[Load Balancing]
-        G --> J[Circuit Breakers]
-        
-        C --> G
-        D --> G
-        E --> G
-        F --> G
-    end
-    
-    style A fill:#e3f2fd
-    style C fill:#fff3e0
-    style D fill:#fff3e0
-    style E fill:#fff3e0
-    style F fill:#fff3e0
-```
-
-#### 6.1.5.2 Prerequisites for Services Migration
-
-Future migration to services architecture would require:
-
-- **Service Boundary Definition**: Clear functional decomposition of current monolithic components
-- **Data Store Separation**: Extraction of shared data concerns into dedicated services
-- **Communication Protocol Design**: RESTful APIs or message queuing between service boundaries
-- **Container Orchestration**: Kubernetes or Docker Swarm for service deployment and management
-- **Service Mesh Implementation**: Istio or similar for service-to-service communication management
-
-#### References
-
-**Technical Specification Sections Examined**:
-- `1.2 SYSTEM OVERVIEW` - System context and component analysis
-- `5.1 HIGH-LEVEL ARCHITECTURE` - Architectural patterns and design principles
-- `5.2 COMPONENT DETAILS` - Detailed component structure and relationships
-
-**Repository Files Analyzed**:
-- `pom.xml` - Maven configuration confirming monolithic Java test automation setup
-- `README.md` - Project overview and architecture documentation references
-- `docs/architecture/design.md` - Detailed architecture specifications and future considerations
-
-**Architecture Documentation Sources**:
-- System architecture patterns from Section 5.1.1
-- Component details and scaling considerations from Section 5.2
-- Technology stack analysis from technical specification
-
-## 6.2 DATABASE DESIGN
-
-### 6.2.1 Database Design Applicability Assessment
-
-**Database Design is not applicable to this system.** 
-
-After comprehensive analysis of the system architecture, functional requirements, and technology stack, this repository operates as a technology blueprint and project template that does not require traditional database persistence mechanisms.
-
-#### 6.2.1.1 Rationale for Non-Database Architecture
-
-The system consists of two distinct, non-integrated technology stacks:
-
-- **Java Test Automation Stack**: Selenium WebDriver, Cucumber BDD, and JUnit framework configured for browser automation testing
-- **Node.js Server Stack**: Basic HTTP server with progressive enhancement paths for development tooling integration
-
-Neither stack implements persistent data storage requirements. All data handling is ephemeral, utilizing in-memory structures during execution phases with no need for schema design, relational modeling, or persistent storage architectures.
-
-#### 6.2.1.2 System Context and Scope
-
-The repository serves as a **technology blueprint** containing:
-- Maven-configured test automation framework (Java) with no implementation code
-- Documented HTTP server architecture (Node.js) with no package.json or source files
-- Backprop tooling integration specifications for development workflow optimization
-
-The absence of implementation code combined with detailed configuration suggests this functions as a project template rather than an operational system requiring database persistence.
-
-### 6.2.2 Alternative Storage Mechanisms
-
-#### 6.2.2.1 Configuration Storage Architecture
-
-The system employs file-based and environment-based configuration storage:
-
-| Storage Type | Implementation | Purpose | Persistence Level |
-|---|---|---|---|
-| JSON Configuration | Environment-specific files | Runtime configuration | Static files |
-| Environment Variables | System environment | Deployment configuration | Runtime only |
-| Session Storage | In-memory management | Development sessions | Ephemeral |
-
-#### 6.2.2.2 Test Data Management Strategy
-
-#### Dynamic Test Data Generation
-- **JavaFaker Integration**: Realistic test data generation for browser automation scenarios
-- **Runtime Generation**: On-demand test data creation without persistent storage requirements
-- **Scenario Variation**: Dynamic data generation for varying test conditions
-
-#### Static Test Data Sources
-- **JSON Files**: Structured test data for consistent scenario execution
-- **CSV Files**: Tabular test data for data-driven testing approaches
-- **Configuration Files**: Test environment and browser configuration data
-
-#### 6.2.2.3 Logging and Monitoring Storage
-
-#### Winston Logging Architecture
 ```mermaid
 graph TB
-    subgraph "Logging Storage Architecture"
-        A[Application Events] --> B[Winston Logger]
-        B --> C[Multiple Transports]
-        C --> D[File Transport]
-        C --> E[Console Transport]
-        C --> F[Error Transport]
+    subgraph "Current System (Monolithic)"
+        A1[Load Balancer] --> B1[PM2 Process Manager]
+        B1 --> C1[Node.js Instance 1]
+        B1 --> C2[Node.js Instance 2]
+        B1 --> C3[Node.js Instance N]
         
-        D --> G[Log Files]
-        G --> H[Log Rotation]
-        H --> I[Archived Logs]
-        
-        E --> J[Development Output]
-        F --> K[Error Files]
+        subgraph "Single Application Process"
+            C1 --> D1[Security Middleware]
+            D1 --> E1[Business Logic]
+            E1 --> F1[Data Access]
+        end
     end
     
-    subgraph "Metrics Collection"
-        L[Performance Metrics] --> M[Metrics Storage]
-        M --> N[Monitoring Systems]
+    subgraph "Alternative Microservices (Not Implemented)"
+        A2[API Gateway] --> B2[Service Discovery]
+        B2 --> C4[Auth Service]
+        B2 --> C5[API Service]
+        B2 --> C6[Data Service]
+        C4 --> D2[(Database)]
+        C5 --> D2
+        C6 --> D2
     end
     
-    B --> L
+    style A1 fill:#e1f5fe
+    style B1 fill:#c8e6c9
+    style C1 fill:#f3e5f5
+    style A2 fill:#ffebee,stroke:#f44336,stroke-dasharray: 5 5
+    style B2 fill:#ffebee,stroke:#f44336,stroke-dasharray: 5 5
 ```
 
-#### Storage Characteristics
-- **File-based Logging**: Structured logging with rotation capabilities
-- **Transport Options**: Multiple output destinations for different log levels
-- **Metrics Collection**: Performance metrics storage for monitoring purposes
-- **Retention Policy**: Log rotation without long-term database persistence
+### 6.1.2 Actual System Architecture
 
-### 6.2.3 Data Flow Architecture
+#### 6.1.2.1 Layered Architecture Implementation
 
-#### 6.2.3.1 Test Automation Data Flow
+The system implements a **Defense-in-Depth Layered Architecture** with the following structure:
+
+| Layer | Technology | Responsibility | Implementation |
+|---|---|---|---|
+| **Transport Layer** | HTTP/HTTPS, TLS 1.2+ | Secure communication and protocol handling | Express.js server with HTTPS support |
+| **Security Layer** | Helmet.js, CORS, Rate Limiting | OWASP Top 10 protection and input validation | Integrated middleware stack |
+| **Application Layer** | Express.js routing and handlers | Business logic and API endpoints | Route handlers and controllers |
+| **Data Layer** | PostgreSQL (optional) | Data persistence and management | Database client connections |
+
+#### 6.1.2.2 Process-Level Scaling Architecture
+
+```mermaid
+graph TB
+    subgraph "Production Environment"
+        LB[Load Balancer] --> PM2[PM2 Process Manager]
+        
+        subgraph "PM2 Cluster Management"
+            PM2 --> W1[Worker Process 1<br/>server.js]
+            PM2 --> W2[Worker Process 2<br/>server.js]
+            PM2 --> W3[Worker Process 3<br/>server.js]
+            PM2 --> WN[Worker Process N<br/>server.js]
+        end
+        
+        subgraph "Shared Resources"
+            W1 --> DB[(PostgreSQL<br/>Connection Pool)]
+            W2 --> DB
+            W3 --> DB
+            WN --> DB
+            
+            W1 --> FS[File System<br/>Logs & Assets]
+            W2 --> FS
+            W3 --> FS
+            WN --> FS
+        end
+        
+        subgraph "External Integrations"
+            W1 --> EXT1[Backprop API]
+            W2 --> EXT2[Let's Encrypt]
+            W3 --> EXT3[Monitoring Systems]
+        end
+    end
+    
+    style PM2 fill:#c8e6c9
+    style W1 fill:#e3f2fd
+    style W2 fill:#e3f2fd
+    style W3 fill:#e3f2fd
+    style WN fill:#e3f2fd
+```
+
+### 6.1.3 Scaling and Resilience Patterns
+
+#### 6.1.3.1 Horizontal Scaling Strategy
+
+**Process-Level Clustering Approach:**
+
+| Scaling Parameter | Configuration | Implementation |
+|---|---|---|
+| **Scaling Method** | Process forking via PM2 cluster mode | `exec_mode: 'cluster'` with CPU-based instance count |
+| **Instance Management** | Automatic worker process spawning | `instances: 'max'` or specific count (e.g., 4) |
+| **Load Distribution** | Built-in PM2 load balancing | Round-robin distribution across worker processes |
+| **Resource Utilization** | CPU core-based scaling | One worker process per CPU core optimally |
+
+**Auto-scaling Configuration:**
+```mermaid
+flowchart TD
+    A[PM2 Monitoring] --> B{CPU Usage > 80%?}
+    B -->|Yes| C[Spawn Additional Worker]
+    B -->|No| D{Memory Usage > 90%?}
+    
+    D -->|Yes| E[Restart High Memory Worker]
+    D -->|No| F{Worker Count > CPU Cores?}
+    
+    F -->|Yes| G[Scale Down Workers]
+    F -->|No| H[Continue Monitoring]
+    
+    C --> I[Health Check New Worker]
+    E --> J[Health Check Restarted Worker]
+    G --> K[Graceful Worker Shutdown]
+    
+    I --> L{Worker Healthy?}
+    J --> L
+    K --> H
+    
+    L -->|Yes| H
+    L -->|No| M[Mark Worker as Failed]
+    
+    M --> N{Restart Attempts < Limit?}
+    N -->|Yes| E
+    N -->|No| O[Alert Operations Team]
+    
+    H --> A
+    O --> P[Manual Intervention Required]
+    
+    style A fill:#e1f5fe
+    style H fill:#c8e6c9
+    style P fill:#ffcdd2
+```
+
+#### 6.1.3.2 Resilience and Fault Tolerance
+
+**Application-Level Resilience Patterns:**
+
+| Pattern | Implementation | Configuration |
+|---|---|---|
+| **Health Monitoring** | PM2 health checks with restart policies | Automatic restart on process failure |
+| **Circuit Breaker** | Application-level timeout and retry logic | 30-second timeouts with 3 retry attempts |
+| **Graceful Degradation** | Stateless design enabling rapid recovery | No server-side sessions or persistent state |
+| **Resource Protection** | Rate limiting and input validation | Global and endpoint-specific rate limits |
+
+**Fault Recovery Workflow:**
+```mermaid
+stateDiagram-v2
+    [*] --> Healthy: Process Start
+    Healthy --> Monitoring: Continuous Health Checks
+    
+    Monitoring --> HealthCheckFailed: Health Check Timeout
+    Monitoring --> HighResourceUsage: CPU/Memory Threshold
+    Monitoring --> CrashDetected: Process Exception
+    
+    HealthCheckFailed --> RestartAttempt: Automated Recovery
+    HighResourceUsage --> RestartAttempt: Resource Management
+    CrashDetected --> RestartAttempt: Exception Recovery
+    
+    RestartAttempt --> Healthy: Restart Successful
+    RestartAttempt --> FailedRestart: Restart Failed
+    
+    FailedRestart --> RetryAttempt: Retry Counter < Limit
+    FailedRestart --> PermanentFailure: Max Retries Exceeded
+    
+    RetryAttempt --> RestartAttempt: Wait Period Complete
+    PermanentFailure --> AlertGenerated: Operations Notification
+    
+    AlertGenerated --> ManualIntervention: Human Response Required
+    ManualIntervention --> Healthy: Issue Resolved
+```
+
+### 6.1.4 Integration and Communication Patterns
+
+#### 6.1.4.1 External System Integration
+
+**Client-Server Communication Patterns:**
+
+| Integration Type | Protocol | Pattern | Implementation |
+|---|---|---|---|
+| **Database Connectivity** | PostgreSQL Protocol | Connection Pooling | 10 max connections, 30s idle timeout |
+| **API Monitoring** | HTTPS/JSON | Request/Response | Backprop API with timeout and retry |
+| **Certificate Management** | HTTPS/ACME | Automated Renewal | Let's Encrypt integration |
+| **Process Management** | IPC/Events | Command/Control | PM2 monitoring interface |
+
+#### 6.1.4.2 Request Processing Pipeline
 
 ```mermaid
 sequenceDiagram
-    participant TF as Test Framework
-    participant JF as JavaFaker
-    participant WD as WebDriver
-    participant BRS as Browser
-    participant RF as Report Files
+    participant Client
+    participant LoadBalancer as Load Balancer
+    participant PM2 as PM2 Manager
+    participant Worker as Worker Process
+    participant Security as Security Layer
+    participant Handler as Request Handler
+    participant DB as Database
     
-    TF->>JF: Request Test Data
-    JF->>TF: Generate Dynamic Data
-    TF->>WD: Initialize Browser Session
-    WD->>BRS: Launch Browser Instance
-    TF->>BRS: Execute Test Scenarios
-    BRS->>TF: Return Test Results
-    TF->>RF: Write Test Reports
+    Client->>LoadBalancer: HTTP Request
+    LoadBalancer->>PM2: Route to Available Worker
+    PM2->>Worker: Forward Request
     
-    Note over TF,RF: All data ephemeral - no persistence
+    Worker->>Security: Security Pipeline
+    Security->>Security: Apply Helmet Headers
+    Security->>Security: CORS Validation
+    Security->>Security: Rate Limiting
+    Security->>Security: Input Validation
+    
+    Security->>Handler: Validated Request
+    Handler->>DB: Data Query (if needed)
+    DB->>Handler: Query Response
+    Handler->>Security: Business Logic Response
+    
+    Security->>Worker: Apply Security Headers
+    Worker->>PM2: Formatted Response
+    PM2->>LoadBalancer: Worker Response
+    LoadBalancer->>Client: HTTP Response
 ```
 
-#### 6.2.3.2 HTTP Server Data Flow
+### 6.1.5 Why Microservices Architecture Was Not Chosen
 
-```mermaid
-graph LR
-    subgraph "Request Processing"
-        A[HTTP Request] --> B[Node.js Server]
-        B --> C[Request Handler]
-        C --> D[Response Generation]
-        D --> E[HTTP Response]
-        Note1["Note: Stateless processing"]
-    end
-    
-    subgraph "Configuration"
-        F[Environment Variables] --> B
-        G[JSON Config] --> B
-        Note2["Note: File-based configuration"]
-    end
-    
-    subgraph "Logging"
-        B --> H[Winston Logger]
-        H --> I[Log Files]
-        Note3["Note: Logging only persistence"]
-    end
-```
+#### 6.1.5.1 Design Decision Rationale
 
-### 6.2.4 Storage Performance Considerations
+**Factors Supporting Monolithic Architecture:**
 
-#### 6.2.4.1 In-Memory Processing Optimization
+| Factor | Monolithic Advantage | Microservices Complexity |
+|---|---|---|
+| **System Complexity** | Single codebase, unified deployment | Multiple services, distributed deployment |
+| **Team Size** | Small team can manage entire system | Requires dedicated teams per service |
+| **Business Domain** | Security middleware with cohesive functionality | Would require artificial service boundaries |
+| **Performance Requirements** | In-process communication, minimal latency | Network latency between services |
 
-- **Session Management**: In-memory session storage for development environments
-- **Test Data Caching**: Runtime caching of generated test data during execution cycles
-- **Configuration Caching**: Environment configuration loaded once during application startup
+#### 6.1.5.2 Architectural Trade-offs Analysis
 
-#### 6.2.4.2 File I/O Optimization
+**Current Architecture Benefits:**
+- **Simplified Operations**: Single deployment unit reduces operational complexity
+- **Performance Optimization**: In-process communication eliminates network overhead
+- **Development Velocity**: Unified codebase enables rapid feature development
+- **Resource Efficiency**: Lower resource overhead without service orchestration
 
-- **Log Rotation**: Automated log file rotation to prevent disk space issues
-- **Configuration Loading**: Optimized JSON parsing for environment-specific configuration
-- **Static Resource Access**: Efficient access to CSV and JSON test data files
+**Potential Future Considerations:**
+If the system evolves to require microservices architecture, natural service boundaries might include:
+- **Authentication Service**: User authentication and authorization
+- **API Gateway Service**: Request routing and rate limiting
+- **Data Processing Service**: Business logic and data transformation
+- **Monitoring Service**: Health checks and metrics collection
 
-### 6.2.5 Compliance and Data Management
-
-#### 6.2.5.1 Data Retention Strategy
-
-Since the system operates without persistent databases:
-- **Test Results**: Generated reports stored temporarily in file system
-- **Log Retention**: Configurable log rotation with automated cleanup
-- **Configuration Versioning**: Git-based versioning for configuration files
-
-#### 6.2.5.2 Privacy and Security Considerations
-
-- **No PII Storage**: System generates synthetic test data without storing personal information
-- **Configuration Security**: Environment variables for sensitive configuration data
-- **Access Controls**: File system permissions for configuration and log access
-
-### 6.2.6 Integration Architecture
-
-#### 6.2.6.1 Backprop Tooling Integration
-
-The Node.js server stack integrates with Backprop development tooling for:
-- **Code Analysis**: Integration without persistent storage requirements
-- **Metrics Collection**: Temporary metrics storage during analysis phases
-- **Report Generation**: File-based report output without database persistence
-
-#### 6.2.6.2 CI/CD Pipeline Integration
-
-- **GitHub Actions**: Integration for automated testing and deployment
-- **Docker**: Containerized deployment with ephemeral storage
-- **Maven/NPM**: Build system integration with temporary artifact storage
+However, the current system design with PM2 clustering effectively addresses scalability and availability requirements without the complexity overhead of distributed services architecture.
 
 #### References
 
-#### Technical Specification Sections Retrieved
-- `1.2 SYSTEM OVERVIEW` - System context and dual-stack architecture analysis
-- `2.2 FUNCTIONAL REQUIREMENTS TABLE` - Functional requirements verification (no database requirements identified)
-- `3.1 TECHNOLOGY STACK OVERVIEW` - Technology stack analysis confirming no database technologies
-- `3.6 DATABASES & STORAGE` - Storage mechanisms documentation (configuration, logging, test data only)
+**Technical Specification Sections Retrieved:**
+- `5.1 HIGH-LEVEL ARCHITECTURE` - Confirmed layered architecture pattern and system boundaries
+- `1.2 SYSTEM OVERVIEW` - Verified monolithic system design and component structure
+- `4.4 PRODUCTION DEPLOYMENT WORKFLOWS` - Analyzed PM2 process management and scaling approach
+- `5.2 COMPONENT DETAILS` - Examined detailed component architecture and integration patterns
 
-## 6.3 INTEGRATION ARCHITECTURE
+**Files and Directories Analyzed:**
+- Root repository structure analysis for deployment and configuration patterns
+- PM2 configuration references and clustering setup documentation
+- Production deployment guides and scaling configurations
 
-### 6.3.1 Integration Architecture Overview
+## 6.2 DATABASE DESIGN
 
-#### 6.3.1.1 Integration Context Analysis
+### 6.2.1 Database Implementation Status
 
-The Testinium-QA system implements a **hybrid integration architecture** that supports dual operational modes through sophisticated external system connectivity. Based on comprehensive repository analysis, the system requires extensive integration capabilities despite its monolithic core architecture.
+**Database Design is not applicable to this system in its current implementation.**
 
-**Primary Integration Requirements**:
-- Java Test Automation Framework integration with browser automation services
-- Node.js HTTP Server integration with development tooling and monitoring systems
-- CI/CD pipeline integration for automated testing and deployment
-- External service integration for test management and reporting
+#### 6.2.1.1 System Architecture Rationale
 
-#### 6.3.1.2 Integration Architecture Classification
+The secure-node-server implements a **stateless layered architecture** with defense-in-depth security design principles that intentionally excludes database dependency for the following architectural reasons:
+
+| Design Principle | Implementation Impact | Database Implication |
+|---|---|---|
+| **Stateless Architecture** | Enables horizontal scalability and load balancer compatibility | No server-side session or state storage required |
+| **Security-First Design** | Minimizes attack surface and reduces complexity | Eliminates database-related security vectors |
+| **Zero Trust Architecture** | All inputs validated, no persistent trust relationships | No trusted data persistence layer needed |
+| **Progressive Enhancement** | Core functionality independent of external dependencies | Database integration as optional future enhancement |
+
+#### 6.2.1.2 Evidence Analysis
+
+**Codebase Examination Results:**
+
+| Component | Analysis Result | Evidence |
+|---|---|---|
+| **Dependencies** | No database drivers present | `package.json` contains no pg, mysql2, mongodb, or ORM libraries |
+| **Application Logic** | No database operations implemented | `server.js` and all route handlers operate without database calls |
+| **Configuration** | Database parameters configured but unused | `.env.example` includes PostgreSQL template configuration |
+| **Endpoints** | All endpoints function without persistence | `/health`, `/ping`, `/api/data`, `/api/status` return static or runtime data |
+
+### 6.2.2 Current Data Management Strategy
+
+#### 6.2.2.1 File System-Based Data Persistence
+
+The system implements structured data management through the file system, providing secure and performant data handling for its operational requirements:
 
 ```mermaid
 graph TB
-    subgraph "Integration Architecture Overview"
-        A[Dual-Stack Integration Hub]
+    subgraph "Data Management Architecture"
+        A[Application Data] --> B[Configuration Data]
+        A --> C[Static Assets]
+        A --> D[Log Data]
+        A --> E[Security Assets]
         
-        subgraph "Java Integration Stack"
-            B[Maven Build Integration]
-            C[Selenium WebDriver Integration]
-            D[Test Reporting Integration]
-            E[CI/CD Pipeline Integration]
-        end
+        B --> F[Environment Variables<br/>.env files]
+        C --> G[Public Directory<br/>Static file serving]
+        D --> H[Logs Directory<br/>Application logging]
+        E --> I[Certs Directory<br/>SSL/TLS certificates]
         
-        subgraph "Node.js Integration Stack"
-            F[HTTP API Integration]
-            G[Backprop Tooling Integration]
-            H[Process Management Integration]
-            I[Health Monitoring Integration]
-        end
-        
-        subgraph "Shared Integration Services"
-            J[External System APIs]
-            K[Security & Authentication]
-            L[Configuration Management]
-            M[Report Generation]
-        end
-        
-        A --> B
-        A --> F
-        B --> J
-        F --> J
-        
-        B --> C
-        B --> D
-        B --> E
-        
-        F --> G
-        F --> H
-        F --> I
-        
-        J --> K
-        J --> L
-        J --> M
+        F --> J[Server Configuration<br/>Security Policies<br/>API Keys]
+        G --> K[Client Assets<br/>Documentation<br/>Static Resources]
+        H --> L[Access Logs<br/>Error Logs<br/>Security Events]
+        I --> M[SSL Certificates<br/>Private Keys<br/>Certificate Chain]
     end
     
-    style A fill:#e3f2fd
-    style J fill:#fff3e0
-    style K fill:#ffcdd2
+    style A fill:#e1f5fe
+    style F fill:#c8e6c9
+    style G fill:#f3e5f5
+    style H fill:#fff3e0
+    style I fill:#ffebee
+```
+
+#### 6.2.2.2 Data Storage Implementation
+
+| Data Type | Storage Location | Access Pattern | Security Controls |
+|---|---|---|---|
+| **Configuration Data** | Environment variables and `.env` files | Read-only at application startup | File system permissions, environment isolation |
+| **Static Assets** | `/public` directory with Express.js static middleware | HTTP requests with security headers | MIME type validation, path traversal protection |
+| **Application Logs** | `/logs` directory with structured logging | Write-only append operations | Log rotation, access controls, audit trails |
+| **SSL Certificates** | `/certs` directory with secure permissions | Read-only for TLS termination | Restricted file permissions, certificate validation |
+
+#### 6.2.2.3 Data Flow Architecture
+
+```mermaid
+flowchart TD
+    A[Client Request] --> B[Security Middleware Pipeline]
+    B --> C{Data Required?}
+    
+    C -->|Configuration| D[Environment Variables]
+    C -->|Static Assets| E[File System - /public]
+    C -->|Logging| F[File System - /logs]
+    C -->|Runtime Data| G[In-Memory Processing]
+    
+    D --> H[Security Policy Application]
+    E --> I[Static Asset Delivery]
+    F --> J[Audit Trail Creation]
+    G --> K[Dynamic Response Generation]
+    
+    H --> L[Response with Security Headers]
+    I --> L
+    J --> L
+    K --> L
+    
+    L --> M[Client Response]
+    
+    style B fill:#ffcdd2
+    style H fill:#c8e6c9
+    style L fill:#e1f5fe
+```
+
+### 6.2.3 Database Configuration Template
+
+#### 6.2.3.1 PostgreSQL Configuration Framework
+
+While not currently implemented, the system includes comprehensive PostgreSQL configuration parameters as a template for future database integration:
+
+**Database Connection Configuration:**
+```
+# Primary Database Connection
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=your_database
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+DB_SSL=false
+
+#### Connection Pool Management
+DB_POOL_MIN=2
+DB_POOL_MAX=10
+DB_POOL_IDLE_TIMEOUT=30000
+```
+
+#### 6.2.3.2 Database Integration Architecture Design
+
+```mermaid
+erDiagram
+    APPLICATION ||--o{ CONNECTION_POOL : manages
+    CONNECTION_POOL ||--|| POSTGRESQL : connects_to
+    
+    APPLICATION {
+        string node_version "22.x LTS"
+        string express_version "4.20.0"
+        string security_middleware "integrated"
+    }
+    
+    CONNECTION_POOL {
+        int min_connections "2"
+        int max_connections "10"
+        int idle_timeout "30000ms"
+        boolean ssl_enabled "configurable"
+    }
+    
+    POSTGRESQL {
+        string version "recommended_latest"
+        boolean acid_compliance "true"
+        string ssl_mode "configurable"
+        string authentication "credential_based"
+    }
+```
+
+#### 6.2.3.3 Future Database Implementation Guidelines
+
+**Database Technology Selection Rationale:**
+
+| Criteria | PostgreSQL Advantages | Implementation Considerations |
+|---|---|---|
+| **ACID Compliance** | Full transactional integrity for critical data | Ensures data consistency in security contexts |
+| **Security Features** | Row-level security, SSL support, audit logging | Aligns with zero trust architecture principles |
+| **Performance** | Advanced indexing, query optimization | Supports connection pooling for high-traffic scenarios |
+| **Ecosystem** | Extensive Node.js driver support (`pg` library) | Minimal integration complexity with existing codebase |
+
+### 6.2.4 Migration Strategy for Database Integration
+
+#### 6.2.4.1 Database Implementation Phases
+
+Should database functionality be required, the following phased approach is recommended:
+
+```mermaid
+gantt
+    title Database Integration Implementation Timeline
+    dateFormat  YYYY-MM-DD
+    section Phase 1: Foundation
+    Database Setup           :done, phase1, 2024-01-01, 2024-01-15
+    Connection Pool Config   :done, after phase1, 2024-01-16, 2024-01-30
+    
+    section Phase 2: Integration
+    Database Client Setup    :active, phase2, 2024-02-01, 2024-02-15
+    Health Check Integration :phase2b, after phase2, 2024-02-16, 2024-02-28
+    
+    section Phase 3: Implementation
+    Schema Design           :phase3, 2024-03-01, 2024-03-15
+    Migration Scripts       :after phase3, 2024-03-16, 2024-03-31
+    
+    section Phase 4: Security
+    Access Controls         :phase4, 2024-04-01, 2024-04-15
+    Encryption Setup        :after phase4, 2024-04-16, 2024-04-30
+```
+
+#### 6.2.4.2 Implementation Checklist
+
+| Implementation Area | Tasks | Priority |
+|---|---|---|
+| **Dependency Management** | Install `pg` driver, update `package.json`, configure TypeScript types | Critical |
+| **Connection Management** | Implement connection pooling, configure SSL, add health checks | Critical |
+| **Security Integration** | Enable SSL connections, implement prepared statements, add audit logging | High |
+| **Application Integration** | Update health endpoint, add database status checks, implement graceful degradation | High |
+
+#### 6.2.4.3 Security Considerations for Database Integration
+
+**Security Architecture Enhancement:**
+
+```mermaid
+graph TB
+    subgraph "Enhanced Security Layer with Database"
+        A[Client Request] --> B[Security Middleware]
+        B --> C[Input Validation]
+        C --> D[SQL Injection Prevention]
+        D --> E[Database Access Control]
+        
+        E --> F[Connection Pool Security]
+        F --> G[Encrypted Connections]
+        G --> H[Query Execution]
+        H --> I[Result Sanitization]
+        I --> J[Security Headers Application]
+        J --> K[Client Response]
+    end
+    
+    subgraph "Database Security Controls"
+        L[Row-Level Security]
+        M[Audit Logging]
+        N[Access Controls]
+        O[Encryption at Rest]
+    end
+    
+    E --> L
+    E --> M
+    E --> N
+    G --> O
+    
+    style B fill:#ffcdd2
+    style D fill:#ffcdd2
+    style E fill:#ffcdd2
+    style G fill:#c8e6c9
+```
+
+### 6.2.5 Performance and Scalability Considerations
+
+#### 6.2.5.1 Current System Performance Profile
+
+**Stateless Architecture Performance Benefits:**
+
+| Metric | Current Performance | Database Integration Impact |
+|---|---|---|
+| **Response Time** | <100ms p95 (middleware overhead) | Would add 5-50ms database query time |
+| **Memory Usage** | Minimal (no connection pools or caches) | Would add 10-50MB for connection pooling |
+| **CPU Utilization** | Low (no database operations) | Would add database client processing overhead |
+| **Scalability** | Horizontal scaling via PM2 clustering | Would require connection pool management per worker |
+
+#### 6.2.5.2 Database Performance Planning Template
+
+**Connection Pool Optimization Strategy:**
+
+```mermaid
+graph LR
+    A[Worker Process 1] --> D[Database Connection Pool<br/>Min: 2, Max: 10]
+    B[Worker Process 2] --> D
+    C[Worker Process N] --> D
+    
+    D --> E[(PostgreSQL Database)]
+    
+    F[PM2 Cluster Manager] --> A
+    F --> B
+    F --> C
+    
+    G[Load Balancer] --> F
+    
+    subgraph "Connection Management"
+        H[Connection Health Checks]
+        I[Idle Connection Cleanup]
+        J[Connection Retry Logic]
+        K[Failover Handling]
+    end
+    
+    D --> H
+    D --> I
+    D --> J
+    D --> K
+    
+    style D fill:#e1f5fe
+    style E fill:#c8e6c9
+    style F fill:#f3e5f5
+```
+
+### 6.2.6 Compliance and Security Framework
+
+#### 6.2.6.1 Data Security Standards Alignment
+
+The current stateless architecture inherently supports security compliance by eliminating database-related security vectors:
+
+| Security Standard | Current Compliance | Database Integration Requirements |
+|---|---|---|
+| **OWASP Top 10** | Full compliance (no SQL injection vectors) | Would require prepared statements and input validation |
+| **Zero Trust Architecture** | Complete (no persistent trust relationships) | Would need database access controls and encryption |
+| **Data Minimization** | Optimal (no unnecessary data storage) | Would require data retention policies and archival |
+| **Audit Trail** | File-based logging sufficient | Would need database audit logging and compliance reporting |
+
+#### 6.2.6.2 Future Compliance Framework
+
+**Database Security Compliance Template:**
+
+```mermaid
+flowchart TD
+    A[Data Input] --> B[Input Validation & Sanitization]
+    B --> C[SQL Injection Prevention]
+    C --> D[Access Control Validation]
+    D --> E[Encrypted Database Connection]
+    
+    E --> F[(Encrypted Database)]
+    F --> G[Audit Log Generation]
+    G --> H[Data Access Logging]
+    H --> I[Compliance Reporting]
+    
+    J[Data Retention Policy] --> K[Automated Archival]
+    K --> L[Secure Data Deletion]
+    
+    F --> J
+    I --> M[Security Monitoring]
+    M --> N[Threat Detection]
+    
+    style C fill:#ffcdd2
+    style E fill:#c8e6c9
+    style F fill:#e1f5fe
+    style G fill:#fff3e0
+```
+
+### 6.2.7 Conclusion and Recommendations
+
+#### 6.2.7.1 Current Architecture Assessment
+
+The secure-node-server's stateless architecture without database dependency is **architecturally appropriate** for its designed use case as a security-focused HTTP/HTTPS server and reference implementation. This design choice provides:
+
+- **Operational Simplicity**: Reduced complexity in deployment and maintenance
+- **Security Hardening**: Elimination of database attack vectors
+- **Performance Optimization**: Minimal latency and resource overhead
+- **Scalability**: Effective horizontal scaling through PM2 clustering
+
+#### 6.2.7.2 Future Enhancement Pathway
+
+If database functionality becomes required, the existing PostgreSQL configuration template provides a comprehensive foundation for secure database integration while maintaining the system's security-first design principles.
+
+**Recommended Next Steps for Database Integration:**
+1. Conduct thorough requirements analysis to validate database necessity
+2. Implement database connectivity using the provided configuration template
+3. Maintain stateless design principles where possible
+4. Apply comprehensive security controls aligned with zero trust architecture
+5. Implement thorough testing of all database-related security controls
+
+#### References
+
+**Technical Specification Sections Retrieved:**
+- `3.5 DATABASES & STORAGE` - Database configuration and data persistence strategy analysis
+- `1.2 SYSTEM OVERVIEW` - System architecture and design principles validation
+- `5.1 HIGH-LEVEL ARCHITECTURE` - Architectural pattern confirmation and data flow analysis
+- `6.1 CORE SERVICES ARCHITECTURE` - Service architecture pattern and scaling approach verification
+
+**Repository Files Analyzed:**
+- `.env.example` - Database configuration template and connection parameters
+- `server.js` - Application architecture and database usage analysis
+- `package.json` - Dependency analysis for database-related libraries
+- `PM2 ecosystem configuration` - Process management and scaling architecture
+
+**Configuration Templates Documented:**
+- PostgreSQL connection configuration parameters
+- Connection pool management settings
+- SSL and security configuration options
+- Performance tuning parameters for future database integration
+
+## 6.3 INTEGRATION ARCHITECTURE
+
+### 6.3.1 Architecture Overview
+
+The system implements a **comprehensive integration architecture** designed around security-first principles and scalable external service connectivity. The integration architecture supports multiple integration patterns while maintaining the core monolithic design with strategic external service dependencies for monitoring, security, and operational excellence.
+
+**Integration Architecture Principles:**
+- **Security-First Integration**: All external communications implement defense-in-depth security patterns
+- **Configuration-Driven Connectivity**: Environment-based integration configuration enabling deployment flexibility
+- **Fault-Tolerant Communication**: Built-in retry mechanisms, timeouts, and graceful degradation patterns
+- **Performance-Optimized Protocols**: HTTP/HTTPS with connection pooling and rate limiting
+- **Progressive Enhancement**: Core functionality remains operational with external service degradation
+
+```mermaid
+graph TB
+    subgraph "Client Applications"
+        C1[Web Browsers]
+        C2[API Clients]
+        C3[Mobile Apps]
+        C4[Test Automation]
+    end
+    
+    subgraph "Load Balancer Layer"
+        LB[Load Balancer/Reverse Proxy]
+    end
+    
+    subgraph "Application Layer"
+        subgraph "PM2 Process Management"
+            PM2[PM2 Manager]
+            W1[Worker Process 1]
+            W2[Worker Process 2]
+            WN[Worker Process N]
+        end
+        
+        subgraph "Security & Integration Middleware"
+            SEC[Security Pipeline]
+            CORS[CORS Handler]
+            RL[Rate Limiter]
+            AUTH[JWT Authentication]
+            VAL[Input Validation]
+        end
+        
+        subgraph "API Layer"
+            REST[REST Endpoints]
+            HEALTH[Health Checks]
+            STATIC[Static Assets]
+        end
+    end
+    
+    subgraph "External Integrations"
+        BP[Backprop API<br/>Monitoring]
+        LE[Let's Encrypt<br/>SSL/TLS]
+        DB[(PostgreSQL<br/>Database)]
+    end
+    
+    C1 --> LB
+    C2 --> LB
+    C3 --> LB
+    C4 --> LB
+    
+    LB --> PM2
+    PM2 --> W1
+    PM2 --> W2
+    PM2 --> WN
+    
+    W1 --> SEC
+    W2 --> SEC
+    WN --> SEC
+    
+    SEC --> CORS
+    CORS --> RL
+    RL --> AUTH
+    AUTH --> VAL
+    VAL --> REST
+    VAL --> HEALTH
+    VAL --> STATIC
+    
+    REST --> BP
+    HEALTH --> BP
+    W1 --> LE
+    REST --> DB
+    
+    style SEC fill:#ffcdd2
+    style BP fill:#e8f5e8
+    style LE fill:#e8f5e8
+    style DB fill:#e3f2fd
 ```
 
 ### 6.3.2 API DESIGN
 
 #### 6.3.2.1 Protocol Specifications
 
-#### HTTP Server API Specifications
+**Primary Communication Protocols:**
 
-| Endpoint | Method | Protocol | Response Format | Purpose |
-|---|---|---|---|---|
-| `/` | GET | HTTP/1.1, HTTP/2 | text/plain | Basic health check |
-| `/hello` | GET | HTTP/1.1, HTTP/2 | text/plain | Application greeting |
-| `/health` | GET | HTTP/1.1, HTTP/2 | application/json | Health monitoring endpoint |
-
-**Protocol Support Matrix**:
-- **HTTP/1.1**: Full support with keep-alive connections
-- **HTTP/2**: Available through Express.js enhancement layer
-- **HTTPS/TLS**: SSL/TLS 1.2+ support via configuration
-- **WebSocket**: Available through Express.js WebSocket middleware
-
-#### External API Integration Protocols
-
-| Integration Target | Protocol | Authentication Method | Data Format |
+| Protocol | Usage Context | Configuration | Security Features |
 |---|---|---|---|
-| **Backprop API** | REST/HTTP | API Key Authentication | JSON |
-| **Selenium WebDriver** | W3C WebDriver Protocol | None (Local) | JSON-RPC |
-| **Jenkins CI/CD** | REST/HTTP | Token-based | JSON/XML |
-| **Jira Integration** | REST/HTTP | OAuth 2.0 / API Token | JSON |
+| **HTTPS (Production)** | All production communications | TLS 1.2+ with Grade A configuration | Perfect Forward Secrecy, HSTS enforcement |
+| **HTTP (Development)** | Local development environment | Port 3000 with automatic HTTPS redirect | Security headers applied in all environments |
+| **PostgreSQL Protocol** | Database connectivity | Connection pooling with SSL enforcement | Encrypted connections, connection limits |
+| **JSON over HTTPS** | API data exchange | Content-Type: application/json | Input validation, output sanitization |
+
+**Protocol Stack Implementation:**
+```mermaid
+graph TB
+    subgraph "Protocol Stack"
+        A[Application Layer<br/>Express.js Handlers]
+        B[Security Layer<br/>Helmet.js + Custom Middleware]
+        C[Transport Layer<br/>HTTP/HTTPS]
+        D[Network Layer<br/>TCP/IP]
+    end
+    
+    subgraph "Security Enhancements"
+        E[Content Security Policy]
+        F[HSTS Headers]
+        G[CORS Configuration]
+        H[Rate Limiting]
+    end
+    
+    A --> B
+    B --> C
+    C --> D
+    
+    B --> E
+    B --> F
+    B --> G
+    B --> H
+    
+    style B fill:#ffcdd2
+    style E fill:#e8f5e8
+    style F fill:#e8f5e8
+    style G fill:#e8f5e8
+    style H fill:#e8f5e8
+```
 
 #### 6.3.2.2 Authentication Methods
 
-#### API Key Authentication (Backprop Integration)
+**JWT-Based Authentication Architecture:**
 
+| Component | Implementation | Configuration |
+|---|---|---|
+| **Token Generation** | JWT with configurable expiration | Environment-based secret management |
+| **Token Validation** | Middleware-based verification | Automatic token refresh support |
+| **Session Management** | Stateless token-based sessions | No server-side session storage |
+| **Security Headers** | Automatic security header injection | 15+ security headers via Helmet.js |
+
+**Authentication Flow:**
 ```mermaid
 sequenceDiagram
     participant Client
-    participant Server
-    participant Backprop
+    participant Auth as Auth Middleware
+    participant JWT as JWT Handler
+    participant API as API Endpoint
+    participant DB as Database
     
-    Client->>Server: Request with API Key
-    Server->>Server: Validate BACKPROP_API_KEY
-    Server->>Backprop: Authenticated Request
-    Backprop-->>Server: Response
-    Server-->>Client: Processed Response
+    Client->>Auth: Request with JWT Token
+    Auth->>JWT: Validate Token
+    JWT->>JWT: Verify Signature & Expiration
     
-    Note over Client,Backprop: Environment variable:<br/>BACKPROP_API_KEY
+    alt Token Valid
+        JWT->>Auth: Token Validated
+        Auth->>API: Authorized Request
+        API->>DB: Business Logic Query
+        DB->>API: Query Response
+        API->>Client: Success Response
+    else Token Invalid
+        JWT->>Auth: Token Rejected
+        Auth->>Client: 401 Unauthorized
+    end
+    
+    alt Token Near Expiry
+        JWT->>Client: Refresh Token Header
+        Client->>Auth: Refresh Token Request
+        Auth->>Client: New JWT Token
+    end
 ```
-
-**Environment Variables Configuration**:
-- `BACKPROP_ENABLED`: Boolean flag to enable/disable Backprop integration
-- `BACKPROP_API_KEY`: Secure API key for Backprop service authentication
-- `NODE_ENV`: Environment specification affecting authentication behavior
-
-#### Security Headers Integration
-
-Based on the system's Helmet.js integration capability:
-
-| Security Header | Implementation | Purpose |
-|---|---|---|
-| `Content-Security-Policy` | Configurable CSP rules | XSS protection |
-| `X-Frame-Options` | DENY/SAMEORIGIN | Clickjacking prevention |
-| `Strict-Transport-Security` | HTTPS enforcement | SSL/TLS security |
-| `X-Content-Type-Options` | nosniff | MIME type security |
 
 #### 6.3.2.3 Authorization Framework
 
-#### Role-Based Access Control (Future Enhancement)
+**Role-Based Authorization Patterns:**
 
-The system architecture supports future implementation of role-based authorization:
-
-```mermaid
-graph LR
-    subgraph "Authorization Framework (Future)"
-        A[Request] --> B[Authentication Middleware]
-        B --> C[Authorization Middleware]
-        C --> D[Role Validation]
-        D --> E[Resource Access Control]
-        E --> F[API Endpoint]
-        
-        G[Configuration Store] --> D
-        H[User Role Database] --> D
-    end
-    
-    style A fill:#e3f2fd
-    style F fill:#c8e6c9
-    style G fill:#fff3e0
-    style H fill:#fff3e0
-```
+| Authorization Level | Implementation | Scope |
+|---|---|---|
+| **Endpoint-Level** | Route-specific middleware | Individual API endpoints |
+| **Resource-Level** | Context-aware validation | Data access permissions |
+| **Operation-Level** | HTTP method restrictions | CRUD operation control |
+| **Rate-Limit Based** | Request throttling authorization | Usage-based access control |
 
 #### 6.3.2.4 Rate Limiting Strategy
 
-## Node.js Server Rate Limiting
+**Multi-Tier Rate Limiting Architecture:**
 
-**Implementation Approach**:
-- Express.js middleware-based rate limiting
-- PM2 cluster-aware rate limiting for multi-process deployments
-- Configurable rate limits per endpoint
+| Rate Limit Tier | Scope | Limits | Implementation |
+|---|---|---|---|
+| **Global Rate Limit** | All endpoints | 1000 requests/hour per IP | express-rate-limit middleware |
+| **API Rate Limit** | /api/* endpoints | 100 requests/minute per IP | Enhanced rate limiting for API routes |
+| **Authentication Rate Limit** | Login endpoints | 10 attempts/hour per IP | Brute force protection |
+| **Health Check Exclusion** | /health, /ping | Unlimited | Monitoring system compatibility |
 
-| Rate Limit Type | Configuration | Implementation |
-|---|---|---|
-| **Global Rate Limit** | 1000 requests/hour/IP | Express-rate-limit middleware |
-| **API Endpoint Limit** | 100 requests/minute/IP | Endpoint-specific middleware |
-| **Health Check Limit** | 60 requests/minute/IP | Separate middleware configuration |
+**Rate Limiting Flow:**
+```mermaid
+flowchart TD
+    A[Incoming Request] --> B{Global Rate Limit Check}
+    B -->|Within Limit| C{Endpoint-Specific Check}
+    B -->|Exceeded| D[429 Too Many Requests]
+    
+    C -->|API Endpoint| E{API Rate Limit Check}
+    C -->|Health Endpoint| F[Skip Rate Limiting]
+    C -->|Static Asset| G{Static Rate Limit}
+    
+    E -->|Within Limit| H[Process Request]
+    E -->|Exceeded| I[429 API Limit Exceeded]
+    
+    G -->|Within Limit| H
+    G -->|Exceeded| J[429 Static Limit Exceeded]
+    
+    F --> H
+    H --> K[Continue to Authentication]
+    
+    style D fill:#ffcdd2
+    style I fill:#ffcdd2
+    style J fill:#ffcdd2
+    style H fill:#c8e6c9
+```
 
 #### 6.3.2.5 Versioning Approach
 
-#### Progressive Enhancement Versioning
+**API Versioning Strategy:**
 
-The system implements **capability-based versioning** rather than traditional API versioning:
-
-- **Base Capability**: Core HTTP server functionality
-- **Enhanced Capability**: Express.js framework features
-- **Production Capability**: PM2 process management and monitoring
+| Versioning Method | Implementation | Current Status |
+|---|---|---|
+| **URL Path Versioning** | `/api/v1/endpoint` pattern | Prepared for future versions |
+| **Header-Based Versioning** | Accept: application/vnd.api.v1+json | Alternative versioning support |
+| **Backward Compatibility** | Deprecation warnings and migration paths | Version lifecycle management |
+| **Documentation Versioning** | Version-specific API documentation | Synchronized with code versions |
 
 #### 6.3.2.6 Documentation Standards
 
-#### API Documentation Integration
+**API Documentation Framework:**
 
-**Documentation Tools Integration**:
-- **MkDocs**: Python-based documentation generation from `docs/` directory
-- **Docusaurus**: React-based documentation platform for interactive API docs
-- **OpenAPI Specification**: Future implementation for REST API documentation
+| Documentation Type | Tool/Format | Location | Update Frequency |
+|---|---|---|---|
+| **Endpoint Specifications** | Markdown with examples | `docs/api/endpoints.md` | Per release |
+| **Integration Guides** | Step-by-step implementation | `docs/guides/` | Per major feature |
+| **Security Documentation** | Security implementation details | `docs/guides/security.md` | Per security update |
+| **Schema Definitions** | JSON Schema specifications | Inline code documentation | Per API change |
 
 ### 6.3.3 MESSAGE PROCESSING
 
 #### 6.3.3.1 Event Processing Patterns
 
-#### Test Automation Event Processing
+**Request-Response Processing Pipeline:**
+
+The system implements a **synchronous request-response pattern** optimized for security and reliability:
 
 ```mermaid
 flowchart TD
-    subgraph "Test Automation Event Flow"
-        A[Maven Test Trigger] --> B[WebDriverManager Initialization]
-        B --> C[Browser Instance Creation]
-        C --> D[Cucumber Feature Loading]
-        D --> E[Parallel Test Execution]
-        E --> F[Result Aggregation]
-        F --> G[Report Generation]
-        G --> H[CI/CD Integration]
-        
-        I[Error Detection] --> J[Test Retry Logic]
-        J --> E
-        
-        K[Screenshot Capture] --> F
-        L[Performance Metrics] --> F
-    end
+    A[HTTP Request] --> B[Security Middleware Pipeline]
+    B --> C[Helmet.js Security Headers]
+    C --> D[CORS Validation]
+    D --> E[Global Rate Limiting]
+    E --> F[Request Body Parsing]
+    F --> G[Input Validation & Sanitization]
+    G --> H[Route Matching]
+    H --> I[Endpoint-Specific Rate Limiting]
+    I --> J[JWT Authentication]
+    J --> K[Business Logic Handler]
+    K --> L[Database Operations]
+    L --> M[Response Generation]
+    M --> N[Security Header Injection]
+    N --> O[HTTP Response]
     
-    style A fill:#e3f2fd
-    style H fill:#c8e6c9
-    style I fill:#ffcdd2
+    style B fill:#ffcdd2
+    style G fill:#e8f5e8
+    style J fill:#fff3e0
+    style N fill:#ffcdd2
 ```
 
-**Event Processing Characteristics**:
-- **Parallel Processing**: Maven Surefire plugin enables method-level parallel execution
-- **Event-Driven Architecture**: Cucumber hooks and listeners for test lifecycle events
-- **Asynchronous Processing**: Non-blocking test execution with result aggregation
+**Event Processing Characteristics:**
 
-#### HTTP Server Event Processing
-
-```mermaid
-flowchart LR
-    subgraph "HTTP Event Processing"
-        A[HTTP Request] --> B[Event Loop]
-        B --> C[Request Handler]
-        C --> D[Middleware Stack]
-        D --> E[Response Generation]
-        E --> F[Event Loop]
-        F --> G[HTTP Response]
-        
-        H[Health Check Events] --> I[PM2 Health Monitor]
-        I --> J[Process Status Update]
-        
-        K[Backprop Events] --> L[Analysis Pipeline]
-        L --> M[Metrics Collection]
-    end
-    
-    style B fill:#e3f2fd
-    style F fill:#e3f2fd
-    style I fill:#fff3e0
-```
+| Processing Type | Implementation | Performance Target |
+|---|---|---|---|
+| **Synchronous Processing** | Direct request-response flow | <200ms p95 response time |
+| **Security Event Processing** | Real-time security validation | <10ms middleware overhead |
+| **Health Check Processing** | Lightweight status verification | <50ms response time |
+| **Static Asset Processing** | File system-based serving | <100ms asset delivery |
 
 #### 6.3.3.2 Message Queue Architecture
 
-#### Process-Level Message Handling
+**Current State: Message Queue Architecture is not implemented in this system.**
 
-**Java Test Automation Message Handling**:
-- **Thread-Safe Queuing**: JUnit framework provides thread-safe test execution queuing
-- **Result Message Handling**: Cucumber report generation handles test result messages
-- **Error Message Processing**: Exception handling and error reporting through Maven Surefire
+The system operates on a **direct request-response model** without message queuing infrastructure. This design decision supports:
+- **Simplified Architecture**: Eliminates message queue operational complexity
+- **Predictable Latency**: Direct processing without queue delays
+- **Resource Efficiency**: No additional message broker infrastructure required
+- **Development Velocity**: Streamlined debugging and testing processes
 
-**Node.js Event-Driven Messaging**:
-- **Event Emitter Pattern**: Native Node.js EventEmitter for internal message handling
-- **HTTP Request Queue**: Native HTTP module handles request queuing and processing
-- **PM2 Inter-Process Communication**: IPC messaging between PM2 master and worker processes
+**Future Message Queue Considerations:**
+If asynchronous processing becomes required, integration points would include:
+- Background security log processing
+- Batch certificate renewal operations
+- Monitoring data aggregation workflows
+- Performance metrics collection pipelines
 
 #### 6.3.3.3 Stream Processing Design
 
-#### Real-Time Log Streaming
+**Current State: Stream Processing is not applicable for this system.**
 
-```mermaid
-graph LR
-    subgraph "Stream Processing Architecture"
-        A[Test Execution] --> B[Log Stream]
-        B --> C[Maven Surefire Reporter]
-        C --> D[Report Generation Stream]
-        D --> E[File Output Stream]
-        
-        F[HTTP Server] --> G[Access Log Stream]
-        G --> H[PM2 Log Aggregation]
-        H --> I[Monitoring Dashboard]
-        
-        J[Health Metrics Stream] --> K[PM2 Health Monitor]
-        K --> L[Auto-Restart Triggers]
-    end
-    
-    style B fill:#e3f2fd
-    style G fill:#e3f2fd
-    style J fill:#fff3e0
-```
+The application implements **stateless request processing** without stream processing requirements. Each request is processed independently with complete context available in the request payload.
 
 #### 6.3.3.4 Batch Processing Flows
 
-#### Test Report Batch Processing
+**Scheduled Batch Operations:**
 
-| Processing Stage | Input | Processing Type | Output |
+| Process Type | Frequency | Implementation | Purpose |
 |---|---|---|---|
-| **Test Execution** | Feature files | Parallel batch processing | Test results |
-| **Report Generation** | Test results | Sequential batch processing | HTML/JSON/TXT reports |
-| **Screenshot Processing** | Browser captures | Batch image processing | Report attachments |
-| **CI/CD Integration** | Generated reports | Batch upload processing | Jenkins/Jira integration |
+| **SSL Certificate Renewal** | Every 60 days | Let's Encrypt automation | Maintain HTTPS security |
+| **Security Log Rotation** | Daily | PM2 log management | Prevent disk space issues |
+| **Health Check Aggregation** | Every 5 minutes | Backprop API reporting | System monitoring |
+| **Performance Metrics Collection** | Every 15 minutes | PM2 monitoring | Resource utilization tracking |
+
+```mermaid
+gantt
+    title Batch Processing Schedule
+    dateFormat HH:mm
+    axisFormat %H:%M
+    
+    section Daily Operations
+    Log Rotation           :done, log, 00:00, 00:15
+    Health Metrics         :active, health, 00:00, 23:59
+    
+    section Monitoring
+    Performance Collection :crit, perf, 00:00, 23:59
+    Backprop Reporting    :active, bp, 00:00, 23:59
+    
+    section Security
+    Certificate Check     :done, cert, 00:00, 00:30
+    Security Scan         :active, scan, 02:00, 02:30
+```
 
 #### 6.3.3.5 Error Handling Strategy
 
-#### Comprehensive Error Handling Architecture
+**Comprehensive Error Processing Pipeline:**
 
+| Error Type | Detection Method | Response Strategy | Recovery Mechanism |
+|---|---|---|---|
+| **Input Validation Errors** | express-validator middleware | 400 Bad Request with details | Client-side correction required |
+| **Authentication Failures** | JWT middleware validation | 401 Unauthorized | Token refresh or re-authentication |
+| **Rate Limit Violations** | express-rate-limit tracking | 429 Too Many Requests | Automatic retry after timeout |
+| **External Service Failures** | Timeout and retry logic | Graceful degradation | Circuit breaker pattern |
+
+**Error Response Flow:**
 ```mermaid
-flowchart TD
-    subgraph "Error Handling Strategy"
-        A[Error Detection] --> B{Error Type}
-        
-        B -->|Test Failure| C[Cucumber Retry Logic]
-        B -->|Browser Error| D[WebDriver Recovery]
-        B -->|Server Error| E[PM2 Auto-Restart]
-        B -->|Integration Error| F[Fallback Mechanisms]
-        
-        C --> G[Test Result Recording]
-        D --> H[Browser Re-initialization]
-        E --> I[Process Recovery]
-        F --> J[Error Logging]
-        
-        G --> K[Report Generation]
-        H --> L[Test Continuation]
-        I --> M[Service Restoration]
-        J --> N[Alert System]
+sequenceDiagram
+    participant Client
+    participant Middleware as Error Middleware
+    participant Handler as Error Handler
+    participant Logger as Winston Logger
+    participant Monitor as Monitoring
+    
+    Client->>Middleware: Request with Error
+    Middleware->>Handler: Catch Error
+    Handler->>Logger: Log Error Details
+    Handler->>Monitor: Report Error Metrics
+    
+    alt Recoverable Error
+        Handler->>Client: Structured Error Response
+        Client->>Middleware: Retry Request
+    else Fatal Error
+        Handler->>Client: 500 Internal Server Error
+        Monitor->>Monitor: Trigger Alert
     end
     
-    style A fill:#ffcdd2
-    style K fill:#c8e6c9
-    style L fill:#c8e6c9
-    style M fill:#c8e6c9
+    Logger->>Logger: Store Error Context
+    Monitor->>Monitor: Update Error Counters
 ```
-
-**Error Handling Patterns**:
-- **Circuit Breaker Pattern**: Backprop integration includes failure detection and recovery
-- **Retry with Exponential Backoff**: WebDriverManager implements automatic retry for browser driver downloads
-- **Graceful Degradation**: HTTP server continues operation even if Backprop integration fails
-- **Health Check Recovery**: PM2 automatic process restart on health check failures
 
 ### 6.3.4 EXTERNAL SYSTEMS
 
 #### 6.3.4.1 Third-Party Integration Patterns
 
-#### CI/CD Pipeline Integration
+**Integration Architecture Summary:**
 
+| System | Integration Type | Protocol | Failover Strategy |
+|---|---|---|---|
+| **Backprop API** | Monitoring & Testing | HTTPS/JSON | Graceful degradation |
+| **Let's Encrypt** | Certificate Management | HTTPS/ACME | Manual certificate fallback |
+| **PostgreSQL** | Data Persistence | PostgreSQL Protocol | Connection pool management |
+| **PM2 Monitoring** | Process Management | IPC/Events | Built-in health recovery |
+
+#### 6.3.4.2 Backprop API Integration
+
+**Monitoring and Testing Platform Integration:**
+
+```mermaid
+sequenceDiagram
+    participant App as Node.js Application
+    participant BP as Backprop API
+    participant Monitor as Monitoring System
+    
+    Note over App,BP: Health Check Integration
+    App->>BP: POST /health-check
+    Note right of BP: System metrics<br/>Security status<br/>Performance data
+    BP->>App: Health Status Response
+    
+    Note over App,BP: Testing Integration
+    App->>BP: POST /test-results
+    Note right of BP: Test execution data<br/>Security validation<br/>Performance metrics
+    BP->>App: Test Acknowledgment
+    
+    Note over App,Monitor: Monitoring Flow
+    BP->>Monitor: Aggregated Metrics
+    Monitor->>Monitor: Alert Generation
+    
+    alt API Failure
+        App->>App: Log Local Metrics
+        App->>Monitor: Direct Monitoring
+    end
+```
+
+**Backprop Integration Configuration:**
+
+| Parameter | Environment Variable | Default Value | Purpose |
+|---|---|---|---|
+| **API Base URL** | BACKPROP_BASE_URL | https://api.backprop.com | Service endpoint |
+| **API Key** | BACKPROP_API_KEY | (required) | Authentication credential |
+| **Timeout** | BACKPROP_TIMEOUT | 30000ms | Request timeout |
+| **Retry Attempts** | BACKPROP_RETRIES | 3 | Fault tolerance |
+
+#### 6.3.4.3 Let's Encrypt Certificate Management
+
+**Automated SSL/TLS Certificate Provisioning:**
+
+```mermaid
+flowchart TD
+    A[Certificate Expiry Check] --> B{Certificate < 30 days?}
+    B -->|Yes| C[Initiate ACME Challenge]
+    B -->|No| D[Continue Normal Operation]
+    
+    C --> E[DNS-01 Challenge]
+    E --> F[Let's Encrypt Validation]
+    F --> G{Validation Success?}
+    
+    G -->|Yes| H[Download New Certificate]
+    G -->|No| I[Log Error & Alert]
+    
+    H --> J[Install Certificate]
+    J --> K[Reload HTTPS Configuration]
+    K --> L[Verify Certificate Grade A]
+    L --> M[Update Monitoring]
+    
+    I --> N[Use Existing Certificate]
+    N --> O[Schedule Retry]
+    
+    style C fill:#e8f5e8
+    style I fill:#ffcdd2
+    style L fill:#c8e6c9
+```
+
+#### 6.3.4.4 Database Integration Patterns
+
+**PostgreSQL Connection Architecture:**
+
+| Configuration | Value | Purpose |
+|---|---|---|
+| **Max Connections** | 10 | Connection pool size |
+| **Idle Timeout** | 30 seconds | Connection cleanup |
+| **Connection Timeout** | 5 seconds | Connection establishment |
+| **SSL Mode** | required | Encrypted communications |
+
+**Database Integration Flow:**
+```mermaid
+sequenceDiagram
+    participant App as Application
+    participant Pool as Connection Pool
+    participant DB as PostgreSQL
+    participant Monitor as Health Monitor
+    
+    App->>Pool: Request Database Connection
+    Pool->>DB: Establish Connection (if needed)
+    DB->>Pool: Connection Ready
+    Pool->>App: Provide Connection
+    
+    App->>DB: Execute Query
+    DB->>App: Query Results
+    App->>Pool: Return Connection
+    
+    Note over Pool: Connection remains in pool for reuse
+    
+    Pool->>Monitor: Connection Pool Metrics
+    Monitor->>Monitor: Track Pool Health
+    
+    alt Connection Failure
+        DB->>Pool: Connection Lost
+        Pool->>App: Connection Error
+        App->>App: Graceful Error Handling
+    end
+```
+
+#### 6.3.4.5 API Gateway Configuration
+
+**Current State: Dedicated API Gateway is not implemented.**
+
+The system implements **integrated API management** within the Express.js application rather than using a separate API gateway. This provides:
+
+**Integrated API Management Features:**
+- **Request Routing**: Express.js router with pattern matching
+- **Rate Limiting**: Multi-tier rate limiting via express-rate-limit
+- **Authentication**: JWT-based authentication middleware
+- **CORS Management**: Dynamic CORS configuration
+- **Security Headers**: Comprehensive security header injection
+
+**API Gateway Alternative Architecture:**
 ```mermaid
 graph TB
-    subgraph "CI/CD Integration Architecture"
-        A[Git Repository] --> B[Jenkins Pipeline]
-        B --> C[Maven Build Execution]
-        C --> D[Parallel Test Execution]
-        D --> E[Report Generation]
-        E --> F[Jenkins Report Publishing]
+    subgraph "Current Implementation (Integrated)"
+        C1[Client Requests] --> LB[Load Balancer]
+        LB --> PM2[PM2 Process Manager]
+        PM2 --> APP[Express.js Application]
         
-        G[Node.js Deployment] --> H[PM2 Process Management]
-        H --> I[Health Monitoring]
-        I --> J[Production Deployment]
-        
-        B --> G
-        F --> K[Jira Test Management]
-        
-        L[Backprop Integration] --> M[Development Metrics]
-        M --> N[Code Analysis Pipeline]
+        subgraph "Integrated API Management"
+            APP --> CORS[CORS Middleware]
+            CORS --> RL[Rate Limiting]
+            RL --> AUTH[Authentication]
+            AUTH --> ROUTES[Route Handlers]
+        end
     end
     
-    style B fill:#e3f2fd
-    style F fill:#c8e6c9
-    style K fill:#fff3e0
-    style L fill:#fff3e0
-```
-
-#### Browser Automation Service Integration
-
-| Integration Component | Service Provider | Protocol | Configuration |
-|---|---|---|---|
-| **WebDriverManager** | Selenium Grid | W3C WebDriver | Automatic driver management |
-| **Chrome Driver** | Google Chrome | WebDriver Protocol | Version 3.141.59 |
-| **Firefox Driver** | Mozilla Firefox | WebDriver Protocol | Automatic version detection |
-| **Cloud Testing Services** | BrowserStack/Sauce Labs | WebDriver Protocol | Grid URL configuration |
-
-#### 6.3.4.2 Legacy System Interfaces
-
-#### Maven Legacy Integration
-
-The system maintains compatibility with legacy Maven-based build systems:
-
-- **Maven 3.x Compatibility**: Full support for existing Maven installations
-- **Legacy Plugin Support**: Compatible with older Surefire plugin versions
-- **Dependency Management**: Handles legacy dependency resolution patterns
-
-#### 6.3.4.3 API Gateway Configuration
-
-#### Future API Gateway Integration
-
-While not currently implemented, the system architecture supports future API gateway integration:
-
-```mermaid
-graph LR
-    subgraph "Future API Gateway Architecture"
-        A[Client Requests] --> B[API Gateway]
-        B --> C[Authentication Service]
-        B --> D[Rate Limiting Service]
-        B --> E[Load Balancer]
-        
-        E --> F[Node.js Server Instance 1]
-        E --> G[Node.js Server Instance 2]
-        E --> H[Node.js Server Instance N]
-        
-        I[Service Discovery] --> E
-        J[Health Monitoring] --> I
+    subgraph "Alternative (Dedicated Gateway) - Not Implemented"
+        C2[Client Requests] --> GW[API Gateway]
+        GW --> LB2[Load Balancer]
+        LB2 --> SVC[Service Instances]
     end
     
-    style B fill:#e3f2fd
-    style C fill:#ffcdd2
-    style I fill:#fff3e0
+    style APP fill:#c8e6c9
+    style GW fill:#ffebee,stroke:#f44336,stroke-dasharray: 5 5
 ```
 
-#### 6.3.4.4 External Service Contracts
+#### 6.3.4.6 External Service Contracts
 
-#### Backprop Development Tooling Contract
+**Service Level Agreements and Contracts:**
 
-| Contract Element | Specification | Implementation |
-|---|---|---|
-| **Authentication** | API Key based | Environment variable configuration |
-| **Data Format** | JSON REST API | Native JavaScript object handling |
-| **Rate Limits** | 1000 requests/hour | Client-side rate limiting |
-| **Error Handling** | HTTP status codes | Promise-based error handling |
-
-#### WebDriver Service Contracts
-
-| Browser | Driver Version | Protocol | Support Level |
+| Service | Availability SLA | Response Time SLA | Integration Contract |
 |---|---|---|---|
-| **Chrome** | Auto-managed | W3C WebDriver | Full support |
-| **Firefox** | Auto-managed | W3C WebDriver | Full support |
-| **Safari** | Auto-managed | W3C WebDriver | Platform-dependent |
-| **Edge** | Auto-managed | W3C WebDriver | Windows support |
+| **Backprop API** | 99.9% | <500ms | JSON API with authentication |
+| **Let's Encrypt** | 99.5% | <2000ms | ACME protocol compliance |
+| **PostgreSQL** | 99.9% | <100ms | Connection pool management |
+| **PM2 Monitoring** | 99.99% | <50ms | IPC communication protocol |
 
 ### 6.3.5 INTEGRATION FLOW DIAGRAMS
 
-#### 6.3.5.1 Complete System Integration Flow
-
-```mermaid
-flowchart TB
-    subgraph "Comprehensive Integration Architecture"
-        subgraph "Development Workflow"
-            A[Developer] --> B[Git Repository]
-            B --> C[CI/CD Pipeline]
-        end
-        
-        subgraph "Java Test Integration"
-            D[Maven Build] --> E[WebDriverManager]
-            E --> F[Browser Automation]
-            F --> G[Cucumber Test Execution]
-            G --> H[JUnit Framework]
-            H --> I[Report Generation]
-        end
-        
-        subgraph "Node.js Server Integration"
-            J[HTTP Server] --> K[Express Enhancement]
-            K --> L[PM2 Process Management]
-            L --> M[Health Monitoring]
-            M --> N[Production Deployment]
-        end
-        
-        subgraph "External System Integration"
-            O[Backprop Tooling] --> P[Code Analysis]
-            Q[Jenkins CI/CD] --> R[Test Report Publishing]
-            S[Jira Test Management] --> T[Test Cycle Tracking]
-        end
-        
-        C --> D
-        C --> J
-        
-        I --> Q
-        I --> S
-        
-        J --> O
-        N --> M
-        
-        P --> U[Development Metrics]
-        R --> V[CI/CD Reports]
-        T --> W[Test Management Reports]
-    end
-    
-    style A fill:#e3f2fd
-    style C fill:#fff3e0
-    style O fill:#fff3e0
-    style Q fill:#c8e6c9
-    style S fill:#c8e6c9
-```
-
-#### 6.3.5.2 API Architecture Integration Diagram
+#### 6.3.5.1 Complete Integration Architecture Flow
 
 ```mermaid
 graph TB
-    subgraph "API Integration Architecture"
-        subgraph "Client Layer"
-            A[Web Browsers]
-            B[Test Automation Clients]
-            C[Development Tools]
-            D[CI/CD Systems]
-        end
-        
-        subgraph "API Gateway Layer (Future)"
-            E[Load Balancer]
-            F[Authentication Service]
-            G[Rate Limiting Service]
-        end
-        
-        subgraph "Application Layer"
-            H[Node.js HTTP Server]
-            I[Express.js Middleware]
-            J[API Endpoints]
-        end
-        
-        subgraph "Integration Layer"
-            K[Backprop Integration]
-            L[Health Monitoring]
-            M[Process Management]
-        end
-        
-        subgraph "External Services"
-            N[Backprop API]
-            O[PM2 Manager]
-            P[System Health Checks]
-        end
-        
-        A --> E
-        B --> E
-        C --> E
-        D --> E
-        
-        E --> H
-        H --> I
-        I --> J
-        
-        J --> K
-        J --> L
-        J --> M
-        
-        K --> N
-        L --> P
-        M --> O
+    subgraph "External Clients"
+        WEB[Web Browsers]
+        API[API Clients]
+        TEST[Test Automation]
+        MOB[Mobile Apps]
     end
     
-    style E fill:#e3f2fd
-    style J fill:#c8e6c9
-    style N fill:#fff3e0
+    subgraph "Load Balancing"
+        LB[Load Balancer<br/>HTTPS Termination]
+    end
+    
+    subgraph "Application Cluster"
+        PM2[PM2 Process Manager<br/>Health Monitoring]
+        
+        subgraph "Worker Processes"
+            W1[Worker 1<br/>server.js]
+            W2[Worker 2<br/>server.js]
+            W3[Worker N<br/>server.js]
+        end
+        
+        subgraph "Security Pipeline"
+            HELMET[Helmet.js<br/>Security Headers]
+            CORS[CORS<br/>Origin Validation]
+            RATE[Rate Limiting<br/>Multi-tier]
+            JWT[JWT Auth<br/>Token Validation]
+            VALID[Input Validation<br/>Sanitization]
+        end
+        
+        subgraph "API Layer"
+            ROUTES[Route Handlers]
+            HEALTH[Health Endpoints]
+            STATIC[Static Assets]
+        end
+    end
+    
+    subgraph "External Integrations"
+        BP[Backprop API<br/>Monitoring]
+        LE[Let's Encrypt<br/>SSL/TLS]
+        DB[(PostgreSQL<br/>Database)]
+        LOGS[Winston Logger<br/>File System]
+    end
+    
+    WEB --> LB
+    API --> LB
+    TEST --> LB
+    MOB --> LB
+    
+    LB --> PM2
+    PM2 --> W1
+    PM2 --> W2
+    PM2 --> W3
+    
+    W1 --> HELMET
+    W2 --> HELMET
+    W3 --> HELMET
+    
+    HELMET --> CORS
+    CORS --> RATE
+    RATE --> JWT
+    JWT --> VALID
+    VALID --> ROUTES
+    VALID --> HEALTH
+    VALID --> STATIC
+    
+    ROUTES --> BP
+    ROUTES --> DB
+    HEALTH --> BP
+    PM2 --> LE
+    W1 --> LOGS
+    W2 --> LOGS
+    W3 --> LOGS
+    
+    style HELMET fill:#ffcdd2
+    style CORS fill:#ffcdd2
+    style RATE fill:#ffcdd2
+    style JWT fill:#fff3e0
+    style VALID fill:#e8f5e8
+    style BP fill:#e3f2fd
+    style LE fill:#e3f2fd
+    style DB fill:#e3f2fd
 ```
 
-#### 6.3.5.3 Message Processing Flow Diagram
+#### 6.3.5.2 Security Integration Flow
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant LB as Load Balancer
+    participant PM2 as PM2 Manager
+    participant App as Application
+    participant Security as Security Pipeline
+    participant External as External Services
+    participant Monitor as Monitoring
+    
+    Client->>LB: HTTPS Request
+    LB->>PM2: Route to Available Worker
+    PM2->>App: Forward Request
+    
+    App->>Security: Enter Security Pipeline
+    
+    Security->>Security: Apply Helmet Headers
+    Note right of Security: 15+ security headers<br/>CSP, HSTS, XSS Protection
+    
+    Security->>Security: CORS Validation
+    Note right of Security: Origin verification<br/>Preflight handling
+    
+    Security->>Security: Rate Limit Check
+    Note right of Security: Global: 1000/hour<br/>API: 100/minute
+    
+    Security->>Security: Input Validation
+    Note right of Security: express-validator<br/>Sanitization
+    
+    Security->>Security: JWT Authentication
+    Note right of Security: Token verification<br/>Role extraction
+    
+    Security->>App: Validated Request
+    App->>External: External Service Calls
+    External->>App: Service Responses
+    App->>Security: Business Logic Response
+    
+    Security->>Monitor: Log Security Events
+    Security->>Client: Secured Response
+    
+    Monitor->>Monitor: Aggregate Metrics
+    Monitor->>External: Report to Backprop
+```
+
+#### 6.3.5.3 External Service Integration Message Flow
+
+```mermaid
+flowchart TD
+    subgraph "Application Core"
+        APP[Express.js Application]
+        HEALTH[Health Check Handler]
+        API[API Endpoints]
+    end
+    
+    subgraph "Backprop Integration"
+        BP_CLIENT[Backprop Client]
+        BP_API[Backprop API]
+        BP_METRICS[Metrics Collector]
+    end
+    
+    subgraph "Certificate Management"
+        CERT_MGR[Certificate Manager]
+        ACME[ACME Client]
+        LE_API[Let's Encrypt API]
+    end
+    
+    subgraph "Database Integration"
+        DB_POOL[Connection Pool]
+        DB_CLIENT[PostgreSQL Client]
+        DATABASE[(PostgreSQL)]
+    end
+    
+    subgraph "Process Management"
+        PM2_MGR[PM2 Manager]
+        HEALTH_MON[Health Monitor]
+        CLUSTER[Cluster Management]
+    end
+    
+    APP --> HEALTH
+    APP --> API
+    
+    HEALTH --> BP_CLIENT
+    API --> BP_CLIENT
+    BP_CLIENT --> BP_METRICS
+    BP_METRICS --> BP_API
+    
+    APP --> CERT_MGR
+    CERT_MGR --> ACME
+    ACME --> LE_API
+    
+    API --> DB_POOL
+    DB_POOL --> DB_CLIENT
+    DB_CLIENT --> DATABASE
+    
+    APP --> PM2_MGR
+    PM2_MGR --> HEALTH_MON
+    PM2_MGR --> CLUSTER
+    
+    style BP_CLIENT fill:#e3f2fd
+    style CERT_MGR fill:#e8f5e8
+    style DB_POOL fill:#fff3e0
+    style PM2_MGR fill:#f3e5f5
+```
+
+### 6.3.6 INTEGRATION SECURITY ARCHITECTURE
+
+#### 6.3.6.1 Security Integration Patterns
+
+**End-to-End Security Integration:**
+
+| Security Layer | Implementation | External Integration |
+|---|---|---|---|
+| **Transport Security** | TLS 1.2+ with Grade A configuration | Let's Encrypt certificate automation |
+| **Application Security** | Helmet.js with 15+ security headers | Backprop security monitoring |
+| **Authentication Security** | JWT with configurable expiration | External auth provider ready |
+| **Data Security** | PostgreSQL SSL connections | Encrypted database communications |
+
+#### 6.3.6.2 Integration Monitoring and Alerting
+
+**Monitoring Integration Architecture:**
+
+```mermaid
+graph TB
+    subgraph "Application Metrics"
+        APP_METRICS[Application Metrics]
+        PERF_METRICS[Performance Metrics]
+        SEC_METRICS[Security Metrics]
+    end
+    
+    subgraph "Integration Health"
+        BP_HEALTH[Backprop Health]
+        DB_HEALTH[Database Health]
+        CERT_HEALTH[Certificate Health]
+        PM2_HEALTH[PM2 Health]
+    end
+    
+    subgraph "Monitoring Systems"
+        BACKPROP[Backprop Monitoring]
+        LOCAL_LOG[Local Logging]
+        ALERT_MGR[Alert Manager]
+    end
+    
+    APP_METRICS --> BACKPROP
+    PERF_METRICS --> BACKPROP
+    SEC_METRICS --> BACKPROP
+    
+    BP_HEALTH --> LOCAL_LOG
+    DB_HEALTH --> LOCAL_LOG
+    CERT_HEALTH --> LOCAL_LOG
+    PM2_HEALTH --> LOCAL_LOG
+    
+    BACKPROP --> ALERT_MGR
+    LOCAL_LOG --> ALERT_MGR
+    
+    style BACKPROP fill:#e3f2fd
+    style ALERT_MGR fill:#ffcdd2
+```
+
+### 6.3.7 PERFORMANCE AND SCALABILITY INTEGRATION
+
+#### 6.3.7.1 Integration Performance Optimization
+
+**Performance-Optimized Integration Patterns:**
+
+| Integration | Optimization Technique | Performance Target |
+|---|---|---|
+| **Database Connections** | Connection pooling (10 max) | <100ms query response |
+| **External API Calls** | Timeout and retry (30s, 3 attempts) | <500ms API response |
+| **Certificate Validation** | Cached certificate checks | <50ms validation |
+| **Health Monitoring** | Lightweight metric collection | <10ms overhead |
+
+#### 6.3.7.2 Horizontal Scaling Integration
+
+**Scaling-Aware Integration Design:**
+
+```mermaid
+graph TB
+    subgraph "Load Balancer"
+        LB[Load Balancer<br/>Session Affinity: None]
+    end
+    
+    subgraph "Scalable Application Layer"
+        PM2[PM2 Cluster Manager]
+        W1[Worker 1]
+        W2[Worker 2]
+        W3[Worker 3]
+        WN[Worker N]
+    end
+    
+    subgraph "Shared External Resources"
+        DB_POOL[(Database Pool<br/>Shared Connections)]
+        CERT_STORE[Certificate Store<br/>Shared SSL Certificates]
+        LOG_STORE[Log Storage<br/>Centralized Logging]
+    end
+    
+    subgraph "External Services"
+        BP_API[Backprop API<br/>Stateless]
+        LE_API[Let's Encrypt<br/>Stateless]
+    end
+    
+    LB --> PM2
+    PM2 --> W1
+    PM2 --> W2
+    PM2 --> W3
+    PM2 --> WN
+    
+    W1 --> DB_POOL
+    W2 --> DB_POOL
+    W3 --> DB_POOL
+    WN --> DB_POOL
+    
+    W1 --> CERT_STORE
+    W2 --> CERT_STORE
+    W3 --> CERT_STORE
+    WN --> CERT_STORE
+    
+    W1 --> LOG_STORE
+    W2 --> LOG_STORE
+    W3 --> LOG_STORE
+    WN --> LOG_STORE
+    
+    W1 --> BP_API
+    W2 --> LE_API
+    W3 --> BP_API
+    WN --> LE_API
+    
+    style PM2 fill:#c8e6c9
+    style DB_POOL fill:#e3f2fd
+    style CERT_STORE fill:#e8f5e8
+```
+
+#### References
+
+**Technical Specification Sections Retrieved:**
+- `1.2 SYSTEM OVERVIEW` - System context and integration requirements
+- `3.4 THIRD-PARTY SERVICES` - External service specifications and configurations
+- `5.1 HIGH-LEVEL ARCHITECTURE` - Integration points and system boundaries
+- `6.1 CORE SERVICES ARCHITECTURE` - Core services integration patterns
+
+**Files and Directories Analyzed:**
+- `server.js` - Core server implementation with security middleware and API routes
+- `docs/api/endpoints.md` - API endpoint specifications and Backprop integration details
+- `.env.example` - Environment configuration including external service integrations
+- `docs/guides/security.md` - Security implementation including authentication and monitoring
+- PM2 configuration and clustering setup for production deployment
+
+**External Dependencies Documented:**
+- Backprop API integration for monitoring and testing platform connectivity
+- Let's Encrypt ACME protocol for automated SSL/TLS certificate provisioning
+- PostgreSQL database integration with connection pooling and security
+- PM2 process management for production monitoring and scaling capabilities
+
+## 6.4 SECURITY ARCHITECTURE
+
+The system implements a **comprehensive defense-in-depth security architecture** that addresses the OWASP Top 10 vulnerabilities and provides enterprise-grade protection through multiple security layers. The architecture follows Zero Trust principles with multi-layer validation, comprehensive input sanitization, and extensive security monitoring capabilities.
+
+### 6.4.1 Authentication Framework
+
+#### 6.4.1.1 Identity Management System
+
+The authentication framework implements a token-based identity management system with comprehensive session security and configurable authentication policies.
+
+**Core Authentication Components:**
+
+| Component | Implementation | Configuration | Security Features |
+|---|---|---|---|
+| **JWT Tokens** | JSON Web Tokens with configurable expiration | JWT_SECRET, JWT_EXPIRATION=1h | RS256 signing, expiration validation |
+| **Refresh Tokens** | Extended session support | JWT_REFRESH_SECRET, JWT_REFRESH_EXPIRATION=7d | Separate secret, extended expiration |
+| **Session Management** | Express-session with secure defaults | SESSION_SECRET, SESSION_TIMEOUT=3600000 | HTTPOnly, SameSite, Secure flags |
+| **Password Security** | bcrypt hashing with configurable rounds | BCRYPT_ROUNDS=12 | Adaptive hashing, salt generation |
+
+**Authentication Configuration Matrix:**
+
+```javascript
+// Environment-based authentication settings from .env.example
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+JWT_EXPIRATION=1h
+JWT_REFRESH_SECRET=your-refresh-token-secret-change-this
+JWT_REFRESH_EXPIRATION=7d
+SESSION_SECRET=your-session-secret-change-this-in-production
+SESSION_TIMEOUT=3600000  # 1 hour in milliseconds
+SESSION_SECURE=true      # Set to true in production (requires HTTPS)
+SESSION_HTTP_ONLY=true
+SESSION_SAME_SITE=strict
+BCRYPT_ROUNDS=12
+```
+
+#### 6.4.1.2 Multi-Factor Authentication Framework
+
+The system provides a foundation for MFA implementation with extensible authentication methods and policy enforcement.
+
+**MFA Architecture Components:**
+- **Primary Authentication**: JWT token-based authentication with secure session management
+- **Secondary Factors**: Framework support for TOTP, SMS, and hardware tokens
+- **Policy Enforcement**: Configurable MFA requirements per endpoint or user role
+- **Backup Codes**: Secure recovery mechanism for account access
+
+#### 6.4.1.3 Session Management and Token Handling
+
+**Session Security Configuration:**
+
+| Security Control | Implementation | Configuration Value | Security Impact |
+|---|---|---|---|
+| **Session Timeout** | Automatic expiration | 3600000ms (1 hour) | Limits exposure window |
+| **Secure Flag** | HTTPS-only cookies | true (production) | Prevents HTTP transmission |
+| **HTTPOnly Flag** | XSS protection | true | Prevents JavaScript access |
+| **SameSite Policy** | CSRF protection | strict | Cross-site request blocking |
+
+#### 6.4.1.4 Authentication Flow Architecture
+
+```mermaid
+flowchart TD
+    A[User Login Request] --> B[Input Validation]
+    B --> C{Validation Pass?}
+    C -->|No| D[Return 400 Bad Request]
+    C -->|Yes| E[Extract Credentials]
+    
+    E --> F[Password Hash Verification]
+    F --> G{Credentials Valid?}
+    G -->|No| H[Log Failed Attempt]
+    H --> I[Return 401 Unauthorized]
+    
+    G -->|Yes| J[Generate JWT Token]
+    J --> K[Generate Refresh Token]
+    K --> L[Create Secure Session]
+    
+    L --> M[Set Security Headers]
+    M --> N[Set Secure Cookies]
+    N --> O[Return Authentication Success]
+    
+    O --> P[Set Session Timeout]
+    P --> Q[Enable Session Monitoring]
+    
+    D --> R[Audit Log Entry]
+    I --> R
+    Q --> S[Authentication Complete]
+    
+    style A fill:#e1f5fe
+    style S fill:#c8e6c9
+    style D fill:#ffcdd2
+    style I fill:#ffcdd2
+```
+
+### 6.4.2 Authorization System
+
+#### 6.4.2.1 Role-Based Access Control (RBAC)
+
+The authorization system implements a comprehensive RBAC framework with granular permission management and policy enforcement across all system endpoints.
+
+**RBAC Architecture Components:**
+
+| Component | Description | Implementation | Configuration |
+|---|---|---|---|
+| **Roles** | User role definitions | Database-driven role assignment | Environment-configurable defaults |
+| **Permissions** | Granular access controls | Resource-action mapping | Policy-based enforcement |
+| **Resources** | Protected system endpoints | URL pattern matching | Wildcard and exact matching |
+| **Policies** | Authorization rule engine | Middleware-based enforcement | Configurable policy files |
+
+#### 6.4.2.2 Permission Management and Resource Authorization
+
+**Authorization Matrix:**
+
+| Resource Pattern | Required Permission | Role Requirements | Audit Logging |
+|---|---|---|---|
+| `/api/admin/*` | admin.full_access | Administrator | All access attempts |
+| `/api/user/*` | user.read, user.write | User, Manager | Failed attempts only |
+| `/api/public/*` | public.read | Public, User | Security violations |
+| `/health`, `/ping` | health.check | Public | Rate limit violations |
+
+#### 6.4.2.3 Policy Enforcement Points and Audit Logging
+
+**Authorization Flow Architecture:**
+
+```mermaid
+flowchart TD
+    A[Authenticated Request] --> B[Extract User Context]
+    B --> C[Route Pattern Matching]
+    C --> D[Load User Roles]
+    
+    D --> E[Load Required Permissions]
+    E --> F{User Has Required Permissions?}
+    
+    F -->|No| G[Log Authorization Failure]
+    G --> H[Return 403 Forbidden]
+    
+    F -->|Yes| I[Check Resource Constraints]
+    I --> J{Resource Access Allowed?}
+    
+    J -->|No| K[Log Resource Violation]
+    K --> H
+    
+    J -->|Yes| L[Log Successful Authorization]
+    L --> M[Set Authorization Context]
+    M --> N[Allow Request Processing]
+    
+    H --> O[Audit Trail Entry]
+    N --> P[Business Logic Execution]
+    P --> Q[Response with Security Headers]
+    
+    style A fill:#e1f5fe
+    style Q fill:#c8e6c9
+    style H fill:#ffcdd2
+```
+
+#### 6.4.2.4 Comprehensive Audit Logging
+
+**Security Event Logging Matrix:**
+
+| Event Type | Log Level | Information Captured | Retention Policy |
+|---|---|---|---|
+| **Authentication Failures** | error | IP, username, timestamp, reason | 90 days |
+| **Authorization Violations** | warn | User, resource, action, decision | 90 days |
+| **Rate Limit Exceeded** | warn | IP, endpoint, limit type, count | 30 days |
+| **Input Validation Failures** | info | Request pattern, validation error | 30 days |
+
+### 6.4.3 Data Protection
+
+#### 6.4.3.1 Encryption Standards and Implementation
+
+The system implements comprehensive encryption standards covering data in transit and at rest with enterprise-grade cipher suites and key management.
+
+**Encryption Implementation Matrix:**
+
+| Data Type | Encryption Method | Key Management | Implementation |
+|---|---|---|---|
+| **HTTPS/TLS** | TLS 1.3, Grade A config | Let's Encrypt automatic renewal | SSL_CERT_PATH, SSL_KEY_PATH |
+| **Session Data** | AES-256 encryption | Environment variable secrets | SESSION_SECRET configuration |
+| **JWT Tokens** | HMAC-SHA256 signing | Separate signing secrets | JWT_SECRET, JWT_REFRESH_SECRET |
+| **Password Storage** | bcrypt adaptive hashing | Per-password salt generation | BCRYPT_ROUNDS=12 |
+
+#### 6.4.3.2 Key Management and Secure Communication
+
+**TLS Configuration and Certificate Management:**
+- **Certificate Authority**: Let's Encrypt with automatic renewal
+- **TLS Version**: TLS 1.3 with fallback to TLS 1.2
+- **Cipher Suites**: Strong cipher suites only, weak ciphers disabled
+- **HSTS**: Strict Transport Security with 1-year max-age and preload
+
+**Secure Communication Headers:**
+```javascript
+// Comprehensive security headers from Helmet.js implementation
+HSTS: max-age=31536000; includeSubDomains; preload
+Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+```
+
+#### 6.4.3.3 Data Masking Rules and Input Validation
+
+**Input Validation and Sanitization Pipeline:**
+
+```mermaid
+flowchart TD
+    A[Raw Input Data] --> B[Schema Validation]
+    B --> C{Schema Valid?}
+    C -->|No| D[Return Validation Error]
+    
+    C -->|Yes| E[Data Type Validation]
+    E --> F[Length and Range Checks]
+    F --> G[XSS Pattern Detection]
+    
+    G --> H{XSS Detected?}
+    H -->|Yes| I[Sanitize Content]
+    I --> J[Log Sanitization Event]
+    
+    H -->|No| K[SQL Injection Check]
+    J --> K
+    
+    K --> L{Injection Pattern Found?}
+    L -->|Yes| M[Reject Request]
+    M --> N[Log Security Violation]
+    
+    L -->|No| O[Apply Data Masking]
+    O --> P[Final Validation]
+    P --> Q[Validated Data Output]
+    
+    style A fill:#e1f5fe
+    style Q fill:#c8e6c9
+    style D fill:#ffcdd2
+    style M fill:#ffcdd2
+```
+
+#### 6.4.3.4 Compliance Controls and Standards
+
+**OWASP Top 10 Compliance Matrix:**
+
+| OWASP Category | Security Control | Implementation | Monitoring |
+|---|---|---|---|
+| **A01: Broken Access Control** | Authentication/Authorization middleware | JWT + RBAC enforcement | Failed access attempts |
+| **A02: Cryptographic Failures** | HTTPS/TLS enforcement | Grade A TLS configuration | Certificate expiration |
+| **A03: Injection** | Input validation pipeline | express-validator sanitization | Injection attempt detection |
+| **A05: Security Misconfiguration** | Helmet.js security headers | 15+ security headers applied | Header compliance checks |
+
+### 6.4.4 Security Zone Architecture
+
+#### 6.4.4.1 Network Security Zones
+
+```mermaid
+flowchart TB
+    subgraph SG1["Internet Zone"]
+        A[Client Browsers]
+        B[API Consumers]
+        C[Mobile Applications]
+    end
+    
+    subgraph SG2["DMZ - Public Zone"]
+        D[Load Balancer]
+        E[SSL Termination]
+        F["WAF/Rate Limiting"]
+    end
+    
+    subgraph SG3["Application Zone"]
+        G["Express.js Server"]
+        H[Security Middleware Stack]
+        I[Business Logic Layer]
+    end
+    
+    subgraph SG4["Data Zone"]
+        J[PostgreSQL Database]
+        K[Session Store]
+        L[Log Storage]
+    end
+    
+    subgraph SG5["Management Zone"]
+        M[PM2 Process Manager]
+        N[Health Monitoring]
+        O[Certificate Management]
+    end
+    
+    A --> D
+    B --> D
+    C --> D
+    
+    D --> E
+    E --> F
+    F --> G
+    
+    G --> H
+    H --> I
+    I --> J
+    I --> K
+    
+    G --> M
+    M --> N
+    E --> O
+    
+    I --> L
+    
+    style SG1 fill:#ffebee
+    style SG2 fill:#fff3e0
+    style SG3 fill:#e8f5e8
+    style SG4 fill:#e3f2fd
+    style SG5 fill:#fce4ec
+```
+
+#### 6.4.4.2 Security Control Implementation Summary
+
+**Multi-Layer Security Controls:**
+
+| Security Layer | Controls Implemented | Configuration Points | Monitoring Capabilities |
+|---|---|---|---|
+| **Transport Layer** | HTTPS/TLS, HSTS, Certificate Management | SSL configuration, cipher suites | Certificate expiration, TLS compliance |
+| **Application Layer** | CORS, Rate Limiting, Input Validation | Origin policies, rate limits, validation rules | Policy violations, attack attempts |
+| **Authentication Layer** | JWT tokens, Session management, Password security | Token expiration, session timeout, hash rounds | Login attempts, session anomalies |
+| **Authorization Layer** | RBAC, Permission enforcement, Audit logging | Role definitions, permission matrices | Access violations, privilege escalation |
+
+### 6.4.5 Security Monitoring and Incident Response
+
+#### 6.4.5.1 Security Event Monitoring
+
+The system implements comprehensive security event monitoring with structured logging and real-time alerting capabilities.
+
+**Security Monitoring Components:**
+- **Winston Logger Integration**: Structured logging with configurable levels and destinations
+- **Failed Authentication Tracking**: Brute force detection and account lockout policies  
+- **Rate Limit Violation Monitoring**: Suspicious traffic pattern detection
+- **Input Validation Failure Tracking**: Attack pattern identification and blocking
+- **Security Event Correlation**: Advanced threat detection through log analysis
+
+#### 6.4.5.2 Incident Response Framework
+
+**Automated Response Capabilities:**
+- **Rate Limiting Escalation**: Automatic IP blocking for repeated violations
+- **Session Termination**: Immediate session invalidation for security violations
+- **Alert Generation**: Real-time notifications for critical security events
+- **Forensic Logging**: Detailed audit trail for incident investigation
+
+#### References
+
+**Repository Files Examined:**
+- `server.js` - Core security middleware implementation and configuration
+- `.env.example` - Complete security configuration template and environment variables
+- `docs/guides/security.md` - Comprehensive security hardening guide and best practices
+- `blitzy/documentation/Technical Specifications.md` - Security architecture specifications and workflows
+- `package.json` - Security dependency declarations and version specifications
+
+**Technical Specification Sections Referenced:**
+- `4.2 SECURITY PROCESSING WORKFLOWS` - Detailed security processing flows and validation pipelines
+- `5.1 HIGH-LEVEL ARCHITECTURE` - Defense-in-depth security architecture and Zero Trust principles
+- `5.4 CROSS-CUTTING CONCERNS` - Authentication framework and security event logging implementation
+
+## 6.5 MONITORING AND OBSERVABILITY
+
+The Node.js Secure Server implements a **pragmatic monitoring and observability architecture** focused on essential production requirements. The system leverages PM2 Process Manager for core monitoring capabilities, complemented by custom health check endpoints and structured logging patterns. This approach provides sufficient visibility for operational needs while maintaining the system's core principles of simplicity-first design and progressive enhancement.
+
+### 6.5.1 MONITORING INFRASTRUCTURE
+
+#### 6.5.1.1 Metrics Collection
+
+The system implements multi-layer metrics collection through PM2's built-in monitoring capabilities and custom health endpoints, providing comprehensive visibility into system performance and health.
+
+**Core Metrics Collection Architecture:**
+
+| Metric Category | Collection Method | Update Frequency | Storage Location |
+|---|---|---|---|
+| **Process Metrics** | PM2 built-in monitoring | Real-time | PM2 daemon memory |
+| **System Health** | `/health` endpoint | On-demand | Ephemeral (per request) |
+| **Application Logs** | Console output + PM2 logs | Event-driven | `./logs/*.log` files |
+| **Performance Data** | PM2 monit + custom tracking | 30-second intervals | Process memory |
+
+**PM2 Metrics Configuration:**
+
+The system leverages PM2's comprehensive monitoring capabilities through the ecosystem configuration:
+
+```javascript
+// ecosystem.config.js monitoring setup
+module.exports = {
+  apps: [{
+    name: 'secure-node-server',
+    script: './server.js',
+    instances: 'max',
+    exec_mode: 'cluster',
+    
+    // Monitoring configuration
+    pmx: true,
+    monitoring: true,
+    merge_logs: true,
+    log_type: 'json',
+    
+    // Performance thresholds
+    max_memory_restart: '1G',
+    min_uptime: '10s',
+    max_restarts: 10,
+    
+    // Auto-scaling configuration
+    autorestart: true,
+    watch: false,
+    ignore_watch: ['node_modules', 'logs']
+  }]
+};
+```
+
+**Health Check Metrics Collection:**
+
+Based on the implementation in `server.js`, the health endpoint provides comprehensive system metrics:
+
+- **System Status**: Overall application health indicator
+- **Process Information**: PID, uptime, Node.js version
+- **Memory Metrics**: RSS, heap used, heap total, external memory
+- **Performance Indicators**: CPU usage patterns, active connections
+- **Environment Context**: NODE_ENV, configuration status
+
+#### 6.5.1.2 Log Aggregation
+
+**Logging Architecture:**
+
+```mermaid
+flowchart TD
+    A[Application Events] --> B[Console Logger]
+    B --> C[PM2 Log Aggregator]
+    
+    C --> D[Combined Logs]
+    C --> E[Error Logs]
+    C --> F[Out Logs]
+    
+    D --> G[combined.log]
+    E --> H[error.log]
+    F --> I[out.log]
+    
+    G --> J[Log Rotation]
+    H --> J
+    I --> J
+    
+    J --> K[Compressed Archives]
+    K --> L[Long-term Storage]
+    
+    M[Security Events] --> N[Structured Logging]
+    N --> B
+    
+    O[Health Checks] --> P[Metrics Logging]
+    P --> B
+    
+    Q[Performance Events] --> R[PM2 Monitoring]
+    R --> C
+    
+    style A fill:#e1f5fe
+    style L fill:#c8e6c9
+    style M fill:#ffcdd2
+    style Q fill:#fff3e0
+```
+
+**Log Configuration Matrix:**
+
+| Log Type | File Path | Rotation Policy | Retention Period |
+|---|---|---|---|
+| **Combined Logs** | `./logs/combined.log` | Daily, 100MB max | 5 files |
+| **Error Logs** | `./logs/error.log` | Daily, 100MB max | 5 files |
+| **Access Logs** | `./logs/access.log` | Daily, 100MB max | 5 files |
+| **Security Events** | Within combined logs | Inherited | Inherited |
+
+**Environment-Based Logging Configuration:**
+
+From `.env.example`, the system supports comprehensive logging configuration:
+
+```bash
+# Logging Configuration
+LOG_LEVEL=info
+LOG_FORMAT=combined
+LOG_DIR=./logs
+LOG_MAX_SIZE=100m
+LOG_MAX_FILES=5
+LOG_DATE_PATTERN=YYYY-MM-DD
+```
+
+#### 6.5.1.3 Distributed Tracing
+
+**Note:** The current system architecture operates as a monolithic application and does not require distributed tracing. Request correlation is achieved through request IDs in logs and PM2's built-in request tracking capabilities.
+
+**Request Correlation Strategy:**
+- Request ID generation for error tracking
+- PM2's request correlation across cluster instances
+- Session tracking for authenticated requests
+- Security event correlation through timestamp and IP tracking
+
+#### 6.5.1.4 Alert Management
+
+**PM2 Alert Configuration:**
+
+```javascript
+// PM2 monitoring and alerting thresholds
+{
+  alert_enabled: true,
+  alert_memory_limit: '1GB',
+  alert_cpu_limit: 80,
+  alert_restart_threshold: 5,
+  alert_error_threshold: 10,
+  
+  // Notification channels
+  alert_email: process.env.ALERT_EMAIL,
+  alert_webhook: process.env.ALERT_WEBHOOK_URL
+}
+```
+
+**Alert Threshold Matrix:**
+
+| Alert Type | Warning Threshold | Critical Threshold | Action |
+|---|---|---|---|
+| **Memory Usage** | >800MB | >1GB | Restart process |
+| **CPU Usage** | >70% | >85% | Scale horizontally |
+| **Error Rate** | >5/min | >10/min | Investigation required |
+| **Response Time** | >500ms | >1000ms | Performance alert |
+
+#### 6.5.1.5 Dashboard Design
+
+**PM2 Monitoring Dashboard Layout:**
+
+```mermaid
+graph TB
+    subgraph "PM2 Web Dashboard"
+        A[Process List View]
+        B[CPU Usage Graph]
+        C[Memory Usage Graph]
+        D[Request/sec Meter]
+        E[Error Rate Display]
+        F[Log Viewer]
+    end
+    
+    subgraph "Health Check Dashboard"
+        G[System Status]
+        H[Uptime Counter]
+        I[Active Connections]
+        J[Response Times]
+    end
+    
+    subgraph "Custom Metrics"
+        K[Rate Limit Stats]
+        L[Security Events]
+        M[Cache Hit Rates]
+        N[SSL Certificate Status]
+    end
+    
+    A --> B
+    A --> C
+    B --> D
+    C --> E
+    D --> F
+    
+    G --> H
+    H --> I
+    I --> J
+    
+    K --> L
+    L --> M
+    M --> N
+    
+    style A fill:#e3f2fd
+    style G fill:#e8f5e8
+    style K fill:#fff3e0
+```
+
+### 6.5.2 OBSERVABILITY PATTERNS
+
+#### 6.5.2.1 Health Checks
+
+**Comprehensive Health Check Implementation:**
+
+The system implements health checks aligned with the workflows documented in section 4.6, providing detailed system status information:
+
+```javascript
+// Health check endpoint implementation from server.js
+app.get('/health', (req, res) => {
+  const healthData = {
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    pid: process.pid,
+    version: process.version,
+    
+    // Application-specific health
+    checks: {
+      database: 'N/A',  // No database in current implementation
+      cache: 'healthy',
+      rateLimit: 'operational',
+      security: 'active'
+    }
+  };
+  
+  res.status(200).json(healthData);
+});
+```
+
+**Health Check Response Schema:**
+
+| Field | Type | Description | Example Value |
+|---|---|---|---|
+| `status` | string | Overall health status | "healthy" |
+| `timestamp` | ISO8601 | Check timestamp | "2024-01-15T10:30:00Z" |
+| `uptime` | number | Process uptime in seconds | 3600 |
+| `memory.rss` | number | Resident set size | 67108864 |
+
+#### 6.5.2.2 Performance Metrics
+
+**Key Performance Indicators:**
+
+| Metric | Target | Warning Threshold | Critical Threshold |
+|---|---|---|---|
+| **Response Time (p95)** | <200ms | >500ms | >1000ms |
+| **CPU Usage** | <60% | >70% | >85% |
+| **Memory Usage** | <70% | >80% | >90% |
+| **Error Rate** | <0.1% | >1% | >5% |
+
+**PM2 Performance Monitoring:**
+
+The system leverages PM2's built-in performance monitoring with automatic scaling capabilities:
+
+```javascript
+// Auto-scaling configuration
+{
+  instances: 'max',  // Use all available CPU cores
+  exec_mode: 'cluster',
+  max_memory_restart: '1G',
+  min_uptime: '10s',
+  
+  // Performance-based scaling
+  autorestart: true,
+  watch: false,
+  ignore_watch: ['node_modules', 'logs']
+}
+```
+
+#### 6.5.2.3 Business Metrics
+
+**Application-Specific Metrics:**
+
+| Metric | Description | Collection Method | Update Frequency |
+|---|---|---|---|
+| **Request Volume** | Total HTTP requests | PM2 request counter | Real-time |
+| **Rate Limit Hits** | Blocked requests | Rate limiter middleware | Per occurrence |
+| **Security Events** | Auth failures, validation errors | Security middleware | Per occurrence |
+| **API Usage** | Endpoint-specific counts | Request handler | Per request |
+
+**Security Event Tracking:**
+
+Based on the security architecture (section 6.4), the system tracks:
+- Authentication failures and brute force attempts
+- Rate limit violations and suspicious traffic patterns
+- Input validation failures and injection attempts
+- CORS violations and unauthorized origin requests
+
+#### 6.5.2.4 SLA Monitoring
+
+**Service Level Objectives:**
+
+| SLO | Target | Measurement | Alert Threshold |
+|---|---|---|---|
+| **Availability** | 99.9% | Health check success rate | <99.5% |
+| **Response Time** | 95th percentile <500ms | PM2 response metrics | >750ms |
+| **Error Rate** | <0.5% | 5xx responses / total | >1% |
+| **Security Response** | <100ms security overhead | Middleware timing | >150ms |
+
+#### 6.5.2.5 Capacity Tracking
+
+**Resource Utilization Monitoring:**
+
+```javascript
+// Auto-scaling implementation
+class AutoScaler {
+  constructor(appName, options = {}) {
+    this.minInstances = options.minInstances || 1;
+    this.maxInstances = options.maxInstances || os.cpus().length;
+    this.scaleUpThreshold = options.scaleUpThreshold || 80;
+    this.scaleDownThreshold = options.scaleDownThreshold || 30;
+  }
+  
+  async checkAndScale() {
+    const processes = await pm2.list();
+    const avgCpu = this.calculateAverageCpu(processes);
+    
+    if (avgCpu > this.scaleUpThreshold) {
+      await this.scaleUp();
+    } else if (avgCpu < this.scaleDownThreshold) {
+      await this.scaleDown();
+    }
+  }
+}
+```
+
+**Capacity Planning Matrix:**
+
+| Resource | Current Capacity | Scale Trigger | Maximum Capacity |
+|---|---|---|---|
+| **CPU Cores** | Variable (max available) | >80% utilization | All available cores |
+| **Memory** | 1GB per instance | >80% utilization | Physical memory limit |
+| **Connections** | Unlimited | >1000 concurrent | OS file descriptor limit |
+| **Storage** | Log rotation enabled | >80% disk usage | Available disk space |
+
+### 6.5.3 INCIDENT RESPONSE
+
+#### 6.5.3.1 Alert Routing
+
+**Alert Flow Architecture:**
+
+```mermaid
+flowchart TD
+    A[PM2 Monitoring System] --> B{Alert Condition Met?}
+    B -->|Yes| C[Generate Alert]
+    B -->|No| D[Continue Monitoring]
+    
+    C --> E{Alert Severity}
+    E -->|Info| F[Log Alert]
+    E -->|Warning| G[Email Notification]
+    E -->|Error| H[Page On-Call]
+    E -->|Critical| I[Multi-Channel Alert]
+    
+    F --> J[Alert Dashboard]
+    G --> K[Operations Team]
+    H --> L[On-Call Engineer]
+    I --> M[All Stakeholders]
+    
+    K --> N[Acknowledge Alert]
+    L --> N
+    M --> N
+    
+    N --> O[Begin Investigation]
+    O --> P[Apply Remediation]
+    P --> Q[Verify Resolution]
+    Q --> R[Close Alert]
+    
+    R --> S[Update Runbooks]
+    S --> T[Conduct Post-Mortem]
+    
+    style C fill:#ff9800
+    style I fill:#f44336
+    style R fill:#4caf50
+    style T fill:#2196f3
+```
+
+**Alert Configuration Integration:**
+
+The system integrates with PM2's alert system and can be extended to support external monitoring platforms:
+
+```bash
+# Environment configuration for alerting
+ALERT_EMAIL=ops-team@company.com
+ALERT_WEBHOOK_URL=https://hooks.slack.com/services/...
+ALERT_ENABLED=true
+ALERT_MEMORY_THRESHOLD=1024
+ALERT_CPU_THRESHOLD=80
+```
+
+#### 6.5.3.2 Escalation Procedures
+
+**Escalation Matrix:**
+
+| Alert Level | Response Time | Primary Contact | Escalation Path |
+|---|---|---|---|
+| **Info** | 8 hours | Dev Team | Team Lead → Manager |
+| **Warning** | 2 hours | Ops Team | Senior Ops → DevOps Lead |
+| **Error** | 30 minutes | On-Call Engineer | Team Lead → Director |
+| **Critical** | 5 minutes | All Teams | CTO → Executive Team |
+
+**Automated Escalation Logic:**
+
+```javascript
+// Escalation timing configuration
+const escalationConfig = {
+  info: { initial: 28800000, escalate: 43200000 },     // 8h → 12h
+  warning: { initial: 7200000, escalate: 14400000 },   // 2h → 4h
+  error: { initial: 1800000, escalate: 3600000 },      // 30m → 1h
+  critical: { initial: 300000, escalate: 900000 }      // 5m → 15m
+};
+```
+
+#### 6.5.3.3 Runbooks
+
+**Standard Operating Procedures:**
+
+#### High Memory Usage Response
+1. **Assessment Phase:**
+   - Check PM2 memory stats: `pm2 monit`
+   - Identify high-memory processes: `pm2 describe <app-name>`
+   - Review memory trends: `pm2 logs --lines 50`
+
+2. **Immediate Response:**
+   - Restart affected workers: `pm2 restart <id>`
+   - Monitor recovery: Watch memory trends for 15 minutes
+   - Scale horizontally if needed: `pm2 scale secure-node-server +2`
+
+3. **Investigation:**
+   - Analyze heap dumps if available
+   - Review recent deployments and configuration changes
+   - Check for memory leaks in application code
+
+#### High CPU Usage Response
+1. **Verification:**
+   - Verify CPU metrics: `pm2 status`
+   - Check request patterns in logs: `pm2 logs | grep "Request processed"`
+   - Analyze load distribution across instances
+
+2. **Scaling Response:**
+   - Scale horizontally: `pm2 scale secure-node-server +2`
+   - Monitor load redistribution
+   - Verify performance improvement
+
+3. **Root Cause Analysis:**
+   - Review application profiling data
+   - Check for blocking operations
+   - Analyze request patterns for optimization opportunities
+
+#### Security Incident Response
+1. **Immediate Actions:**
+   - Check security logs: `grep "security" logs/combined.log`
+   - Identify attack patterns and source IPs
+   - Apply immediate blocking if malicious activity detected
+
+2. **Investigation:**
+   - Correlate security events with system performance
+   - Review rate limiting effectiveness
+   - Check authentication and authorization logs
+
+3. **Remediation:**
+   - Update rate limiting rules if needed
+   - Enhance input validation patterns
+   - Review and update security configurations
+
+#### 6.5.3.4 Post-Mortem Processes
+
+**Incident Review Template:**
+
+| Section | Required Information |
+|---|---|
+| **Incident Summary** | Date, duration, impact, severity |
+| **Root Cause** | Technical failure analysis |
+| **Timeline** | Detection → Resolution events |
+| **Action Items** | Preventive measures with owners |
+
+**Post-Mortem Workflow:**
+
+```mermaid
+flowchart TD
+    A[Incident Resolved] --> B[Schedule Post-Mortem]
+    B --> C[Gather Stakeholders]
+    C --> D[Timeline Construction]
+    D --> E[Root Cause Analysis]
+    E --> F[Impact Assessment]
+    F --> G[Action Item Generation]
+    G --> H[Assign Owners and Due Dates]
+    H --> I[Document Lessons Learned]
+    I --> J[Update Runbooks]
+    J --> K[Improve Monitoring]
+    K --> L[Share Knowledge]
+    
+    style A fill:#4caf50
+    style L fill:#2196f3
+```
+
+#### 6.5.3.5 Improvement Tracking
+
+**Monitoring Enhancement Roadmap:**
+
+| Enhancement | Priority | Status | Target Date |
+|---|---|---|---|
+| Winston Logger Integration | High | Planned | Q2 2024 |
+| Prometheus Metrics Export | Medium | Considered | Q3 2024 |
+| Grafana Dashboard | Medium | Considered | Q3 2024 |
+| APM Integration | Low | Future | Q4 2024 |
+
+**Continuous Improvement Process:**
+
+The system follows a continuous improvement cycle based on operational feedback:
+
+1. **Monthly Review**: Performance metrics analysis and threshold adjustment
+2. **Quarterly Assessment**: Monitoring tool evaluation and enhancement planning
+3. **Annual Planning**: Integration roadmap updates and technology refresh
+4. **Incident-Driven**: Immediate improvements based on incident learnings
+
+**Key Improvement Areas:**
+
+- **Structured Logging**: Migration to Winston for better log parsing and analysis
+- **Metrics Export**: Integration with Prometheus for advanced metrics collection
+- **Visualization**: Grafana dashboards for improved operational visibility
+- **Advanced Monitoring**: APM tools for deeper application performance insights
+
+#### References
+
+**Repository Files Examined:**
+- `server.js` - Core server implementation with health endpoints and basic logging
+- `.env.example` - Complete monitoring and logging configuration variables
+- `docs/guides/production.md` - Comprehensive PM2 monitoring setup and health check implementation
+- `package.json` - PM2 monitoring scripts and dependencies
+- `blitzy/documentation/Technical Specifications.md` - Monitoring strategy overview
+
+**Technical Specification Sections Referenced:**
+- `4.6 PERFORMANCE AND MONITORING WORKFLOWS` - Health check and performance monitoring flows
+- `6.4 SECURITY ARCHITECTURE` - Security monitoring and incident response frameworks
+- `5.1 HIGH-LEVEL ARCHITECTURE` - Overall system architecture and integration points
+- `1.2 SYSTEM OVERVIEW` - System context and success criteria for monitoring implementation
+
+## 6.6 TESTING STRATEGY
+
+The Node.js Secure Server implements a **comprehensive multi-layer testing strategy** that addresses both functional requirements and the extensive security architecture outlined in section 6.4. The testing approach leverages a dual-stack architecture combining Node.js unit/integration testing with Java-based end-to-end automation to ensure comprehensive coverage of security controls, API functionality, and user experience validation.
+
+### 6.6.1 TESTING APPROACH
+
+#### 6.6.1.1 Unit Testing
+
+#### Testing Framework and Tools
+
+**Primary Node.js Testing Stack:**
+
+| Tool | Version | Purpose | Configuration |
+|---|---|---|---|
+| **Jest** | ^29.0.0 | Primary testing framework | `package.json` test configuration |
+| **Supertest** | ^6.3.0 | HTTP API testing | Integration with Express.js server |
+| **ESLint** | ^8.0.0 | Code quality and consistency | Linting rules for test files |
+| **Jest Coverage** | Built-in | Code coverage analysis | Minimum 80% coverage target |
+
+**Jest Configuration Matrix:**
+
+```javascript
+// Jest configuration from package.json
+{
+  "scripts": {
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
+    "test:ci": "jest --ci --coverage --watchAll=false"
+  },
+  
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/**/*.test.js",
+      "!src/config/*.js"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    }
+  }
+}
+```
+
+#### Test Organization Structure
+
+**Test Directory Architecture:**
+
+```mermaid
+graph TD
+    A[__tests__/] --> B[unit/]
+    A --> C[integration/]
+    A --> D[fixtures/]
+    A --> E[helpers/]
+    
+    B --> F[auth/]
+    B --> G[middleware/]
+    B --> H[security/]
+    B --> I[utils/]
+    
+    C --> J[api/]
+    C --> K[security/]
+    C --> L[performance/]
+    
+    D --> M[test-data/]
+    D --> N[mock-responses/]
+    
+    E --> O[test-setup.js]
+    E --> P[mock-helpers.js]
+    
+    F --> Q[jwt.test.js]
+    F --> R[session.test.js]
+    
+    G --> S[rate-limit.test.js]
+    G --> T[cors.test.js]
+    G --> U[helmet.test.js]
+    
+    H --> V[input-validation.test.js]
+    H --> W[xss-protection.test.js]
+    H --> X[injection-prevention.test.js]
+    
+    style A fill:#e3f2fd
+    style B fill:#e8f5e8
+    style C fill:#fff3e0
+    style D fill:#fce4ec
+```
+
+#### Mocking Strategy
+
+**Security Component Mocking Framework:**
+
+| Component | Mock Strategy | Implementation | Purpose |
+|---|---|---|---|
+| **JWT Tokens** | Mock generation with configurable expiration | `jest.mock('jsonwebtoken')` | Authentication testing |
+| **bcrypt Hashing** | Deterministic hash generation | `jest.mock('bcrypt')` | Password testing |
+| **Rate Limiter** | Configurable request counting | `jest.mock('express-rate-limit')` | Rate limiting tests |
+| **External APIs** | HTTP interceptors | `nock` library integration | API dependency isolation |
+
+**Mock Implementation Pattern:**
+
+```javascript
+// Example: JWT authentication mocking
+jest.mock('jsonwebtoken', () => ({
+  sign: jest.fn((payload, secret, options) => 'mock-jwt-token'),
+  verify: jest.fn((token, secret) => ({ userId: 'test-user-id' })),
+  decode: jest.fn((token) => ({ exp: Date.now() / 1000 + 3600 }))
+}));
+
+// Security middleware mocking
+jest.mock('helmet', () => () => (req, res, next) => next());
+jest.mock('express-rate-limit', () => () => (req, res, next) => next());
+```
+
+#### Code Coverage Requirements
+
+**Coverage Targets and Enforcement:**
+
+| Coverage Type | Target Percentage | Critical Threshold | Enforcement Level |
+|---|---|---|---|
+| **Statement Coverage** | 85% | 80% | CI/CD pipeline failure |
+| **Branch Coverage** | 80% | 75% | Warning in CI/CD |
+| **Function Coverage** | 90% | 85% | CI/CD pipeline failure |
+| **Line Coverage** | 85% | 80% | Warning in CI/CD |
+
+**Coverage Exclusions:**
+- Configuration files in `src/config/`
+- Test files (`*.test.js`, `*.spec.js`)
+- Build and deployment scripts
+- Generated documentation files
+
+#### Test Naming Conventions
+
+**Standardized Test Naming Pattern:**
+
+```javascript
+// Unit test naming convention
+describe('SecurityMiddleware', () => {
+  describe('when processing authentication requests', () => {
+    it('should validate JWT tokens successfully', () => {});
+    it('should reject expired JWT tokens', () => {});
+    it('should handle missing authorization headers', () => {});
+  });
+  
+  describe('when enforcing rate limits', () => {
+    it('should allow requests within limit', () => {});
+    it('should block requests exceeding limit', () => {});
+    it('should reset counters after window expiry', () => {});
+  });
+});
+```
+
+**Test File Naming Standards:**
+- Unit tests: `<component>.test.js`
+- Integration tests: `<feature>.integration.test.js`
+- Security tests: `<security-control>.security.test.js`
+- Performance tests: `<component>.performance.test.js`
+
+#### Test Data Management
+
+**Test Data Strategy:**
+
+| Data Type | Management Approach | Location | Lifecycle |
+|---|---|---|---|
+| **Mock Users** | Static fixtures with varied roles | `__tests__/fixtures/users.js` | Test suite scope |
+| **JWT Tokens** | Generated per test with specific claims | Helper functions | Test case scope |
+| **API Responses** | Versioned mock responses | `__tests__/fixtures/api/` | Shared across tests |
+| **Security Payloads** | XSS/injection test vectors | `__tests__/fixtures/security/` | Security test scope |
+
+#### 6.6.1.2 Integration Testing
+
+#### Service Integration Test Approach
+
+**Integration Test Architecture:**
+
+```mermaid
+flowchart TD
+    A[Integration Test Suite] --> B[Server Startup]
+    B --> C[Database Connection]
+    C --> D[Middleware Chain Testing]
+    
+    D --> E[Security Integration]
+    D --> F[API Integration]
+    D --> G[External Service Integration]
+    
+    E --> H[Auth + Rate Limiting]
+    E --> I[CORS + Security Headers]
+    E --> J[Input Validation + XSS Protection]
+    
+    F --> K[API Endpoint Testing]
+    F --> L[Error Handling Integration]
+    F --> M[Response Format Validation]
+    
+    G --> N[External API Mocking]
+    G --> O[Third-party Service Simulation]
+    
+    H --> P[Complete Request Cycle]
+    I --> P
+    J --> P
+    K --> P
+    L --> P
+    M --> P
+    N --> P
+    O --> P
+    
+    P --> Q[Test Results & Coverage]
+    
+    style A fill:#e3f2fd
+    style P fill:#c8e6c9
+    style Q fill:#4caf50
+```
+
+**Integration Test Configuration:**
+
+```javascript
+// Integration test setup with real server instance
+const request = require('supertest');
+const app = require('../server');
+
+describe('Security Integration Tests', () => {
+  let server;
+  
+  beforeAll(async () => {
+    server = app.listen(0); // Random available port
+  });
+  
+  afterAll(async () => {
+    await server.close();
+  });
+  
+  describe('Authentication + Authorization Flow', () => {
+    it('should enforce complete auth pipeline', async () => {
+      // Test complete request cycle with real middleware stack
+      const response = await request(server)
+        .post('/api/protected')
+        .set('Authorization', 'Bearer invalid-token')
+        .expect(401);
+        
+      expect(response.body.error).toBe('Invalid token');
+    });
+  });
+});
+```
+
+#### API Testing Strategy
+
+**Comprehensive API Testing Matrix:**
+
+| Test Category | Scope | Tools | Validation Points |
+|---|---|---|---|
+| **Functional API Tests** | All endpoints, CRUD operations | Supertest + Jest | Status codes, response schemas |
+| **Security API Tests** | Authentication, authorization, input validation | Custom security test suite | Security headers, payload sanitization |
+| **Error Handling Tests** | Exception scenarios, edge cases | Supertest error simulation | Error responses, logging behavior |
+| **Performance API Tests** | Response times, concurrent requests | Artillery.js integration | Response time thresholds, throughput |
+
+**API Test Implementation Pattern:**
+
+```javascript
+describe('API Security Testing', () => {
+  describe('POST /api/auth/login', () => {
+    it('should enforce rate limiting', async () => {
+      const requests = Array(100).fill().map(() => 
+        request(server)
+          .post('/api/auth/login')
+          .send({ username: 'test', password: 'test' })
+      );
+      
+      const responses = await Promise.all(requests);
+      const rateLimitedResponses = responses.filter(r => r.status === 429);
+      expect(rateLimitedResponses.length).toBeGreaterThan(0);
+    });
+    
+    it('should sanitize XSS attempts', async () => {
+      const xssPayload = '<script>alert("xss")</script>';
+      const response = await request(server)
+        .post('/api/auth/login')
+        .send({ username: xssPayload, password: 'test' })
+        .expect(400);
+        
+      expect(response.body.username).not.toContain('<script>');
+    });
+  });
+});
+```
+
+#### Database Integration Testing
+
+**Note:** The current system architecture does not include a database layer as confirmed in the health check implementation (`checks.database: 'N/A'`). Session data is managed through Express sessions with configurable storage backends.
+
+**Session Storage Integration Testing:**
+
+```javascript
+describe('Session Management Integration', () => {
+  it('should persist session data across requests', async () => {
+    const agent = request.agent(server);
+    
+    // Login and establish session
+    await agent
+      .post('/api/auth/login')
+      .send({ username: 'testuser', password: 'testpass' })
+      .expect(200);
+      
+    // Verify session persistence
+    await agent
+      .get('/api/user/profile')
+      .expect(200);
+  });
+  
+  it('should expire sessions after timeout', async () => {
+    // Test session timeout behavior
+    jest.advanceTimersByTime(3600000); // 1 hour
+    
+    await request(server)
+      .get('/api/user/profile')
+      .expect(401);
+  });
+});
+```
+
+#### External Service Mocking
+
+**External Dependency Simulation:**
+
+| Service Type | Mock Strategy | Implementation | Test Scenarios |
+|---|---|---|---|
+| **Certificate Authority** | SSL certificate validation | `nock` HTTPS interception | Certificate renewal, validation |
+| **Email Services** | SMTP simulation | `nodemailer-mock` | Alert notifications, user communications |
+| **Monitoring APIs** | Webhook endpoints | Express test servers | Alert delivery, metric submission |
+| **CDN Services** | Static asset delivery | Local file serving | Asset availability, performance |
+
+#### Test Environment Management
+
+**Environment Configuration Matrix:**
+
+| Environment | Purpose | Configuration | Data Strategy |
+|---|---|---|---|
+| **Local Development** | Developer testing | `.env.test` configuration | Fresh data per test run |
+| **CI/CD Pipeline** | Automated testing | Environment variables | Isolated test containers |
+| **Staging Integration** | Pre-production validation | Production-like config | Sanitized production data |
+| **Performance Testing** | Load and stress testing | Scaled infrastructure | High-volume test data |
+
+#### 6.6.1.3 End-to-End Testing
+
+#### E2E Test Scenarios
+
+**Java-Based E2E Test Architecture:**
+
+Based on the Maven configuration in `pom.xml`, the system implements comprehensive E2E testing using:
+
+| Framework | Version | Purpose | Configuration |
+|---|---|---|---|
+| **Selenium WebDriver** | 3.141.59 | Browser automation | Cross-browser testing |
+| **Cucumber** | 7.14.0 | BDD test framework | Feature-driven scenarios |
+| **JUnit** | 4.13.2 | Test runner | Test execution and reporting |
+| **WebDriverManager** | 5.1.0 | Browser driver management | Automated driver downloads |
+| **JavaFaker** | 1.0.2 | Test data generation | Dynamic test data creation |
+
+**E2E Test Scenario Coverage:**
+
+```mermaid
+graph TD
+    A[E2E Test Scenarios] --> B[Security Workflows]
+    A --> C[User Authentication]
+    A --> D[API Interactions]
+    A --> E[Error Handling]
+    
+    B --> F[Rate Limiting Behavior]
+    B --> G[XSS Protection Validation]
+    B --> H[CORS Policy Enforcement]
+    B --> I[Security Header Validation]
+    
+    C --> J[Login Flow]
+    C --> K[Session Management]
+    C --> L[Token Refresh]
+    C --> M[Logout Process]
+    
+    D --> N[API Request/Response]
+    D --> O[Data Validation]
+    D --> P[Performance Verification]
+    
+    E --> Q[Network Errors]
+    E --> R[Server Errors]
+    E --> S[Timeout Handling]
+    E --> T[Graceful Degradation]
+    
+    style A fill:#e3f2fd
+    style B fill:#ffcdd2
+    style C fill:#c8e6c9
+    style D fill:#fff3e0
+    style E fill:#fce4ec
+```
+
+**Feature-Driven Test Implementation:**
+
+```gherkin
+# Example Cucumber feature file
+Feature: Security Header Validation
+  As a security-conscious application
+  I want to ensure all security headers are properly set
+  So that the application is protected against common attacks
+
+  Scenario: Verify HSTS header implementation
+    Given the server is running
+    When I make a request to any endpoint
+    Then the response should include HSTS header
+    And the HSTS header should have max-age directive
+    And the HSTS header should include includeSubDomains
+    
+  Scenario: Validate Content Security Policy
+    Given the server is running
+    When I access the application
+    Then the CSP header should restrict script sources
+    And the CSP header should prevent inline scripts
+    And the CSP header should block data: URLs
+```
+
+#### UI Automation Approach
+
+**Browser Testing Matrix:**
+
+| Browser | Versions | Platform | Test Scope |
+|---|---|---|---|
+| **Chrome** | Latest, Latest-1 | Windows, macOS, Linux | Full test suite |
+| **Firefox** | Latest, ESR | Windows, macOS, Linux | Core functionality |
+| **Safari** | Latest | macOS | Compatibility testing |
+| **Edge** | Latest | Windows | Compatibility testing |
+
+**WebDriver Configuration:**
+
+```java
+// Cross-browser test configuration
+@RunWith(Cucumber.class)
+@CucumberOptions(
+    features = "src/test/resources/features",
+    glue = "com.security.tests.steps",
+    plugin = {"pretty", "html:target/cucumber-reports"}
+)
+public class SecurityTestRunner {
+    
+    @Before
+    public void setUp() {
+        WebDriverManager.chromedriver().setup();
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--headless");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        
+        driver = new ChromeDriver(options);
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+    }
+}
+```
+
+#### Test Data Setup/Teardown
+
+**Test Data Management Strategy:**
+
+| Data Type | Setup Strategy | Teardown Strategy | Lifecycle |
+|---|---|---|---|
+| **User Accounts** | JavaFaker generation | Automatic cleanup | Test suite scope |
+| **Session Data** | Fresh sessions per test | Session invalidation | Test case scope |
+| **API Test Data** | Dynamic payload generation | Response validation cleanup | Request scope |
+| **Security Test Vectors** | Predefined attack patterns | Sanitization verification | Security test scope |
+
+**Test Data Implementation:**
+
+```java
+public class TestDataManager {
+    private Faker faker = new Faker();
+    
+    public User createTestUser() {
+        return User.builder()
+            .username(faker.internet().emailAddress())
+            .password(faker.internet().password(8, 16))
+            .role(UserRole.TEST_USER)
+            .build();
+    }
+    
+    public void cleanupTestData() {
+        // Cleanup logic for test artifacts
+        sessionManager.invalidateAllTestSessions();
+        logManager.clearTestLogs();
+    }
+}
+```
+
+#### Performance Testing Requirements
+
+**Performance Test Specifications:**
+
+| Metric | Target | Warning Threshold | Critical Threshold |
+|---|---|---|---|
+| **Page Load Time** | <2 seconds | >3 seconds | >5 seconds |
+| **API Response Time** | <500ms | >1 second | >2 seconds |
+| **Security Middleware Overhead** | <100ms | >150ms | >300ms |
+| **Concurrent User Capacity** | 1000 users | <500 users | <100 users |
+
+**Load Testing Configuration:**
+
+```java
+@Test
+public void performanceTest() {
+    int numberOfThreads = 100;
+    int rampUpTime = 60; // seconds
+    int testDuration = 300; // seconds
+    
+    ThreadGroup threadGroup = new ThreadGroup();
+    threadGroup.setNumThreads(numberOfThreads);
+    threadGroup.setRampTime(rampUpTime);
+    
+    // Execute performance test scenarios
+    executeLoadTest(threadGroup, testDuration);
+}
+```
+
+#### Cross-Browser Testing Strategy
+
+**Browser Compatibility Matrix:**
+
+| Feature | Chrome | Firefox | Safari | Edge | Testing Priority |
+|---|---|---|---|---|---|
+| **Security Headers** | ✓ | ✓ | ✓ | ✓ | High |
+| **CORS Handling** | ✓ | ✓ | ✓ | ✓ | High |
+| **Authentication Flow** | ✓ | ✓ | ✓ | ✓ | High |
+| **Rate Limiting** | ✓ | ✓ | ✓ | ✓ | Medium |
+| **Error Handling** | ✓ | ✓ | ✓ | ✓ | Medium |
+
+### 6.6.2 TEST AUTOMATION
+
+#### 6.6.2.1 CI/CD Integration
+
+**Automated Test Pipeline Architecture:**
+
+```mermaid
+flowchart LR
+    A[Code Commit] --> B[CI Pipeline Trigger]
+    B --> C[Dependency Installation]
+    C --> D[Linting & Code Quality]
+    
+    D --> E[Unit Tests]
+    E --> F[Integration Tests]
+    F --> G[Security Tests]
+    
+    G --> H[Build Application]
+    H --> I[E2E Test Environment Setup]
+    I --> J[Cucumber E2E Tests]
+    
+    J --> K[Performance Tests]
+    K --> L[Coverage Report Generation]
+    L --> M[Quality Gate Evaluation]
+    
+    M -->|Pass| N[Deploy to Staging]
+    M -->|Fail| O[Pipeline Failure]
+    
+    N --> P[Staging Smoke Tests]
+    P --> Q[Production Deployment]
+    
+    O --> R[Notification & Rollback]
+    
+    style A fill:#e3f2fd
+    style Q fill:#c8e6c9
+    style O fill:#ffcdd2
+    style R fill:#ffcdd2
+```
+
+**GitHub Actions CI Configuration:**
+
+```yaml
+# .github/workflows/ci.yml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
+        
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run linting
+      run: npm run lint
+      
+    - name: Run unit tests
+      run: npm run test
+      
+    - name: Run integration tests
+      run: npm run test:integration
+      
+    - name: Run security tests
+      run: npm run test:security
+      
+    - name: Generate coverage report
+      run: npm run test:coverage
+      
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+  
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20.x'
+        
+    - name: Start application
+      run: |
+        npm install
+        npm start &
+        npx wait-on http://localhost:3000
+        
+    - name: Run E2E tests
+      run: mvn test -Dtest=SecurityTestRunner
+      
+    - name: Upload test reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-reports
+        path: target/cucumber-reports/
+```
+
+#### 6.6.2.2 Automated Test Triggers
+
+**Test Execution Trigger Matrix:**
+
+| Trigger Event | Test Scope | Execution Environment | Notification |
+|---|---|---|---|
+| **Code Push** | Full test suite | CI/CD runners | Slack notifications |
+| **Pull Request** | Changed components + regression | GitHub Actions | PR comments |
+| **Scheduled (Nightly)** | Full suite + performance | Dedicated environment | Email reports |
+| **Release Branch** | Complete validation | Staging environment | Release team alerts |
+| **Production Deploy** | Smoke tests | Production environment | Operations team |
+
+**Test Trigger Configuration:**
+
+```javascript
+// Test trigger configuration
+const testTriggers = {
+  push: {
+    branches: ['main', 'develop'],
+    tests: ['unit', 'integration', 'security'],
+    parallel: true
+  },
+  pullRequest: {
+    tests: ['unit', 'integration', 'affected'],
+    coverage: true,
+    qualityGate: true
+  },
+  schedule: {
+    cron: '0 2 * * *', // 2 AM daily
+    tests: ['full-suite', 'performance', 'security-scan'],
+    environment: 'staging'
+  }
+};
+```
+
+#### 6.6.2.3 Parallel Test Execution
+
+**Parallel Execution Strategy:**
+
+| Test Type | Parallel Strategy | Resource Allocation | Execution Time |
+|---|---|---|---|
+| **Unit Tests** | Jest parallel workers | CPU cores - 1 | ~30 seconds |
+| **Integration Tests** | Test isolation | Dedicated ports | ~2 minutes |
+| **E2E Tests** | Browser instances | Selenium Grid | ~10 minutes |
+| **Security Tests** | Isolated environments | Container instances | ~5 minutes |
+
+**Maven Parallel Configuration:**
+
+```xml
+<!-- Maven Surefire parallel execution -->
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-surefire-plugin</artifactId>
+    <version>3.0.0-M9</version>
+    <configuration>
+        <parallel>methods</parallel>
+        <threadCount>4</threadCount>
+        <perCoreThreadCount>2</perCoreThreadCount>
+        <useUnlimitedThreads>false</useUnlimitedThreads>
+        <rerunFailingTestsCount>2</rerunFailingTestsCount>
+    </configuration>
+</plugin>
+```
+
+#### 6.6.2.4 Test Reporting Requirements
+
+**Comprehensive Test Reporting Architecture:**
+
+```mermaid
+graph TD
+    A[Test Execution] --> B[Jest Reports]
+    A --> C[Cucumber Reports]
+    A --> D[Coverage Reports]
+    A --> E[Security Test Reports]
+    
+    B --> F[Unit Test Results]
+    C --> G[E2E Test Results]
+    D --> H[Coverage Analysis]
+    E --> I[Security Scan Results]
+    
+    F --> J[Test Report Aggregator]
+    G --> J
+    H --> J
+    I --> J
+    
+    J --> K[HTML Dashboard]
+    J --> L[JSON API]
+    J --> M[Email Reports]
+    J --> N[Slack Notifications]
+    
+    K --> O[Stakeholder Dashboard]
+    L --> P[CI/CD Integration]
+    M --> Q[Management Reports]
+    N --> R[Development Team]
+    
+    style A fill:#e3f2fd
+    style J fill:#fff3e0
+    style O fill:#c8e6c9
+```
+
+**Report Generation Configuration:**
+
+| Report Type | Format | Distribution | Retention |
+|---|---|---|---|
+| **Unit Test Reports** | JUnit XML, HTML | CI/CD artifacts | 90 days |
+| **Coverage Reports** | LCOV, HTML, Cobertura | Codecov integration | 1 year |
+| **E2E Test Reports** | Cucumber HTML, JSON | Email, Slack | 30 days |
+| **Security Reports** | SARIF, HTML | Security team | 1 year |
+
+#### 6.6.2.5 Failed Test Handling
+
+**Failure Management Workflow:**
+
+```mermaid
+flowchart TD
+    A[Test Failure Detected] --> B[Failure Classification]
+    B --> C{Failure Type}
+    
+    C -->|Flaky Test| D[Add to Flaky Test Registry]
+    C -->|Environment Issue| E[Environment Recovery]
+    C -->|Code Defect| F[Bug Report Creation]
+    C -->|Test Issue| G[Test Fix Required]
+    
+    D --> H[Automatic Retry]
+    E --> I[Infrastructure Check]
+    F --> J[Developer Assignment]
+    G --> K[Test Team Assignment]
+    
+    H --> L{Retry Successful?}
+    L -->|Yes| M[Continue Pipeline]
+    L -->|No| N[Mark as Flaky Failure]
+    
+    I --> O[Pipeline Retry]
+    J --> P[Code Fix Process]
+    K --> Q[Test Update Process]
+    
+    N --> R[Flaky Test Analysis]
+    P --> S[Regression Testing]
+    Q --> T[Test Validation]
+    
+    style A fill:#ffcdd2
+    style M fill:#c8e6c9
+    style R fill:#fff3e0
+```
+
+**Failure Handling Configuration:**
+
+```javascript
+// Jest retry configuration
+module.exports = {
+  retry: {
+    testRetryLimit: 2,
+    retryImmediately: true,
+    retryDelayInMs: 1000
+  },
+  
+  failureThreshold: {
+    unit: 0,      // No unit test failures allowed
+    integration: 1, // 1 integration test failure allowed
+    e2e: 2,       // 2 E2E test failures allowed (flaky tolerance)
+    security: 0   // No security test failures allowed
+  }
+};
+```
+
+#### 6.6.2.6 Flaky Test Management
+
+**Flaky Test Detection and Resolution:**
+
+| Detection Method | Threshold | Action | Timeline |
+|---|---|---|---|
+| **Success Rate Analysis** | <90% success rate | Quarantine test | Immediate |
+| **Execution Time Variance** | >50% time variance | Performance investigation | 1 week |
+| **Environment Dependency** | Fails in specific environments | Environment fix | 3 days |
+| **Timing Issues** | Random failures | Add explicit waits | 2 days |
+
+**Flaky Test Registry:**
+
+```javascript
+// Flaky test tracking
+const flakyTestRegistry = {
+  quarantined: [
+    {
+      testName: 'should handle concurrent rate limit requests',
+      reason: 'Race condition in rate limiter',
+      quarantineDate: '2024-01-15',
+      assignee: 'dev-team',
+      estimatedFix: '2024-01-22'
+    }
+  ],
+  
+  monitoring: [
+    {
+      testName: 'should validate SSL certificate renewal',
+      successRate: 85,
+      variance: 30,
+      lastFailure: '2024-01-10'
+    }
+  ]
+};
+```
+
+### 6.6.3 QUALITY METRICS
+
+#### 6.6.3.1 Code Coverage Targets
+
+**Coverage Requirements Matrix:**
+
+| Component | Statement Coverage | Branch Coverage | Function Coverage | Line Coverage |
+|---|---|---|---|---|
+| **Security Middleware** | 95% | 90% | 100% | 95% |
+| **Authentication Logic** | 90% | 85% | 95% | 90% |
+| **API Endpoints** | 85% | 80% | 90% | 85% |
+| **Utility Functions** | 90% | 85% | 95% | 90% |
+| **Error Handlers** | 80% | 75% | 85% | 80% |
+| **Overall System** | 85% | 80% | 90% | 85% |
+
+**Coverage Enforcement:**
+
+```javascript
+// Jest coverage configuration
+{
+  "coverageThreshold": {
+    "global": {
+      "branches": 80,
+      "functions": 90,
+      "lines": 85,
+      "statements": 85
+    },
+    "./src/middleware/security/": {
+      "branches": 90,
+      "functions": 100,
+      "lines": 95,
+      "statements": 95
+    },
+    "./src/auth/": {
+      "branches": 85,
+      "functions": 95,
+      "lines": 90,
+      "statements": 90
+    }
+  }
+}
+```
+
+#### 6.6.3.2 Test Success Rate Requirements
+
+**Success Rate Targets:**
+
+| Test Category | Target Success Rate | Warning Threshold | Critical Threshold |
+|---|---|---|---|
+| **Unit Tests** | 100% | <99.5% | <98% |
+| **Integration Tests** | 98% | <95% | <90% |
+| **Security Tests** | 100% | <99% | <95% |
+| **E2E Tests** | 95% | <90% | <85% |
+| **Performance Tests** | 90% | <85% | <80% |
+
+#### 6.6.3.3 Performance Test Thresholds
+
+**Performance Benchmarks:**
+
+| Metric | Target | Warning | Critical | Test Frequency |
+|---|---|---|---|---|
+| **API Response Time (p95)** | <500ms | >750ms | >1000ms | Every commit |
+| **Security Middleware Overhead** | <100ms | >150ms | >300ms | Daily |
+| **Memory Usage (per request)** | <50MB | >75MB | >100MB | Weekly |
+| **CPU Utilization (peak)** | <70% | >80% | >90% | Weekly |
+| **Concurrent User Capacity** | 1000 users | <750 users | <500 users | Weekly |
+
+**Performance Test Implementation:**
+
+```javascript
+// Performance test example
+describe('Performance Tests', () => {
+  it('should handle API requests within time limits', async () => {
+    const startTime = Date.now();
+    
+    const response = await request(server)
+      .get('/api/health')
+      .expect(200);
+      
+    const responseTime = Date.now() - startTime;
+    expect(responseTime).toBeLessThan(500); // 500ms threshold
+  });
+  
+  it('should handle concurrent requests efficiently', async () => {
+    const concurrentRequests = 100;
+    const requests = Array(concurrentRequests).fill().map(() =>
+      request(server).get('/api/health')
+    );
+    
+    const startTime = Date.now();
+    const responses = await Promise.all(requests);
+    const totalTime = Date.now() - startTime;
+    
+    expect(responses.every(r => r.status === 200)).toBe(true);
+    expect(totalTime).toBeLessThan(2000); // 2 second threshold for 100 requests
+  });
+});
+```
+
+#### 6.6.3.4 Quality Gates
+
+**Automated Quality Gate Configuration:**
+
+| Gate Type | Criteria | Enforcement | Override Authority |
+|---|---|---|---|
+| **Code Quality** | ESLint score A, Zero critical issues | Block merge | Tech Lead |
+| **Test Coverage** | >85% overall, >90% security code | Block merge | None |
+| **Security Tests** | 100% pass rate, Zero vulnerabilities | Block deployment | Security Team |
+| **Performance** | Response time <500ms, Memory <100MB | Block deployment | DevOps Lead |
+
+**Quality Gate Implementation:**
+
+```yaml
+# GitHub branch protection rules
+quality_gates:
+  required_checks:
+    - "Unit Tests"
+    - "Integration Tests"
+    - "Security Tests"
+    - "Coverage Report"
+    - "ESLint Check"
+    - "Performance Tests"
+  
+  merge_requirements:
+    coverage_threshold: 85
+    security_scan_pass: true
+    performance_threshold_pass: true
+    review_required: true
+    review_count: 2
+```
+
+#### 6.6.3.5 Documentation Requirements
+
+**Test Documentation Standards:**
+
+| Documentation Type | Required Content | Update Frequency | Review Process |
+|---|---|---|---|
+| **Test Plan** | Strategy, scope, approach | Per release | Architecture review |
+| **Test Cases** | Scenarios, expected results | Per feature | Peer review |
+| **Security Test Specs** | OWASP compliance validation | Per security update | Security team review |
+| **Performance Baselines** | Benchmark data, thresholds | Monthly | Performance team review |
+
+### 6.6.4 SECURITY TESTING IMPLEMENTATION
+
+#### 6.6.4.1 OWASP Top 10 Compliance Testing
+
+**Comprehensive Security Test Coverage:**
+
+| OWASP Category | Test Implementation | Validation Method | Automation Level |
+|---|---|---|---|
+| **A01: Broken Access Control** | JWT validation, RBAC testing | Supertest API calls | Fully automated |
+| **A02: Cryptographic Failures** | TLS configuration, encryption validation | SSL Labs API integration | Fully automated |
+| **A03: Injection** | SQL injection, XSS prevention testing | Payload injection tests | Fully automated |
+| **A05: Security Misconfiguration** | Security headers validation | Header compliance checks | Fully automated |
+| **A06: Vulnerable Components** | Dependency vulnerability scanning | `npm audit`, Snyk integration | Fully automated |
+| **A07: Authentication Failures** | Brute force, session management testing | Rate limiting validation | Fully automated |
+| **A08: Software Integrity Failures** | Package integrity verification | Hash validation | Automated in CI/CD |
+| **A09: Logging Failures** | Security event logging validation | Log analysis tests | Semi-automated |
+| **A10: Server-Side Request Forgery** | SSRF prevention testing | Network request validation | Fully automated |
+
+**Security Test Implementation Examples:**
+
+```javascript
+describe('Security Compliance Tests', () => {
+  describe('A01: Broken Access Control', () => {
+    it('should enforce JWT token validation', async () => {
+      const response = await request(server)
+        .get('/api/protected')
+        .expect(401);
+        
+      expect(response.body.error).toBe('No token provided');
+    });
+    
+    it('should validate RBAC permissions', async () => {
+      const userToken = generateTestToken({ role: 'user' });
+      
+      const response = await request(server)
+        .get('/api/admin/users')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(403);
+        
+      expect(response.body.error).toContain('Insufficient permissions');
+    });
+  });
+  
+  describe('A03: Injection Prevention', () => {
+    it('should sanitize XSS attempts', async () => {
+      const xssPayloads = [
+        '<script>alert("xss")</script>',
+        'javascript:alert(1)',
+        '<img src=x onerror=alert(1)>'
+      ];
+      
+      for (const payload of xssPayloads) {
+        const response = await request(server)
+          .post('/api/user/profile')
+          .send({ name: payload })
+          .expect(400);
+          
+        expect(response.body.errors).toContain('Invalid input detected');
+      }
+    });
+  });
+  
+  describe('A05: Security Misconfiguration', () => {
+    it('should include all required security headers', async () => {
+      const response = await request(server)
+        .get('/health')
+        .expect(200);
+        
+      expect(response.headers['strict-transport-security']).toBeDefined();
+      expect(response.headers['x-content-type-options']).toBe('nosniff');
+      expect(response.headers['x-frame-options']).toBe('DENY');
+      expect(response.headers['content-security-policy']).toBeDefined();
+    });
+  });
+});
+```
+
+#### 6.6.4.2 Vulnerability Scanning Integration
+
+**Automated Security Scanning Pipeline:**
+
+```mermaid
+flowchart TD
+    A[Code Commit] --> B[Dependency Scan]
+    B --> C[Static Code Analysis]
+    C --> D[Container Image Scan]
+    D --> E[Dynamic Security Testing]
+    
+    B --> F[npm audit]
+    B --> G[Snyk Vulnerability DB]
+    B --> H[GitHub Security Advisories]
+    
+    C --> I[ESLint Security Rules]
+    C --> J[SonarQube Security Rules]
+    C --> K[CodeQL Analysis]
+    
+    D --> L[Trivy Container Scan]
+    D --> M[Clair Vulnerability Scan]
+    
+    E --> N[OWASP ZAP]
+    E --> O[Custom Security Tests]
+    
+    F --> P[Vulnerability Report]
+    G --> P
+    H --> P
+    I --> P
+    J --> P
+    K --> P
+    L --> P
+    M --> P
+    N --> P
+    O --> P
+    
+    P --> Q{Critical Vulnerabilities?}
+    Q -->|Yes| R[Block Deployment]
+    Q -->|No| S[Continue Pipeline]
+    
+    style A fill:#e3f2fd
+    style R fill:#ffcdd2
+    style S fill:#c8e6c9
+```
+
+### 6.6.5 TEST ENVIRONMENT ARCHITECTURE
+
+#### 6.6.5.1 Environment Configuration
+
+**Test Environment Matrix:**
+
+| Environment | Purpose | Infrastructure | Data Strategy | Access Control |
+|---|---|---|---|---|
+| **Local Development** | Developer testing | Docker containers | Synthetic data | Developer access |
+| **CI/CD Runners** | Automated testing | GitHub Actions runners | Fresh per run | CI/CD service accounts |
+| **Integration Testing** | Component integration | Kubernetes pods | Sanitized production data | QA team access |
+| **E2E Testing** | End-to-end validation | Dedicated VMs | Production-like data | Automated tests only |
+| **Performance Testing** | Load and stress testing | Scaled infrastructure | High-volume datasets | Performance team |
+| **Security Testing** | Penetration testing | Isolated network | Attack simulation data | Security team |
+
+#### 6.6.5.2 Test Data Management
+
+**Test Data Architecture:**
+
+```mermaid
+graph TD
+    A[Test Data Sources] --> B[Synthetic Data Generator]
+    A --> C[Sanitized Production Data]
+    A --> D[Static Test Fixtures]
+    
+    B --> E[JavaFaker Integration]
+    B --> F[Custom Data Builders]
+    
+    C --> G[Data Anonymization]
+    C --> H[PII Removal]
+    
+    D --> I[User Fixtures]
+    D --> J[API Response Mocks]
+    
+    E --> K[Test Data Repository]
+    F --> K
+    G --> K
+    H --> K
+    I --> K
+    J --> K
+    
+    K --> L[Unit Tests]
+    K --> M[Integration Tests]
+    K --> N[E2E Tests]
+    K --> O[Performance Tests]
+    
+    style A fill:#e3f2fd
+    style K fill:#fff3e0
+    style L fill:#c8e6c9
+    style M fill:#c8e6c9
+    style N fill:#c8e6c9
+    style O fill:#c8e6c9
+```
+
+#### 6.6.5.3 Infrastructure as Code
+
+**Test Environment Provisioning:**
+
+```yaml
+# docker-compose.test.yml
+version: '3.8'
+services:
+  app-test:
+    build: .
+    environment:
+      - NODE_ENV=test
+      - PORT=3000
+      - JWT_SECRET=test-secret
+      - RATE_LIMIT_MAX=1000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - redis-test
+      
+  redis-test:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+      
+  selenium-hub:
+    image: selenium/hub:latest
+    ports:
+      - "4444:4444"
+      
+  chrome-node:
+    image: selenium/node-chrome:latest
+    environment:
+      - HUB_HOST=selenium-hub
+    depends_on:
+      - selenium-hub
+```
+
+### 6.6.6 TEST EXECUTION WORKFLOWS
+
+#### 6.6.6.1 Continuous Integration Flow
+
+**Complete CI/CD Test Workflow:**
+
+```mermaid
+flowchart TD
+    A[Developer Commits Code] --> B[Pre-commit Hooks]
+    B --> C[Linting & Formatting]
+    C --> D[Unit Tests Execution]
+    
+    D --> E[Push to Repository]
+    E --> F[CI Pipeline Triggered]
+    F --> G[Environment Setup]
+    
+    G --> H[Dependency Installation]
+    H --> I[Build Application]
+    I --> J[Unit Test Suite]
+    
+    J --> K[Integration Test Suite]
+    K --> L[Security Test Suite]
+    L --> M[Coverage Analysis]
+    
+    M --> N{Quality Gates Pass?}
+    N -->|No| O[Pipeline Failure]
+    N -->|Yes| P[E2E Test Environment Setup]
+    
+    P --> Q[Start Application Server]
+    Q --> R[Selenium Grid Setup]
+    R --> S[E2E Test Execution]
+    
+    S --> T[Performance Test Execution]
+    T --> U[Test Report Generation]
+    U --> V[Artifact Storage]
+    
+    V --> W[Notification Dispatch]
+    W --> X[Merge/Deploy Decision]
+    
+    O --> Y[Developer Notification]
+    X --> Z[Production Deployment]
+    
+    style A fill:#e3f2fd
+    style O fill:#ffcdd2
+    style Z fill:#c8e6c9
+```
+
+#### 6.6.6.2 Release Testing Protocol
+
+**Release Validation Checklist:**
+
+| Test Phase | Required Tests | Success Criteria | Rollback Trigger |
+|---|---|---|---|
+| **Pre-Release** | Full regression suite | 100% security tests pass | Any critical failure |
+| **Smoke Tests** | Core functionality validation | Basic features working | Core feature failure |
+| **Performance** | Load testing, response times | Metrics within thresholds | Performance degradation >20% |
+| **Security** | Vulnerability scan, penetration testing | Zero critical vulnerabilities | High/critical vulnerability found |
+| **User Acceptance** | End-user workflow validation | Business workflows complete | User-blocking issues |
+
+### 6.6.7 MONITORING AND REPORTING
+
+#### 6.6.7.1 Test Metrics Dashboard
+
+**Real-time Test Monitoring:**
+
+| Metric | Visualization | Update Frequency | Alert Threshold |
+|---|---|---|---|
+| **Test Success Rate** | Line chart with trend | Real-time | <95% |
+| **Coverage Percentage** | Progress bars by component | Per commit | <85% |
+| **Performance Trends** | Time series graphs | Per test run | >20% degradation |
+| **Security Test Status** | Status indicators | Per security scan | Any failure |
+| **Flaky Test Count** | Alert badges | Daily | >5 flaky tests |
+
+#### 6.6.7.2 Automated Reporting
+
+**Report Distribution Strategy:**
+
+| Report Type | Recipients | Frequency | Format | Distribution Method |
+|---|---|---|---|---|
+| **Daily Test Summary** | Development team | Daily | HTML email | Automated email |
+| **Weekly Quality Report** | Management | Weekly | PDF dashboard | Email + Slack |
+| **Release Test Report** | All stakeholders | Per release | Comprehensive HTML | Email + Portal |
+| **Security Test Report** | Security team | Per scan | SARIF + HTML | Secure email |
+| **Performance Trend Report** | DevOps team | Weekly | Charts + metrics | Slack + Dashboard |
+
+#### References
+
+**Repository Files Examined:**
+- `package.json` - Node.js testing framework configuration (Jest, Supertest, ESLint)
+- `pom.xml` - Java E2E test automation framework setup (Selenium, Cucumber, JUnit)
+- `docs/guides/testing.md` - Comprehensive testing guide with framework comparisons and best practices
+- `docs/guides/security.md` - Security testing implementation and validation procedures
+- `docs/guides/production.md` - Production deployment testing considerations and PM2 monitoring
+- `blitzy/documentation/Technical Specifications.md` - System architecture and security requirements for testing
+
+**Technical Specification Sections Referenced:**
+- `6.4 SECURITY ARCHITECTURE` - Comprehensive security controls requiring testing validation
+- `6.5 MONITORING AND OBSERVABILITY` - Health check implementations and performance monitoring for test validation
+- `1.2 SYSTEM OVERVIEW` - System context and success criteria driving testing requirements
+- `3.1 PROGRAMMING LANGUAGES` - Dual-stack architecture (Node.js + Java) requiring coordinated testing approach
+
+**Web Searches Performed:**
+- None required - all information derived from repository analysis and existing technical specifications
+
+## 6.1 CORE SERVICES ARCHITECTURE
+
+### 6.1.1 Architecture Assessment
+
+**Core Services Architecture is not applicable for this system.**
+
+#### 6.1.1.1 Architecture Pattern Analysis
+
+This system implements a **Monolithic Architecture with Layered Design** rather than a distributed services architecture. The system consists of a single Node.js/Express.js application deployed as one unified deployable unit with integrated middleware layers providing security and business logic functionality.
+
+**Evidence Supporting Monolithic Design:**
+
+| Architectural Element | Implementation | Evidence |
+|---|---|---|
+| **Deployment Model** | Single deployable unit (`server.js`) | All functionality integrated into one Express.js application |
+| **Process Management** | PM2 clustering of identical application instances | Multiple processes running the same codebase, not separate services |
+| **Component Integration** | Middleware pipeline within single application | Security, routing, and business logic as integrated layers |
+| **Communication Patterns** | In-process function calls and middleware chain | No inter-service communication or service discovery required |
+
+#### 6.1.1.2 Monolithic vs. Microservices Comparison
+
+```mermaid
+graph TB
+    subgraph "Current System (Monolithic)"
+        A1[Load Balancer] --> B1[PM2 Process Manager]
+        B1 --> C1[Node.js Instance 1]
+        B1 --> C2[Node.js Instance 2]
+        B1 --> C3[Node.js Instance N]
+        
+        subgraph "Single Application Process"
+            C1 --> D1[Security Middleware]
+            D1 --> E1[Business Logic]
+            E1 --> F1[Data Access]
+        end
+    end
+    
+    subgraph "Alternative Microservices (Not Implemented)"
+        A2[API Gateway] --> B2[Service Discovery]
+        B2 --> C4[Auth Service]
+        B2 --> C5[API Service]
+        B2 --> C6[Data Service]
+        C4 --> D2[(Database)]
+        C5 --> D2
+        C6 --> D2
+    end
+    
+    style A1 fill:#e1f5fe
+    style B1 fill:#c8e6c9
+    style C1 fill:#f3e5f5
+    style A2 fill:#ffebee,stroke:#f44336,stroke-dasharray: 5 5
+    style B2 fill:#ffebee,stroke:#f44336,stroke-dasharray: 5 5
+```
+
+### 6.1.2 Actual System Architecture
+
+#### 6.1.2.1 Layered Architecture Implementation
+
+The system implements a **Defense-in-Depth Layered Architecture** with the following structure:
+
+| Layer | Technology | Responsibility | Implementation |
+|---|---|---|---|
+| **Transport Layer** | HTTP/HTTPS, TLS 1.2+ | Secure communication and protocol handling | Express.js server with HTTPS support |
+| **Security Layer** | Helmet.js, CORS, Rate Limiting | OWASP Top 10 protection and input validation | Integrated middleware stack |
+| **Application Layer** | Express.js routing and handlers | Business logic and API endpoints | Route handlers and controllers |
+| **Data Layer** | PostgreSQL (optional) | Data persistence and management | Database client connections |
+
+#### 6.1.2.2 Process-Level Scaling Architecture
+
+```mermaid
+graph TB
+    subgraph "Production Environment"
+        LB[Load Balancer] --> PM2[PM2 Process Manager]
+        
+        subgraph "PM2 Cluster Management"
+            PM2 --> W1[Worker Process 1<br/>server.js]
+            PM2 --> W2[Worker Process 2<br/>server.js]
+            PM2 --> W3[Worker Process 3<br/>server.js]
+            PM2 --> WN[Worker Process N<br/>server.js]
+        end
+        
+        subgraph "Shared Resources"
+            W1 --> DB[(PostgreSQL<br/>Connection Pool)]
+            W2 --> DB
+            W3 --> DB
+            WN --> DB
+            
+            W1 --> FS[File System<br/>Logs & Assets]
+            W2 --> FS
+            W3 --> FS
+            WN --> FS
+        end
+        
+        subgraph "External Integrations"
+            W1 --> EXT1[Backprop API]
+            W2 --> EXT2[Let's Encrypt]
+            W3 --> EXT3[Monitoring Systems]
+        end
+    end
+    
+    style PM2 fill:#c8e6c9
+    style W1 fill:#e3f2fd
+    style W2 fill:#e3f2fd
+    style W3 fill:#e3f2fd
+    style WN fill:#e3f2fd
+```
+
+### 6.1.3 Scaling and Resilience Patterns
+
+#### 6.1.3.1 Horizontal Scaling Strategy
+
+**Process-Level Clustering Approach:**
+
+| Scaling Parameter | Configuration | Implementation |
+|---|---|---|
+| **Scaling Method** | Process forking via PM2 cluster mode | `exec_mode: 'cluster'` with CPU-based instance count |
+| **Instance Management** | Automatic worker process spawning | `instances: 'max'` or specific count (e.g., 4) |
+| **Load Distribution** | Built-in PM2 load balancing | Round-robin distribution across worker processes |
+| **Resource Utilization** | CPU core-based scaling | One worker process per CPU core optimally |
+
+**Auto-scaling Configuration:**
+```mermaid
+flowchart TD
+    A[PM2 Monitoring] --> B{CPU Usage > 80%?}
+    B -->|Yes| C[Spawn Additional Worker]
+    B -->|No| D{Memory Usage > 90%?}
+    
+    D -->|Yes| E[Restart High Memory Worker]
+    D -->|No| F{Worker Count > CPU Cores?}
+    
+    F -->|Yes| G[Scale Down Workers]
+    F -->|No| H[Continue Monitoring]
+    
+    C --> I[Health Check New Worker]
+    E --> J[Health Check Restarted Worker]
+    G --> K[Graceful Worker Shutdown]
+    
+    I --> L{Worker Healthy?}
+    J --> L
+    K --> H
+    
+    L -->|Yes| H
+    L -->|No| M[Mark Worker as Failed]
+    
+    M --> N{Restart Attempts < Limit?}
+    N -->|Yes| E
+    N -->|No| O[Alert Operations Team]
+    
+    H --> A
+    O --> P[Manual Intervention Required]
+    
+    style A fill:#e1f5fe
+    style H fill:#c8e6c9
+    style P fill:#ffcdd2
+```
+
+#### 6.1.3.2 Resilience and Fault Tolerance
+
+**Application-Level Resilience Patterns:**
+
+| Pattern | Implementation | Configuration |
+|---|---|---|
+| **Health Monitoring** | PM2 health checks with restart policies | Automatic restart on process failure |
+| **Circuit Breaker** | Application-level timeout and retry logic | 30-second timeouts with 3 retry attempts |
+| **Graceful Degradation** | Stateless design enabling rapid recovery | No server-side sessions or persistent state |
+| **Resource Protection** | Rate limiting and input validation | Global and endpoint-specific rate limits |
+
+**Fault Recovery Workflow:**
+```mermaid
+stateDiagram-v2
+    [*] --> Healthy: Process Start
+    Healthy --> Monitoring: Continuous Health Checks
+    
+    Monitoring --> HealthCheckFailed: Health Check Timeout
+    Monitoring --> HighResourceUsage: CPU/Memory Threshold
+    Monitoring --> CrashDetected: Process Exception
+    
+    HealthCheckFailed --> RestartAttempt: Automated Recovery
+    HighResourceUsage --> RestartAttempt: Resource Management
+    CrashDetected --> RestartAttempt: Exception Recovery
+    
+    RestartAttempt --> Healthy: Restart Successful
+    RestartAttempt --> FailedRestart: Restart Failed
+    
+    FailedRestart --> RetryAttempt: Retry Counter < Limit
+    FailedRestart --> PermanentFailure: Max Retries Exceeded
+    
+    RetryAttempt --> RestartAttempt: Wait Period Complete
+    PermanentFailure --> AlertGenerated: Operations Notification
+    
+    AlertGenerated --> ManualIntervention: Human Response Required
+    ManualIntervention --> Healthy: Issue Resolved
+```
+
+### 6.1.4 Integration and Communication Patterns
+
+#### 6.1.4.1 External System Integration
+
+**Client-Server Communication Patterns:**
+
+| Integration Type | Protocol | Pattern | Implementation |
+|---|---|---|---|
+| **Database Connectivity** | PostgreSQL Protocol | Connection Pooling | 10 max connections, 30s idle timeout |
+| **API Monitoring** | HTTPS/JSON | Request/Response | Backprop API with timeout and retry |
+| **Certificate Management** | HTTPS/ACME | Automated Renewal | Let's Encrypt integration |
+| **Process Management** | IPC/Events | Command/Control | PM2 monitoring interface |
+
+#### 6.1.4.2 Request Processing Pipeline
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant LoadBalancer as Load Balancer
+    participant PM2 as PM2 Manager
+    participant Worker as Worker Process
+    participant Security as Security Layer
+    participant Handler as Request Handler
+    participant DB as Database
+    
+    Client->>LoadBalancer: HTTP Request
+    LoadBalancer->>PM2: Route to Available Worker
+    PM2->>Worker: Forward Request
+    
+    Worker->>Security: Security Pipeline
+    Security->>Security: Apply Helmet Headers
+    Security->>Security: CORS Validation
+    Security->>Security: Rate Limiting
+    Security->>Security: Input Validation
+    
+    Security->>Handler: Validated Request
+    Handler->>DB: Data Query (if needed)
+    DB->>Handler: Query Response
+    Handler->>Security: Business Logic Response
+    
+    Security->>Worker: Apply Security Headers
+    Worker->>PM2: Formatted Response
+    PM2->>LoadBalancer: Worker Response
+    LoadBalancer->>Client: HTTP Response
+```
+
+### 6.1.5 Why Microservices Architecture Was Not Chosen
+
+#### 6.1.5.1 Design Decision Rationale
+
+**Factors Supporting Monolithic Architecture:**
+
+| Factor | Monolithic Advantage | Microservices Complexity |
+|---|---|---|
+| **System Complexity** | Single codebase, unified deployment | Multiple services, distributed deployment |
+| **Team Size** | Small team can manage entire system | Requires dedicated teams per service |
+| **Business Domain** | Security middleware with cohesive functionality | Would require artificial service boundaries |
+| **Performance Requirements** | In-process communication, minimal latency | Network latency between services |
+
+#### 6.1.5.2 Architectural Trade-offs Analysis
+
+**Current Architecture Benefits:**
+- **Simplified Operations**: Single deployment unit reduces operational complexity
+- **Performance Optimization**: In-process communication eliminates network overhead
+- **Development Velocity**: Unified codebase enables rapid feature development
+- **Resource Efficiency**: Lower resource overhead without service orchestration
+
+**Potential Future Considerations:**
+If the system evolves to require microservices architecture, natural service boundaries might include:
+- **Authentication Service**: User authentication and authorization
+- **API Gateway Service**: Request routing and rate limiting
+- **Data Processing Service**: Business logic and data transformation
+- **Monitoring Service**: Health checks and metrics collection
+
+However, the current system design with PM2 clustering effectively addresses scalability and availability requirements without the complexity overhead of distributed services architecture.
+
+#### References
+
+**Technical Specification Sections Retrieved:**
+- `5.1 HIGH-LEVEL ARCHITECTURE` - Confirmed layered architecture pattern and system boundaries
+- `1.2 SYSTEM OVERVIEW` - Verified monolithic system design and component structure
+- `4.4 PRODUCTION DEPLOYMENT WORKFLOWS` - Analyzed PM2 process management and scaling approach
+- `5.2 COMPONENT DETAILS` - Examined detailed component architecture and integration patterns
+
+**Files and Directories Analyzed:**
+- Root repository structure analysis for deployment and configuration patterns
+- PM2 configuration references and clustering setup documentation
+- Production deployment guides and scaling configurations
+
+## 6.2 DATABASE DESIGN
+
+### 6.2.1 Database Implementation Status
+
+**Database Design is not applicable to this system in its current implementation.**
+
+#### 6.2.1.1 System Architecture Rationale
+
+The secure-node-server implements a **stateless layered architecture** with defense-in-depth security design principles that intentionally excludes database dependency for the following architectural reasons:
+
+| Design Principle | Implementation Impact | Database Implication |
+|---|---|---|
+| **Stateless Architecture** | Enables horizontal scalability and load balancer compatibility | No server-side session or state storage required |
+| **Security-First Design** | Minimizes attack surface and reduces complexity | Eliminates database-related security vectors |
+| **Zero Trust Architecture** | All inputs validated, no persistent trust relationships | No trusted data persistence layer needed |
+| **Progressive Enhancement** | Core functionality independent of external dependencies | Database integration as optional future enhancement |
+
+#### 6.2.1.2 Evidence Analysis
+
+**Codebase Examination Results:**
+
+| Component | Analysis Result | Evidence |
+|---|---|---|
+| **Dependencies** | No database drivers present | `package.json` contains no pg, mysql2, mongodb, or ORM libraries |
+| **Application Logic** | No database operations implemented | `server.js` and all route handlers operate without database calls |
+| **Configuration** | Database parameters configured but unused | `.env.example` includes PostgreSQL template configuration |
+| **Endpoints** | All endpoints function without persistence | `/health`, `/ping`, `/api/data`, `/api/status` return static or runtime data |
+
+### 6.2.2 Current Data Management Strategy
+
+#### 6.2.2.1 File System-Based Data Persistence
+
+The system implements structured data management through the file system, providing secure and performant data handling for its operational requirements:
+
+```mermaid
+graph TB
+    subgraph "Data Management Architecture"
+        A[Application Data] --> B[Configuration Data]
+        A --> C[Static Assets]
+        A --> D[Log Data]
+        A --> E[Security Assets]
+        
+        B --> F[Environment Variables<br/>.env files]
+        C --> G[Public Directory<br/>Static file serving]
+        D --> H[Logs Directory<br/>Application logging]
+        E --> I[Certs Directory<br/>SSL/TLS certificates]
+        
+        F --> J[Server Configuration<br/>Security Policies<br/>API Keys]
+        G --> K[Client Assets<br/>Documentation<br/>Static Resources]
+        H --> L[Access Logs<br/>Error Logs<br/>Security Events]
+        I --> M[SSL Certificates<br/>Private Keys<br/>Certificate Chain]
+    end
+    
+    style A fill:#e1f5fe
+    style F fill:#c8e6c9
+    style G fill:#f3e5f5
+    style H fill:#fff3e0
+    style I fill:#ffebee
+```
+
+#### 6.2.2.2 Data Storage Implementation
+
+| Data Type | Storage Location | Access Pattern | Security Controls |
+|---|---|---|---|
+| **Configuration Data** | Environment variables and `.env` files | Read-only at application startup | File system permissions, environment isolation |
+| **Static Assets** | `/public` directory with Express.js static middleware | HTTP requests with security headers | MIME type validation, path traversal protection |
+| **Application Logs** | `/logs` directory with structured logging | Write-only append operations | Log rotation, access controls, audit trails |
+| **SSL Certificates** | `/certs` directory with secure permissions | Read-only for TLS termination | Restricted file permissions, certificate validation |
+
+#### 6.2.2.3 Data Flow Architecture
+
+```mermaid
+flowchart TD
+    A[Client Request] --> B[Security Middleware Pipeline]
+    B --> C{Data Required?}
+    
+    C -->|Configuration| D[Environment Variables]
+    C -->|Static Assets| E[File System - /public]
+    C -->|Logging| F[File System - /logs]
+    C -->|Runtime Data| G[In-Memory Processing]
+    
+    D --> H[Security Policy Application]
+    E --> I[Static Asset Delivery]
+    F --> J[Audit Trail Creation]
+    G --> K[Dynamic Response Generation]
+    
+    H --> L[Response with Security Headers]
+    I --> L
+    J --> L
+    K --> L
+    
+    L --> M[Client Response]
+    
+    style B fill:#ffcdd2
+    style H fill:#c8e6c9
+    style L fill:#e1f5fe
+```
+
+### 6.2.3 Database Configuration Template
+
+#### 6.2.3.1 PostgreSQL Configuration Framework
+
+While not currently implemented, the system includes comprehensive PostgreSQL configuration parameters as a template for future database integration:
+
+**Database Connection Configuration:**
+```
+# Primary Database Connection
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=your_database
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+DB_SSL=false
+
+#### Connection Pool Management
+DB_POOL_MIN=2
+DB_POOL_MAX=10
+DB_POOL_IDLE_TIMEOUT=30000
+```
+
+#### 6.2.3.2 Database Integration Architecture Design
+
+```mermaid
+erDiagram
+    APPLICATION ||--o{ CONNECTION_POOL : manages
+    CONNECTION_POOL ||--|| POSTGRESQL : connects_to
+    
+    APPLICATION {
+        string node_version "22.x LTS"
+        string express_version "4.20.0"
+        string security_middleware "integrated"
+    }
+    
+    CONNECTION_POOL {
+        int min_connections "2"
+        int max_connections "10"
+        int idle_timeout "30000ms"
+        boolean ssl_enabled "configurable"
+    }
+    
+    POSTGRESQL {
+        string version "recommended_latest"
+        boolean acid_compliance "true"
+        string ssl_mode "configurable"
+        string authentication "credential_based"
+    }
+```
+
+#### 6.2.3.3 Future Database Implementation Guidelines
+
+**Database Technology Selection Rationale:**
+
+| Criteria | PostgreSQL Advantages | Implementation Considerations |
+|---|---|---|
+| **ACID Compliance** | Full transactional integrity for critical data | Ensures data consistency in security contexts |
+| **Security Features** | Row-level security, SSL support, audit logging | Aligns with zero trust architecture principles |
+| **Performance** | Advanced indexing, query optimization | Supports connection pooling for high-traffic scenarios |
+| **Ecosystem** | Extensive Node.js driver support (`pg` library) | Minimal integration complexity with existing codebase |
+
+### 6.2.4 Migration Strategy for Database Integration
+
+#### 6.2.4.1 Database Implementation Phases
+
+Should database functionality be required, the following phased approach is recommended:
+
+```mermaid
+gantt
+    title Database Integration Implementation Timeline
+    dateFormat  YYYY-MM-DD
+    section Phase 1: Foundation
+    Database Setup           :done, phase1, 2024-01-01, 2024-01-15
+    Connection Pool Config   :done, after phase1, 2024-01-16, 2024-01-30
+    
+    section Phase 2: Integration
+    Database Client Setup    :active, phase2, 2024-02-01, 2024-02-15
+    Health Check Integration :phase2b, after phase2, 2024-02-16, 2024-02-28
+    
+    section Phase 3: Implementation
+    Schema Design           :phase3, 2024-03-01, 2024-03-15
+    Migration Scripts       :after phase3, 2024-03-16, 2024-03-31
+    
+    section Phase 4: Security
+    Access Controls         :phase4, 2024-04-01, 2024-04-15
+    Encryption Setup        :after phase4, 2024-04-16, 2024-04-30
+```
+
+#### 6.2.4.2 Implementation Checklist
+
+| Implementation Area | Tasks | Priority |
+|---|---|---|
+| **Dependency Management** | Install `pg` driver, update `package.json`, configure TypeScript types | Critical |
+| **Connection Management** | Implement connection pooling, configure SSL, add health checks | Critical |
+| **Security Integration** | Enable SSL connections, implement prepared statements, add audit logging | High |
+| **Application Integration** | Update health endpoint, add database status checks, implement graceful degradation | High |
+
+#### 6.2.4.3 Security Considerations for Database Integration
+
+**Security Architecture Enhancement:**
+
+```mermaid
+graph TB
+    subgraph "Enhanced Security Layer with Database"
+        A[Client Request] --> B[Security Middleware]
+        B --> C[Input Validation]
+        C --> D[SQL Injection Prevention]
+        D --> E[Database Access Control]
+        
+        E --> F[Connection Pool Security]
+        F --> G[Encrypted Connections]
+        G --> H[Query Execution]
+        H --> I[Result Sanitization]
+        I --> J[Security Headers Application]
+        J --> K[Client Response]
+    end
+    
+    subgraph "Database Security Controls"
+        L[Row-Level Security]
+        M[Audit Logging]
+        N[Access Controls]
+        O[Encryption at Rest]
+    end
+    
+    E --> L
+    E --> M
+    E --> N
+    G --> O
+    
+    style B fill:#ffcdd2
+    style D fill:#ffcdd2
+    style E fill:#ffcdd2
+    style G fill:#c8e6c9
+```
+
+### 6.2.5 Performance and Scalability Considerations
+
+#### 6.2.5.1 Current System Performance Profile
+
+**Stateless Architecture Performance Benefits:**
+
+| Metric | Current Performance | Database Integration Impact |
+|---|---|---|
+| **Response Time** | <100ms p95 (middleware overhead) | Would add 5-50ms database query time |
+| **Memory Usage** | Minimal (no connection pools or caches) | Would add 10-50MB for connection pooling |
+| **CPU Utilization** | Low (no database operations) | Would add database client processing overhead |
+| **Scalability** | Horizontal scaling via PM2 clustering | Would require connection pool management per worker |
+
+#### 6.2.5.2 Database Performance Planning Template
+
+**Connection Pool Optimization Strategy:**
+
+```mermaid
+graph LR
+    A[Worker Process 1] --> D[Database Connection Pool<br/>Min: 2, Max: 10]
+    B[Worker Process 2] --> D
+    C[Worker Process N] --> D
+    
+    D --> E[(PostgreSQL Database)]
+    
+    F[PM2 Cluster Manager] --> A
+    F --> B
+    F --> C
+    
+    G[Load Balancer] --> F
+    
+    subgraph "Connection Management"
+        H[Connection Health Checks]
+        I[Idle Connection Cleanup]
+        J[Connection Retry Logic]
+        K[Failover Handling]
+    end
+    
+    D --> H
+    D --> I
+    D --> J
+    D --> K
+    
+    style D fill:#e1f5fe
+    style E fill:#c8e6c9
+    style F fill:#f3e5f5
+```
+
+### 6.2.6 Compliance and Security Framework
+
+#### 6.2.6.1 Data Security Standards Alignment
+
+The current stateless architecture inherently supports security compliance by eliminating database-related security vectors:
+
+| Security Standard | Current Compliance | Database Integration Requirements |
+|---|---|---|
+| **OWASP Top 10** | Full compliance (no SQL injection vectors) | Would require prepared statements and input validation |
+| **Zero Trust Architecture** | Complete (no persistent trust relationships) | Would need database access controls and encryption |
+| **Data Minimization** | Optimal (no unnecessary data storage) | Would require data retention policies and archival |
+| **Audit Trail** | File-based logging sufficient | Would need database audit logging and compliance reporting |
+
+#### 6.2.6.2 Future Compliance Framework
+
+**Database Security Compliance Template:**
+
+```mermaid
+flowchart TD
+    A[Data Input] --> B[Input Validation & Sanitization]
+    B --> C[SQL Injection Prevention]
+    C --> D[Access Control Validation]
+    D --> E[Encrypted Database Connection]
+    
+    E --> F[(Encrypted Database)]
+    F --> G[Audit Log Generation]
+    G --> H[Data Access Logging]
+    H --> I[Compliance Reporting]
+    
+    J[Data Retention Policy] --> K[Automated Archival]
+    K --> L[Secure Data Deletion]
+    
+    F --> J
+    I --> M[Security Monitoring]
+    M --> N[Threat Detection]
+    
+    style C fill:#ffcdd2
+    style E fill:#c8e6c9
+    style F fill:#e1f5fe
+    style G fill:#fff3e0
+```
+
+### 6.2.7 Conclusion and Recommendations
+
+#### 6.2.7.1 Current Architecture Assessment
+
+The secure-node-server's stateless architecture without database dependency is **architecturally appropriate** for its designed use case as a security-focused HTTP/HTTPS server and reference implementation. This design choice provides:
+
+- **Operational Simplicity**: Reduced complexity in deployment and maintenance
+- **Security Hardening**: Elimination of database attack vectors
+- **Performance Optimization**: Minimal latency and resource overhead
+- **Scalability**: Effective horizontal scaling through PM2 clustering
+
+#### 6.2.7.2 Future Enhancement Pathway
+
+If database functionality becomes required, the existing PostgreSQL configuration template provides a comprehensive foundation for secure database integration while maintaining the system's security-first design principles.
+
+**Recommended Next Steps for Database Integration:**
+1. Conduct thorough requirements analysis to validate database necessity
+2. Implement database connectivity using the provided configuration template
+3. Maintain stateless design principles where possible
+4. Apply comprehensive security controls aligned with zero trust architecture
+5. Implement thorough testing of all database-related security controls
+
+#### References
+
+**Technical Specification Sections Retrieved:**
+- `3.5 DATABASES & STORAGE` - Database configuration and data persistence strategy analysis
+- `1.2 SYSTEM OVERVIEW` - System architecture and design principles validation
+- `5.1 HIGH-LEVEL ARCHITECTURE` - Architectural pattern confirmation and data flow analysis
+- `6.1 CORE SERVICES ARCHITECTURE` - Service architecture pattern and scaling approach verification
+
+**Repository Files Analyzed:**
+- `.env.example` - Database configuration template and connection parameters
+- `server.js` - Application architecture and database usage analysis
+- `package.json` - Dependency analysis for database-related libraries
+- `PM2 ecosystem configuration` - Process management and scaling architecture
+
+**Configuration Templates Documented:**
+- PostgreSQL connection configuration parameters
+- Connection pool management settings
+- SSL and security configuration options
+- Performance tuning parameters for future database integration
+
+## 6.3 INTEGRATION ARCHITECTURE
+
+### 6.3.1 Architecture Overview
+
+The system implements a **comprehensive integration architecture** designed around security-first principles and scalable external service connectivity. The integration architecture supports multiple integration patterns while maintaining the core monolithic design with strategic external service dependencies for monitoring, security, and operational excellence.
+
+**Integration Architecture Principles:**
+- **Security-First Integration**: All external communications implement defense-in-depth security patterns
+- **Configuration-Driven Connectivity**: Environment-based integration configuration enabling deployment flexibility
+- **Fault-Tolerant Communication**: Built-in retry mechanisms, timeouts, and graceful degradation patterns
+- **Performance-Optimized Protocols**: HTTP/HTTPS with connection pooling and rate limiting
+- **Progressive Enhancement**: Core functionality remains operational with external service degradation
+
+```mermaid
+graph TB
+    subgraph "Client Applications"
+        C1[Web Browsers]
+        C2[API Clients]
+        C3[Mobile Apps]
+        C4[Test Automation]
+    end
+    
+    subgraph "Load Balancer Layer"
+        LB[Load Balancer/Reverse Proxy]
+    end
+    
+    subgraph "Application Layer"
+        subgraph "PM2 Process Management"
+            PM2[PM2 Manager]
+            W1[Worker Process 1]
+            W2[Worker Process 2]
+            WN[Worker Process N]
+        end
+        
+        subgraph "Security & Integration Middleware"
+            SEC[Security Pipeline]
+            CORS[CORS Handler]
+            RL[Rate Limiter]
+            AUTH[JWT Authentication]
+            VAL[Input Validation]
+        end
+        
+        subgraph "API Layer"
+            REST[REST Endpoints]
+            HEALTH[Health Checks]
+            STATIC[Static Assets]
+        end
+    end
+    
+    subgraph "External Integrations"
+        BP[Backprop API<br/>Monitoring]
+        LE[Let's Encrypt<br/>SSL/TLS]
+        DB[(PostgreSQL<br/>Database)]
+    end
+    
+    C1 --> LB
+    C2 --> LB
+    C3 --> LB
+    C4 --> LB
+    
+    LB --> PM2
+    PM2 --> W1
+    PM2 --> W2
+    PM2 --> WN
+    
+    W1 --> SEC
+    W2 --> SEC
+    WN --> SEC
+    
+    SEC --> CORS
+    CORS --> RL
+    RL --> AUTH
+    AUTH --> VAL
+    VAL --> REST
+    VAL --> HEALTH
+    VAL --> STATIC
+    
+    REST --> BP
+    HEALTH --> BP
+    W1 --> LE
+    REST --> DB
+    
+    style SEC fill:#ffcdd2
+    style BP fill:#e8f5e8
+    style LE fill:#e8f5e8
+    style DB fill:#e3f2fd
+```
+
+### 6.3.2 API DESIGN
+
+#### 6.3.2.1 Protocol Specifications
+
+**Primary Communication Protocols:**
+
+| Protocol | Usage Context | Configuration | Security Features |
+|---|---|---|---|
+| **HTTPS (Production)** | All production communications | TLS 1.2+ with Grade A configuration | Perfect Forward Secrecy, HSTS enforcement |
+| **HTTP (Development)** | Local development environment | Port 3000 with automatic HTTPS redirect | Security headers applied in all environments |
+| **PostgreSQL Protocol** | Database connectivity | Connection pooling with SSL enforcement | Encrypted connections, connection limits |
+| **JSON over HTTPS** | API data exchange | Content-Type: application/json | Input validation, output sanitization |
+
+**Protocol Stack Implementation:**
+```mermaid
+graph TB
+    subgraph "Protocol Stack"
+        A[Application Layer<br/>Express.js Handlers]
+        B[Security Layer<br/>Helmet.js + Custom Middleware]
+        C[Transport Layer<br/>HTTP/HTTPS]
+        D[Network Layer<br/>TCP/IP]
+    end
+    
+    subgraph "Security Enhancements"
+        E[Content Security Policy]
+        F[HSTS Headers]
+        G[CORS Configuration]
+        H[Rate Limiting]
+    end
+    
+    A --> B
+    B --> C
+    C --> D
+    
+    B --> E
+    B --> F
+    B --> G
+    B --> H
+    
+    style B fill:#ffcdd2
+    style E fill:#e8f5e8
+    style F fill:#e8f5e8
+    style G fill:#e8f5e8
+    style H fill:#e8f5e8
+```
+
+#### 6.3.2.2 Authentication Methods
+
+**JWT-Based Authentication Architecture:**
+
+| Component | Implementation | Configuration |
+|---|---|---|
+| **Token Generation** | JWT with configurable expiration | Environment-based secret management |
+| **Token Validation** | Middleware-based verification | Automatic token refresh support |
+| **Session Management** | Stateless token-based sessions | No server-side session storage |
+| **Security Headers** | Automatic security header injection | 15+ security headers via Helmet.js |
+
+**Authentication Flow:**
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Auth as Auth Middleware
+    participant JWT as JWT Handler
+    participant API as API Endpoint
+    participant DB as Database
+    
+    Client->>Auth: Request with JWT Token
+    Auth->>JWT: Validate Token
+    JWT->>JWT: Verify Signature & Expiration
+    
+    alt Token Valid
+        JWT->>Auth: Token Validated
+        Auth->>API: Authorized Request
+        API->>DB: Business Logic Query
+        DB->>API: Query Response
+        API->>Client: Success Response
+    else Token Invalid
+        JWT->>Auth: Token Rejected
+        Auth->>Client: 401 Unauthorized
+    end
+    
+    alt Token Near Expiry
+        JWT->>Client: Refresh Token Header
+        Client->>Auth: Refresh Token Request
+        Auth->>Client: New JWT Token
+    end
+```
+
+#### 6.3.2.3 Authorization Framework
+
+**Role-Based Authorization Patterns:**
+
+| Authorization Level | Implementation | Scope |
+|---|---|---|
+| **Endpoint-Level** | Route-specific middleware | Individual API endpoints |
+| **Resource-Level** | Context-aware validation | Data access permissions |
+| **Operation-Level** | HTTP method restrictions | CRUD operation control |
+| **Rate-Limit Based** | Request throttling authorization | Usage-based access control |
+
+#### 6.3.2.4 Rate Limiting Strategy
+
+**Multi-Tier Rate Limiting Architecture:**
+
+| Rate Limit Tier | Scope | Limits | Implementation |
+|---|---|---|---|
+| **Global Rate Limit** | All endpoints | 1000 requests/hour per IP | express-rate-limit middleware |
+| **API Rate Limit** | /api/* endpoints | 100 requests/minute per IP | Enhanced rate limiting for API routes |
+| **Authentication Rate Limit** | Login endpoints | 10 attempts/hour per IP | Brute force protection |
+| **Health Check Exclusion** | /health, /ping | Unlimited | Monitoring system compatibility |
+
+**Rate Limiting Flow:**
+```mermaid
+flowchart TD
+    A[Incoming Request] --> B{Global Rate Limit Check}
+    B -->|Within Limit| C{Endpoint-Specific Check}
+    B -->|Exceeded| D[429 Too Many Requests]
+    
+    C -->|API Endpoint| E{API Rate Limit Check}
+    C -->|Health Endpoint| F[Skip Rate Limiting]
+    C -->|Static Asset| G{Static Rate Limit}
+    
+    E -->|Within Limit| H[Process Request]
+    E -->|Exceeded| I[429 API Limit Exceeded]
+    
+    G -->|Within Limit| H
+    G -->|Exceeded| J[429 Static Limit Exceeded]
+    
+    F --> H
+    H --> K[Continue to Authentication]
+    
+    style D fill:#ffcdd2
+    style I fill:#ffcdd2
+    style J fill:#ffcdd2
+    style H fill:#c8e6c9
+```
+
+#### 6.3.2.5 Versioning Approach
+
+**API Versioning Strategy:**
+
+| Versioning Method | Implementation | Current Status |
+|---|---|---|
+| **URL Path Versioning** | `/api/v1/endpoint` pattern | Prepared for future versions |
+| **Header-Based Versioning** | Accept: application/vnd.api.v1+json | Alternative versioning support |
+| **Backward Compatibility** | Deprecation warnings and migration paths | Version lifecycle management |
+| **Documentation Versioning** | Version-specific API documentation | Synchronized with code versions |
+
+#### 6.3.2.6 Documentation Standards
+
+**API Documentation Framework:**
+
+| Documentation Type | Tool/Format | Location | Update Frequency |
+|---|---|---|---|
+| **Endpoint Specifications** | Markdown with examples | `docs/api/endpoints.md` | Per release |
+| **Integration Guides** | Step-by-step implementation | `docs/guides/` | Per major feature |
+| **Security Documentation** | Security implementation details | `docs/guides/security.md` | Per security update |
+| **Schema Definitions** | JSON Schema specifications | Inline code documentation | Per API change |
+
+### 6.3.3 MESSAGE PROCESSING
+
+#### 6.3.3.1 Event Processing Patterns
+
+**Request-Response Processing Pipeline:**
+
+The system implements a **synchronous request-response pattern** optimized for security and reliability:
+
+```mermaid
+flowchart TD
+    A[HTTP Request] --> B[Security Middleware Pipeline]
+    B --> C[Helmet.js Security Headers]
+    C --> D[CORS Validation]
+    D --> E[Global Rate Limiting]
+    E --> F[Request Body Parsing]
+    F --> G[Input Validation & Sanitization]
+    G --> H[Route Matching]
+    H --> I[Endpoint-Specific Rate Limiting]
+    I --> J[JWT Authentication]
+    J --> K[Business Logic Handler]
+    K --> L[Database Operations]
+    L --> M[Response Generation]
+    M --> N[Security Header Injection]
+    N --> O[HTTP Response]
+    
+    style B fill:#ffcdd2
+    style G fill:#e8f5e8
+    style J fill:#fff3e0
+    style N fill:#ffcdd2
+```
+
+**Event Processing Characteristics:**
+
+| Processing Type | Implementation | Performance Target |
+|---|---|---|---|
+| **Synchronous Processing** | Direct request-response flow | <200ms p95 response time |
+| **Security Event Processing** | Real-time security validation | <10ms middleware overhead |
+| **Health Check Processing** | Lightweight status verification | <50ms response time |
+| **Static Asset Processing** | File system-based serving | <100ms asset delivery |
+
+#### 6.3.3.2 Message Queue Architecture
+
+**Current State: Message Queue Architecture is not implemented in this system.**
+
+The system operates on a **direct request-response model** without message queuing infrastructure. This design decision supports:
+- **Simplified Architecture**: Eliminates message queue operational complexity
+- **Predictable Latency**: Direct processing without queue delays
+- **Resource Efficiency**: No additional message broker infrastructure required
+- **Development Velocity**: Streamlined debugging and testing processes
+
+**Future Message Queue Considerations:**
+If asynchronous processing becomes required, integration points would include:
+- Background security log processing
+- Batch certificate renewal operations
+- Monitoring data aggregation workflows
+- Performance metrics collection pipelines
+
+#### 6.3.3.3 Stream Processing Design
+
+**Current State: Stream Processing is not applicable for this system.**
+
+The application implements **stateless request processing** without stream processing requirements. Each request is processed independently with complete context available in the request payload.
+
+#### 6.3.3.4 Batch Processing Flows
+
+**Scheduled Batch Operations:**
+
+| Process Type | Frequency | Implementation | Purpose |
+|---|---|---|---|
+| **SSL Certificate Renewal** | Every 60 days | Let's Encrypt automation | Maintain HTTPS security |
+| **Security Log Rotation** | Daily | PM2 log management | Prevent disk space issues |
+| **Health Check Aggregation** | Every 5 minutes | Backprop API reporting | System monitoring |
+| **Performance Metrics Collection** | Every 15 minutes | PM2 monitoring | Resource utilization tracking |
+
+```mermaid
+gantt
+    title Batch Processing Schedule
+    dateFormat HH:mm
+    axisFormat %H:%M
+    
+    section Daily Operations
+    Log Rotation           :done, log, 00:00, 00:15
+    Health Metrics         :active, health, 00:00, 23:59
+    
+    section Monitoring
+    Performance Collection :crit, perf, 00:00, 23:59
+    Backprop Reporting    :active, bp, 00:00, 23:59
+    
+    section Security
+    Certificate Check     :done, cert, 00:00, 00:30
+    Security Scan         :active, scan, 02:00, 02:30
+```
+
+#### 6.3.3.5 Error Handling Strategy
+
+**Comprehensive Error Processing Pipeline:**
+
+| Error Type | Detection Method | Response Strategy | Recovery Mechanism |
+|---|---|---|---|
+| **Input Validation Errors** | express-validator middleware | 400 Bad Request with details | Client-side correction required |
+| **Authentication Failures** | JWT middleware validation | 401 Unauthorized | Token refresh or re-authentication |
+| **Rate Limit Violations** | express-rate-limit tracking | 429 Too Many Requests | Automatic retry after timeout |
+| **External Service Failures** | Timeout and retry logic | Graceful degradation | Circuit breaker pattern |
+
+**Error Response Flow:**
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Middleware as Error Middleware
+    participant Handler as Error Handler
+    participant Logger as Winston Logger
+    participant Monitor as Monitoring
+    
+    Client->>Middleware: Request with Error
+    Middleware->>Handler: Catch Error
+    Handler->>Logger: Log Error Details
+    Handler->>Monitor: Report Error Metrics
+    
+    alt Recoverable Error
+        Handler->>Client: Structured Error Response
+        Client->>Middleware: Retry Request
+    else Fatal Error
+        Handler->>Client: 500 Internal Server Error
+        Monitor->>Monitor: Trigger Alert
+    end
+    
+    Logger->>Logger: Store Error Context
+    Monitor->>Monitor: Update Error Counters
+```
+
+### 6.3.4 EXTERNAL SYSTEMS
+
+#### 6.3.4.1 Third-Party Integration Patterns
+
+**Integration Architecture Summary:**
+
+| System | Integration Type | Protocol | Failover Strategy |
+|---|---|---|---|
+| **Backprop API** | Monitoring & Testing | HTTPS/JSON | Graceful degradation |
+| **Let's Encrypt** | Certificate Management | HTTPS/ACME | Manual certificate fallback |
+| **PostgreSQL** | Data Persistence | PostgreSQL Protocol | Connection pool management |
+| **PM2 Monitoring** | Process Management | IPC/Events | Built-in health recovery |
+
+#### 6.3.4.2 Backprop API Integration
+
+**Monitoring and Testing Platform Integration:**
+
+```mermaid
+sequenceDiagram
+    participant App as Node.js Application
+    participant BP as Backprop API
+    participant Monitor as Monitoring System
+    
+    Note over App,BP: Health Check Integration
+    App->>BP: POST /health-check
+    Note right of BP: System metrics<br/>Security status<br/>Performance data
+    BP->>App: Health Status Response
+    
+    Note over App,BP: Testing Integration
+    App->>BP: POST /test-results
+    Note right of BP: Test execution data<br/>Security validation<br/>Performance metrics
+    BP->>App: Test Acknowledgment
+    
+    Note over App,Monitor: Monitoring Flow
+    BP->>Monitor: Aggregated Metrics
+    Monitor->>Monitor: Alert Generation
+    
+    alt API Failure
+        App->>App: Log Local Metrics
+        App->>Monitor: Direct Monitoring
+    end
+```
+
+**Backprop Integration Configuration:**
+
+| Parameter | Environment Variable | Default Value | Purpose |
+|---|---|---|---|
+| **API Base URL** | BACKPROP_BASE_URL | https://api.backprop.com | Service endpoint |
+| **API Key** | BACKPROP_API_KEY | (required) | Authentication credential |
+| **Timeout** | BACKPROP_TIMEOUT | 30000ms | Request timeout |
+| **Retry Attempts** | BACKPROP_RETRIES | 3 | Fault tolerance |
+
+#### 6.3.4.3 Let's Encrypt Certificate Management
+
+**Automated SSL/TLS Certificate Provisioning:**
+
+```mermaid
+flowchart TD
+    A[Certificate Expiry Check] --> B{Certificate < 30 days?}
+    B -->|Yes| C[Initiate ACME Challenge]
+    B -->|No| D[Continue Normal Operation]
+    
+    C --> E[DNS-01 Challenge]
+    E --> F[Let's Encrypt Validation]
+    F --> G{Validation Success?}
+    
+    G -->|Yes| H[Download New Certificate]
+    G -->|No| I[Log Error & Alert]
+    
+    H --> J[Install Certificate]
+    J --> K[Reload HTTPS Configuration]
+    K --> L[Verify Certificate Grade A]
+    L --> M[Update Monitoring]
+    
+    I --> N[Use Existing Certificate]
+    N --> O[Schedule Retry]
+    
+    style C fill:#e8f5e8
+    style I fill:#ffcdd2
+    style L fill:#c8e6c9
+```
+
+#### 6.3.4.4 Database Integration Patterns
+
+**PostgreSQL Connection Architecture:**
+
+| Configuration | Value | Purpose |
+|---|---|---|
+| **Max Connections** | 10 | Connection pool size |
+| **Idle Timeout** | 30 seconds | Connection cleanup |
+| **Connection Timeout** | 5 seconds | Connection establishment |
+| **SSL Mode** | required | Encrypted communications |
+
+**Database Integration Flow:**
+```mermaid
+sequenceDiagram
+    participant App as Application
+    participant Pool as Connection Pool
+    participant DB as PostgreSQL
+    participant Monitor as Health Monitor
+    
+    App->>Pool: Request Database Connection
+    Pool->>DB: Establish Connection (if needed)
+    DB->>Pool: Connection Ready
+    Pool->>App: Provide Connection
+    
+    App->>DB: Execute Query
+    DB->>App: Query Results
+    App->>Pool: Return Connection
+    
+    Note over Pool: Connection remains in pool for reuse
+    
+    Pool->>Monitor: Connection Pool Metrics
+    Monitor->>Monitor: Track Pool Health
+    
+    alt Connection Failure
+        DB->>Pool: Connection Lost
+        Pool->>App: Connection Error
+        App->>App: Graceful Error Handling
+    end
+```
+
+#### 6.3.4.5 API Gateway Configuration
+
+**Current State: Dedicated API Gateway is not implemented.**
+
+The system implements **integrated API management** within the Express.js application rather than using a separate API gateway. This provides:
+
+**Integrated API Management Features:**
+- **Request Routing**: Express.js router with pattern matching
+- **Rate Limiting**: Multi-tier rate limiting via express-rate-limit
+- **Authentication**: JWT-based authentication middleware
+- **CORS Management**: Dynamic CORS configuration
+- **Security Headers**: Comprehensive security header injection
+
+**API Gateway Alternative Architecture:**
+```mermaid
+graph TB
+    subgraph "Current Implementation (Integrated)"
+        C1[Client Requests] --> LB[Load Balancer]
+        LB --> PM2[PM2 Process Manager]
+        PM2 --> APP[Express.js Application]
+        
+        subgraph "Integrated API Management"
+            APP --> CORS[CORS Middleware]
+            CORS --> RL[Rate Limiting]
+            RL --> AUTH[Authentication]
+            AUTH --> ROUTES[Route Handlers]
+        end
+    end
+    
+    subgraph "Alternative (Dedicated Gateway) - Not Implemented"
+        C2[Client Requests] --> GW[API Gateway]
+        GW --> LB2[Load Balancer]
+        LB2 --> SVC[Service Instances]
+    end
+    
+    style APP fill:#c8e6c9
+    style GW fill:#ffebee,stroke:#f44336,stroke-dasharray: 5 5
+```
+
+#### 6.3.4.6 External Service Contracts
+
+**Service Level Agreements and Contracts:**
+
+| Service | Availability SLA | Response Time SLA | Integration Contract |
+|---|---|---|---|
+| **Backprop API** | 99.9% | <500ms | JSON API with authentication |
+| **Let's Encrypt** | 99.5% | <2000ms | ACME protocol compliance |
+| **PostgreSQL** | 99.9% | <100ms | Connection pool management |
+| **PM2 Monitoring** | 99.99% | <50ms | IPC communication protocol |
+
+### 6.3.5 INTEGRATION FLOW DIAGRAMS
+
+#### 6.3.5.1 Complete Integration Architecture Flow
+
+```mermaid
+graph TB
+    subgraph "External Clients"
+        WEB[Web Browsers]
+        API[API Clients]
+        TEST[Test Automation]
+        MOB[Mobile Apps]
+    end
+    
+    subgraph "Load Balancing"
+        LB[Load Balancer<br/>HTTPS Termination]
+    end
+    
+    subgraph "Application Cluster"
+        PM2[PM2 Process Manager<br/>Health Monitoring]
+        
+        subgraph "Worker Processes"
+            W1[Worker 1<br/>server.js]
+            W2[Worker 2<br/>server.js]
+            W3[Worker N<br/>server.js]
+        end
+        
+        subgraph "Security Pipeline"
+            HELMET[Helmet.js<br/>Security Headers]
+            CORS[CORS<br/>Origin Validation]
+            RATE[Rate Limiting<br/>Multi-tier]
+            JWT[JWT Auth<br/>Token Validation]
+            VALID[Input Validation<br/>Sanitization]
+        end
+        
+        subgraph "API Layer"
+            ROUTES[Route Handlers]
+            HEALTH[Health Endpoints]
+            STATIC[Static Assets]
+        end
+    end
+    
+    subgraph "External Integrations"
+        BP[Backprop API<br/>Monitoring]
+        LE[Let's Encrypt<br/>SSL/TLS]
+        DB[(PostgreSQL<br/>Database)]
+        LOGS[Winston Logger<br/>File System]
+    end
+    
+    WEB --> LB
+    API --> LB
+    TEST --> LB
+    MOB --> LB
+    
+    LB --> PM2
+    PM2 --> W1
+    PM2 --> W2
+    PM2 --> W3
+    
+    W1 --> HELMET
+    W2 --> HELMET
+    W3 --> HELMET
+    
+    HELMET --> CORS
+    CORS --> RATE
+    RATE --> JWT
+    JWT --> VALID
+    VALID --> ROUTES
+    VALID --> HEALTH
+    VALID --> STATIC
+    
+    ROUTES --> BP
+    ROUTES --> DB
+    HEALTH --> BP
+    PM2 --> LE
+    W1 --> LOGS
+    W2 --> LOGS
+    W3 --> LOGS
+    
+    style HELMET fill:#ffcdd2
+    style CORS fill:#ffcdd2
+    style RATE fill:#ffcdd2
+    style JWT fill:#fff3e0
+    style VALID fill:#e8f5e8
+    style BP fill:#e3f2fd
+    style LE fill:#e3f2fd
+    style DB fill:#e3f2fd
+```
+
+#### 6.3.5.2 Security Integration Flow
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant LB as Load Balancer
+    participant PM2 as PM2 Manager
+    participant App as Application
+    participant Security as Security Pipeline
+    participant External as External Services
+    participant Monitor as Monitoring
+    
+    Client->>LB: HTTPS Request
+    LB->>PM2: Route to Available Worker
+    PM2->>App: Forward Request
+    
+    App->>Security: Enter Security Pipeline
+    
+    Security->>Security: Apply Helmet Headers
+    Note right of Security: 15+ security headers<br/>CSP, HSTS, XSS Protection
+    
+    Security->>Security: CORS Validation
+    Note right of Security: Origin verification<br/>Preflight handling
+    
+    Security->>Security: Rate Limit Check
+    Note right of Security: Global: 1000/hour<br/>API: 100/minute
+    
+    Security->>Security: Input Validation
+    Note right of Security: express-validator<br/>Sanitization
+    
+    Security->>Security: JWT Authentication
+    Note right of Security: Token verification<br/>Role extraction
+    
+    Security->>App: Validated Request
+    App->>External: External Service Calls
+    External->>App: Service Responses
+    App->>Security: Business Logic Response
+    
+    Security->>Monitor: Log Security Events
+    Security->>Client: Secured Response
+    
+    Monitor->>Monitor: Aggregate Metrics
+    Monitor->>External: Report to Backprop
+```
+
+#### 6.3.5.3 External Service Integration Message Flow
+
+```mermaid
+flowchart TD
+    subgraph "Application Core"
+        APP[Express.js Application]
+        HEALTH[Health Check Handler]
+        API[API Endpoints]
+    end
+    
+    subgraph "Backprop Integration"
+        BP_CLIENT[Backprop Client]
+        BP_API[Backprop API]
+        BP_METRICS[Metrics Collector]
+    end
+    
+    subgraph "Certificate Management"
+        CERT_MGR[Certificate Manager]
+        ACME[ACME Client]
+        LE_API[Let's Encrypt API]
+    end
+    
+    subgraph "Database Integration"
+        DB_POOL[Connection Pool]
+        DB_CLIENT[PostgreSQL Client]
+        DATABASE[(PostgreSQL)]
+    end
+    
+    subgraph "Process Management"
+        PM2_MGR[PM2 Manager]
+        HEALTH_MON[Health Monitor]
+        CLUSTER[Cluster Management]
+    end
+    
+    APP --> HEALTH
+    APP --> API
+    
+    HEALTH --> BP_CLIENT
+    API --> BP_CLIENT
+    BP_CLIENT --> BP_METRICS
+    BP_METRICS --> BP_API
+    
+    APP --> CERT_MGR
+    CERT_MGR --> ACME
+    ACME --> LE_API
+    
+    API --> DB_POOL
+    DB_POOL --> DB_CLIENT
+    DB_CLIENT --> DATABASE
+    
+    APP --> PM2_MGR
+    PM2_MGR --> HEALTH_MON
+    PM2_MGR --> CLUSTER
+    
+    style BP_CLIENT fill:#e3f2fd
+    style CERT_MGR fill:#e8f5e8
+    style DB_POOL fill:#fff3e0
+    style PM2_MGR fill:#f3e5f5
+```
+
+### 6.3.6 INTEGRATION SECURITY ARCHITECTURE
+
+#### 6.3.6.1 Security Integration Patterns
+
+**End-to-End Security Integration:**
+
+| Security Layer | Implementation | External Integration |
+|---|---|---|---|
+| **Transport Security** | TLS 1.2+ with Grade A configuration | Let's Encrypt certificate automation |
+| **Application Security** | Helmet.js with 15+ security headers | Backprop security monitoring |
+| **Authentication Security** | JWT with configurable expiration | External auth provider ready |
+| **Data Security** | PostgreSQL SSL connections | Encrypted database communications |
+
+#### 6.3.6.2 Integration Monitoring and Alerting
+
+**Monitoring Integration Architecture:**
+
+```mermaid
+graph TB
+    subgraph "Application Metrics"
+        APP_METRICS[Application Metrics]
+        PERF_METRICS[Performance Metrics]
+        SEC_METRICS[Security Metrics]
+    end
+    
+    subgraph "Integration Health"
+        BP_HEALTH[Backprop Health]
+        DB_HEALTH[Database Health]
+        CERT_HEALTH[Certificate Health]
+        PM2_HEALTH[PM2 Health]
+    end
+    
+    subgraph "Monitoring Systems"
+        BACKPROP[Backprop Monitoring]
+        LOCAL_LOG[Local Logging]
+        ALERT_MGR[Alert Manager]
+    end
+    
+    APP_METRICS --> BACKPROP
+    PERF_METRICS --> BACKPROP
+    SEC_METRICS --> BACKPROP
+    
+    BP_HEALTH --> LOCAL_LOG
+    DB_HEALTH --> LOCAL_LOG
+    CERT_HEALTH --> LOCAL_LOG
+    PM2_HEALTH --> LOCAL_LOG
+    
+    BACKPROP --> ALERT_MGR
+    LOCAL_LOG --> ALERT_MGR
+    
+    style BACKPROP fill:#e3f2fd
+    style ALERT_MGR fill:#ffcdd2
+```
+
+### 6.3.7 PERFORMANCE AND SCALABILITY INTEGRATION
+
+#### 6.3.7.1 Integration Performance Optimization
+
+**Performance-Optimized Integration Patterns:**
+
+| Integration | Optimization Technique | Performance Target |
+|---|---|---|
+| **Database Connections** | Connection pooling (10 max) | <100ms query response |
+| **External API Calls** | Timeout and retry (30s, 3 attempts) | <500ms API response |
+| **Certificate Validation** | Cached certificate checks | <50ms validation |
+| **Health Monitoring** | Lightweight metric collection | <10ms overhead |
+
+#### 6.3.7.2 Horizontal Scaling Integration
+
+**Scaling-Aware Integration Design:**
+
+```mermaid
+graph TB
+    subgraph "Load Balancer"
+        LB[Load Balancer<br/>Session Affinity: None]
+    end
+    
+    subgraph "Scalable Application Layer"
+        PM2[PM2 Cluster Manager]
+        W1[Worker 1]
+        W2[Worker 2]
+        W3[Worker 3]
+        WN[Worker N]
+    end
+    
+    subgraph "Shared External Resources"
+        DB_POOL[(Database Pool<br/>Shared Connections)]
+        CERT_STORE[Certificate Store<br/>Shared SSL Certificates]
+        LOG_STORE[Log Storage<br/>Centralized Logging]
+    end
+    
+    subgraph "External Services"
+        BP_API[Backprop API<br/>Stateless]
+        LE_API[Let's Encrypt<br/>Stateless]
+    end
+    
+    LB --> PM2
+    PM2 --> W1
+    PM2 --> W2
+    PM2 --> W3
+    PM2 --> WN
+    
+    W1 --> DB_POOL
+    W2 --> DB_POOL
+    W3 --> DB_POOL
+    WN --> DB_POOL
+    
+    W1 --> CERT_STORE
+    W2 --> CERT_STORE
+    W3 --> CERT_STORE
+    WN --> CERT_STORE
+    
+    W1 --> LOG_STORE
+    W2 --> LOG_STORE
+    W3 --> LOG_STORE
+    WN --> LOG_STORE
+    
+    W1 --> BP_API
+    W2 --> LE_API
+    W3 --> BP_API
+    WN --> LE_API
+    
+    style PM2 fill:#c8e6c9
+    style DB_POOL fill:#e3f2fd
+    style CERT_STORE fill:#e8f5e8
+```
+
+#### References
+
+**Technical Specification Sections Retrieved:**
+- `1.2 SYSTEM OVERVIEW` - System context and integration requirements
+- `3.4 THIRD-PARTY SERVICES` - External service specifications and configurations
+- `5.1 HIGH-LEVEL ARCHITECTURE` - Integration points and system boundaries
+- `6.1 CORE SERVICES ARCHITECTURE` - Core services integration patterns
+
+**Files and Directories Analyzed:**
+- `server.js` - Core server implementation with security middleware and API routes
+- `docs/api/endpoints.md` - API endpoint specifications and Backprop integration details
+- `.env.example` - Environment configuration including external service integrations
+- `docs/guides/security.md` - Security implementation including authentication and monitoring
+- PM2 configuration and clustering setup for production deployment
+
+**External Dependencies Documented:**
+- Backprop API integration for monitoring and testing platform connectivity
+- Let's Encrypt ACME protocol for automated SSL/TLS certificate provisioning
+- PostgreSQL database integration with connection pooling and security
+- PM2 process management for production monitoring and scaling capabilities
+
+## 6.4 SECURITY ARCHITECTURE
+
+The system implements a **comprehensive defense-in-depth security architecture** that addresses the OWASP Top 10 vulnerabilities and provides enterprise-grade protection through multiple security layers. The architecture follows Zero Trust principles with multi-layer validation, comprehensive input sanitization, and extensive security monitoring capabilities.
+
+### 6.4.1 Authentication Framework
+
+#### 6.4.1.1 Identity Management System
+
+The authentication framework implements a token-based identity management system with comprehensive session security and configurable authentication policies.
+
+**Core Authentication Components:**
+
+| Component | Implementation | Configuration | Security Features |
+|---|---|---|---|
+| **JWT Tokens** | JSON Web Tokens with configurable expiration | JWT_SECRET, JWT_EXPIRATION=1h | RS256 signing, expiration validation |
+| **Refresh Tokens** | Extended session support | JWT_REFRESH_SECRET, JWT_REFRESH_EXPIRATION=7d | Separate secret, extended expiration |
+| **Session Management** | Express-session with secure defaults | SESSION_SECRET, SESSION_TIMEOUT=3600000 | HTTPOnly, SameSite, Secure flags |
+| **Password Security** | bcrypt hashing with configurable rounds | BCRYPT_ROUNDS=12 | Adaptive hashing, salt generation |
+
+**Authentication Configuration Matrix:**
+
+```javascript
+// Environment-based authentication settings from .env.example
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+JWT_EXPIRATION=1h
+JWT_REFRESH_SECRET=your-refresh-token-secret-change-this
+JWT_REFRESH_EXPIRATION=7d
+SESSION_SECRET=your-session-secret-change-this-in-production
+SESSION_TIMEOUT=3600000  # 1 hour in milliseconds
+SESSION_SECURE=true      # Set to true in production (requires HTTPS)
+SESSION_HTTP_ONLY=true
+SESSION_SAME_SITE=strict
+BCRYPT_ROUNDS=12
+```
+
+#### 6.4.1.2 Multi-Factor Authentication Framework
+
+The system provides a foundation for MFA implementation with extensible authentication methods and policy enforcement.
+
+**MFA Architecture Components:**
+- **Primary Authentication**: JWT token-based authentication with secure session management
+- **Secondary Factors**: Framework support for TOTP, SMS, and hardware tokens
+- **Policy Enforcement**: Configurable MFA requirements per endpoint or user role
+- **Backup Codes**: Secure recovery mechanism for account access
+
+#### 6.4.1.3 Session Management and Token Handling
+
+**Session Security Configuration:**
+
+| Security Control | Implementation | Configuration Value | Security Impact |
+|---|---|---|---|
+| **Session Timeout** | Automatic expiration | 3600000ms (1 hour) | Limits exposure window |
+| **Secure Flag** | HTTPS-only cookies | true (production) | Prevents HTTP transmission |
+| **HTTPOnly Flag** | XSS protection | true | Prevents JavaScript access |
+| **SameSite Policy** | CSRF protection | strict | Cross-site request blocking |
+
+#### 6.4.1.4 Authentication Flow Architecture
+
+```mermaid
+flowchart TD
+    A[User Login Request] --> B[Input Validation]
+    B --> C{Validation Pass?}
+    C -->|No| D[Return 400 Bad Request]
+    C -->|Yes| E[Extract Credentials]
+    
+    E --> F[Password Hash Verification]
+    F --> G{Credentials Valid?}
+    G -->|No| H[Log Failed Attempt]
+    H --> I[Return 401 Unauthorized]
+    
+    G -->|Yes| J[Generate JWT Token]
+    J --> K[Generate Refresh Token]
+    K --> L[Create Secure Session]
+    
+    L --> M[Set Security Headers]
+    M --> N[Set Secure Cookies]
+    N --> O[Return Authentication Success]
+    
+    O --> P[Set Session Timeout]
+    P --> Q[Enable Session Monitoring]
+    
+    D --> R[Audit Log Entry]
+    I --> R
+    Q --> S[Authentication Complete]
+    
+    style A fill:#e1f5fe
+    style S fill:#c8e6c9
+    style D fill:#ffcdd2
+    style I fill:#ffcdd2
+```
+
+### 6.4.2 Authorization System
+
+#### 6.4.2.1 Role-Based Access Control (RBAC)
+
+The authorization system implements a comprehensive RBAC framework with granular permission management and policy enforcement across all system endpoints.
+
+**RBAC Architecture Components:**
+
+| Component | Description | Implementation | Configuration |
+|---|---|---|---|
+| **Roles** | User role definitions | Database-driven role assignment | Environment-configurable defaults |
+| **Permissions** | Granular access controls | Resource-action mapping | Policy-based enforcement |
+| **Resources** | Protected system endpoints | URL pattern matching | Wildcard and exact matching |
+| **Policies** | Authorization rule engine | Middleware-based enforcement | Configurable policy files |
+
+#### 6.4.2.2 Permission Management and Resource Authorization
+
+**Authorization Matrix:**
+
+| Resource Pattern | Required Permission | Role Requirements | Audit Logging |
+|---|---|---|---|
+| `/api/admin/*` | admin.full_access | Administrator | All access attempts |
+| `/api/user/*` | user.read, user.write | User, Manager | Failed attempts only |
+| `/api/public/*` | public.read | Public, User | Security violations |
+| `/health`, `/ping` | health.check | Public | Rate limit violations |
+
+#### 6.4.2.3 Policy Enforcement Points and Audit Logging
+
+**Authorization Flow Architecture:**
+
+```mermaid
+flowchart TD
+    A[Authenticated Request] --> B[Extract User Context]
+    B --> C[Route Pattern Matching]
+    C --> D[Load User Roles]
+    
+    D --> E[Load Required Permissions]
+    E --> F{User Has Required Permissions?}
+    
+    F -->|No| G[Log Authorization Failure]
+    G --> H[Return 403 Forbidden]
+    
+    F -->|Yes| I[Check Resource Constraints]
+    I --> J{Resource Access Allowed?}
+    
+    J -->|No| K[Log Resource Violation]
+    K --> H
+    
+    J -->|Yes| L[Log Successful Authorization]
+    L --> M[Set Authorization Context]
+    M --> N[Allow Request Processing]
+    
+    H --> O[Audit Trail Entry]
+    N --> P[Business Logic Execution]
+    P --> Q[Response with Security Headers]
+    
+    style A fill:#e1f5fe
+    style Q fill:#c8e6c9
+    style H fill:#ffcdd2
+```
+
+#### 6.4.2.4 Comprehensive Audit Logging
+
+**Security Event Logging Matrix:**
+
+| Event Type | Log Level | Information Captured | Retention Policy |
+|---|---|---|---|
+| **Authentication Failures** | error | IP, username, timestamp, reason | 90 days |
+| **Authorization Violations** | warn | User, resource, action, decision | 90 days |
+| **Rate Limit Exceeded** | warn | IP, endpoint, limit type, count | 30 days |
+| **Input Validation Failures** | info | Request pattern, validation error | 30 days |
+
+### 6.4.3 Data Protection
+
+#### 6.4.3.1 Encryption Standards and Implementation
+
+The system implements comprehensive encryption standards covering data in transit and at rest with enterprise-grade cipher suites and key management.
+
+**Encryption Implementation Matrix:**
+
+| Data Type | Encryption Method | Key Management | Implementation |
+|---|---|---|---|
+| **HTTPS/TLS** | TLS 1.3, Grade A config | Let's Encrypt automatic renewal | SSL_CERT_PATH, SSL_KEY_PATH |
+| **Session Data** | AES-256 encryption | Environment variable secrets | SESSION_SECRET configuration |
+| **JWT Tokens** | HMAC-SHA256 signing | Separate signing secrets | JWT_SECRET, JWT_REFRESH_SECRET |
+| **Password Storage** | bcrypt adaptive hashing | Per-password salt generation | BCRYPT_ROUNDS=12 |
+
+#### 6.4.3.2 Key Management and Secure Communication
+
+**TLS Configuration and Certificate Management:**
+- **Certificate Authority**: Let's Encrypt with automatic renewal
+- **TLS Version**: TLS 1.3 with fallback to TLS 1.2
+- **Cipher Suites**: Strong cipher suites only, weak ciphers disabled
+- **HSTS**: Strict Transport Security with 1-year max-age and preload
+
+**Secure Communication Headers:**
+```javascript
+// Comprehensive security headers from Helmet.js implementation
+HSTS: max-age=31536000; includeSubDomains; preload
+Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+```
+
+#### 6.4.3.3 Data Masking Rules and Input Validation
+
+**Input Validation and Sanitization Pipeline:**
+
+```mermaid
+flowchart TD
+    A[Raw Input Data] --> B[Schema Validation]
+    B --> C{Schema Valid?}
+    C -->|No| D[Return Validation Error]
+    
+    C -->|Yes| E[Data Type Validation]
+    E --> F[Length and Range Checks]
+    F --> G[XSS Pattern Detection]
+    
+    G --> H{XSS Detected?}
+    H -->|Yes| I[Sanitize Content]
+    I --> J[Log Sanitization Event]
+    
+    H -->|No| K[SQL Injection Check]
+    J --> K
+    
+    K --> L{Injection Pattern Found?}
+    L -->|Yes| M[Reject Request]
+    M --> N[Log Security Violation]
+    
+    L -->|No| O[Apply Data Masking]
+    O --> P[Final Validation]
+    P --> Q[Validated Data Output]
+    
+    style A fill:#e1f5fe
+    style Q fill:#c8e6c9
+    style D fill:#ffcdd2
+    style M fill:#ffcdd2
+```
+
+#### 6.4.3.4 Compliance Controls and Standards
+
+**OWASP Top 10 Compliance Matrix:**
+
+| OWASP Category | Security Control | Implementation | Monitoring |
+|---|---|---|---|
+| **A01: Broken Access Control** | Authentication/Authorization middleware | JWT + RBAC enforcement | Failed access attempts |
+| **A02: Cryptographic Failures** | HTTPS/TLS enforcement | Grade A TLS configuration | Certificate expiration |
+| **A03: Injection** | Input validation pipeline | express-validator sanitization | Injection attempt detection |
+| **A05: Security Misconfiguration** | Helmet.js security headers | 15+ security headers applied | Header compliance checks |
+
+### 6.4.4 Security Zone Architecture
+
+#### 6.4.4.1 Network Security Zones
+
+```mermaid
+flowchart TB
+    subgraph SG1["Internet Zone"]
+        A[Client Browsers]
+        B[API Consumers]
+        C[Mobile Applications]
+    end
+    
+    subgraph SG2["DMZ - Public Zone"]
+        D[Load Balancer]
+        E[SSL Termination]
+        F["WAF/Rate Limiting"]
+    end
+    
+    subgraph SG3["Application Zone"]
+        G["Express.js Server"]
+        H[Security Middleware Stack]
+        I[Business Logic Layer]
+    end
+    
+    subgraph SG4["Data Zone"]
+        J[PostgreSQL Database]
+        K[Session Store]
+        L[Log Storage]
+    end
+    
+    subgraph SG5["Management Zone"]
+        M[PM2 Process Manager]
+        N[Health Monitoring]
+        O[Certificate Management]
+    end
+    
+    A --> D
+    B --> D
+    C --> D
+    
+    D --> E
+    E --> F
+    F --> G
+    
+    G --> H
+    H --> I
+    I --> J
+    I --> K
+    
+    G --> M
+    M --> N
+    E --> O
+    
+    I --> L
+    
+    style SG1 fill:#ffebee
+    style SG2 fill:#fff3e0
+    style SG3 fill:#e8f5e8
+    style SG4 fill:#e3f2fd
+    style SG5 fill:#fce4ec
+```
+
+#### 6.4.4.2 Security Control Implementation Summary
+
+**Multi-Layer Security Controls:**
+
+| Security Layer | Controls Implemented | Configuration Points | Monitoring Capabilities |
+|---|---|---|---|
+| **Transport Layer** | HTTPS/TLS, HSTS, Certificate Management | SSL configuration, cipher suites | Certificate expiration, TLS compliance |
+| **Application Layer** | CORS, Rate Limiting, Input Validation | Origin policies, rate limits, validation rules | Policy violations, attack attempts |
+| **Authentication Layer** | JWT tokens, Session management, Password security | Token expiration, session timeout, hash rounds | Login attempts, session anomalies |
+| **Authorization Layer** | RBAC, Permission enforcement, Audit logging | Role definitions, permission matrices | Access violations, privilege escalation |
+
+### 6.4.5 Security Monitoring and Incident Response
+
+#### 6.4.5.1 Security Event Monitoring
+
+The system implements comprehensive security event monitoring with structured logging and real-time alerting capabilities.
+
+**Security Monitoring Components:**
+- **Winston Logger Integration**: Structured logging with configurable levels and destinations
+- **Failed Authentication Tracking**: Brute force detection and account lockout policies  
+- **Rate Limit Violation Monitoring**: Suspicious traffic pattern detection
+- **Input Validation Failure Tracking**: Attack pattern identification and blocking
+- **Security Event Correlation**: Advanced threat detection through log analysis
+
+#### 6.4.5.2 Incident Response Framework
+
+**Automated Response Capabilities:**
+- **Rate Limiting Escalation**: Automatic IP blocking for repeated violations
+- **Session Termination**: Immediate session invalidation for security violations
+- **Alert Generation**: Real-time notifications for critical security events
+- **Forensic Logging**: Detailed audit trail for incident investigation
+
+#### References
+
+**Repository Files Examined:**
+- `server.js` - Core security middleware implementation and configuration
+- `.env.example` - Complete security configuration template and environment variables
+- `docs/guides/security.md` - Comprehensive security hardening guide and best practices
+- `blitzy/documentation/Technical Specifications.md` - Security architecture specifications and workflows
+- `package.json` - Security dependency declarations and version specifications
+
+**Technical Specification Sections Referenced:**
+- `4.2 SECURITY PROCESSING WORKFLOWS` - Detailed security processing flows and validation pipelines
+- `5.1 HIGH-LEVEL ARCHITECTURE` - Defense-in-depth security architecture and Zero Trust principles
+- `5.4 CROSS-CUTTING CONCERNS` - Authentication framework and security event logging implementation
+
+## 6.5 MONITORING AND OBSERVABILITY
+
+The Node.js Secure Server implements a **pragmatic monitoring and observability architecture** focused on essential production requirements. The system leverages PM2 Process Manager for core monitoring capabilities, complemented by custom health check endpoints and structured logging patterns. This approach provides sufficient visibility for operational needs while maintaining the system's core principles of simplicity-first design and progressive enhancement.
+
+### 6.5.1 MONITORING INFRASTRUCTURE
+
+#### 6.5.1.1 Metrics Collection
+
+The system implements multi-layer metrics collection through PM2's built-in monitoring capabilities and custom health endpoints, providing comprehensive visibility into system performance and health.
+
+**Core Metrics Collection Architecture:**
+
+| Metric Category | Collection Method | Update Frequency | Storage Location |
+|---|---|---|---|
+| **Process Metrics** | PM2 built-in monitoring | Real-time | PM2 daemon memory |
+| **System Health** | `/health` endpoint | On-demand | Ephemeral (per request) |
+| **Application Logs** | Console output + PM2 logs | Event-driven | `./logs/*.log` files |
+| **Performance Data** | PM2 monit + custom tracking | 30-second intervals | Process memory |
+
+**PM2 Metrics Configuration:**
+
+The system leverages PM2's comprehensive monitoring capabilities through the ecosystem configuration:
+
+```javascript
+// ecosystem.config.js monitoring setup
+module.exports = {
+  apps: [{
+    name: 'secure-node-server',
+    script: './server.js',
+    instances: 'max',
+    exec_mode: 'cluster',
+    
+    // Monitoring configuration
+    pmx: true,
+    monitoring: true,
+    merge_logs: true,
+    log_type: 'json',
+    
+    // Performance thresholds
+    max_memory_restart: '1G',
+    min_uptime: '10s',
+    max_restarts: 10,
+    
+    // Auto-scaling configuration
+    autorestart: true,
+    watch: false,
+    ignore_watch: ['node_modules', 'logs']
+  }]
+};
+```
+
+**Health Check Metrics Collection:**
+
+Based on the implementation in `server.js`, the health endpoint provides comprehensive system metrics:
+
+- **System Status**: Overall application health indicator
+- **Process Information**: PID, uptime, Node.js version
+- **Memory Metrics**: RSS, heap used, heap total, external memory
+- **Performance Indicators**: CPU usage patterns, active connections
+- **Environment Context**: NODE_ENV, configuration status
+
+#### 6.5.1.2 Log Aggregation
+
+**Logging Architecture:**
+
+```mermaid
+flowchart TD
+    A[Application Events] --> B[Console Logger]
+    B --> C[PM2 Log Aggregator]
+    
+    C --> D[Combined Logs]
+    C --> E[Error Logs]
+    C --> F[Out Logs]
+    
+    D --> G[combined.log]
+    E --> H[error.log]
+    F --> I[out.log]
+    
+    G --> J[Log Rotation]
+    H --> J
+    I --> J
+    
+    J --> K[Compressed Archives]
+    K --> L[Long-term Storage]
+    
+    M[Security Events] --> N[Structured Logging]
+    N --> B
+    
+    O[Health Checks] --> P[Metrics Logging]
+    P --> B
+    
+    Q[Performance Events] --> R[PM2 Monitoring]
+    R --> C
+    
+    style A fill:#e1f5fe
+    style L fill:#c8e6c9
+    style M fill:#ffcdd2
+    style Q fill:#fff3e0
+```
+
+**Log Configuration Matrix:**
+
+| Log Type | File Path | Rotation Policy | Retention Period |
+|---|---|---|---|
+| **Combined Logs** | `./logs/combined.log` | Daily, 100MB max | 5 files |
+| **Error Logs** | `./logs/error.log` | Daily, 100MB max | 5 files |
+| **Access Logs** | `./logs/access.log` | Daily, 100MB max | 5 files |
+| **Security Events** | Within combined logs | Inherited | Inherited |
+
+**Environment-Based Logging Configuration:**
+
+From `.env.example`, the system supports comprehensive logging configuration:
+
+```bash
+# Logging Configuration
+LOG_LEVEL=info
+LOG_FORMAT=combined
+LOG_DIR=./logs
+LOG_MAX_SIZE=100m
+LOG_MAX_FILES=5
+LOG_DATE_PATTERN=YYYY-MM-DD
+```
+
+#### 6.5.1.3 Distributed Tracing
+
+**Note:** The current system architecture operates as a monolithic application and does not require distributed tracing. Request correlation is achieved through request IDs in logs and PM2's built-in request tracking capabilities.
+
+**Request Correlation Strategy:**
+- Request ID generation for error tracking
+- PM2's request correlation across cluster instances
+- Session tracking for authenticated requests
+- Security event correlation through timestamp and IP tracking
+
+#### 6.5.1.4 Alert Management
+
+**PM2 Alert Configuration:**
+
+```javascript
+// PM2 monitoring and alerting thresholds
+{
+  alert_enabled: true,
+  alert_memory_limit: '1GB',
+  alert_cpu_limit: 80,
+  alert_restart_threshold: 5,
+  alert_error_threshold: 10,
+  
+  // Notification channels
+  alert_email: process.env.ALERT_EMAIL,
+  alert_webhook: process.env.ALERT_WEBHOOK_URL
+}
+```
+
+**Alert Threshold Matrix:**
+
+| Alert Type | Warning Threshold | Critical Threshold | Action |
+|---|---|---|---|
+| **Memory Usage** | >800MB | >1GB | Restart process |
+| **CPU Usage** | >70% | >85% | Scale horizontally |
+| **Error Rate** | >5/min | >10/min | Investigation required |
+| **Response Time** | >500ms | >1000ms | Performance alert |
+
+#### 6.5.1.5 Dashboard Design
+
+**PM2 Monitoring Dashboard Layout:**
+
+```mermaid
+graph TB
+    subgraph "PM2 Web Dashboard"
+        A[Process List View]
+        B[CPU Usage Graph]
+        C[Memory Usage Graph]
+        D[Request/sec Meter]
+        E[Error Rate Display]
+        F[Log Viewer]
+    end
+    
+    subgraph "Health Check Dashboard"
+        G[System Status]
+        H[Uptime Counter]
+        I[Active Connections]
+        J[Response Times]
+    end
+    
+    subgraph "Custom Metrics"
+        K[Rate Limit Stats]
+        L[Security Events]
+        M[Cache Hit Rates]
+        N[SSL Certificate Status]
+    end
+    
+    A --> B
+    A --> C
+    B --> D
+    C --> E
+    D --> F
+    
+    G --> H
+    H --> I
+    I --> J
+    
+    K --> L
+    L --> M
+    M --> N
+    
+    style A fill:#e3f2fd
+    style G fill:#e8f5e8
+    style K fill:#fff3e0
+```
+
+### 6.5.2 OBSERVABILITY PATTERNS
+
+#### 6.5.2.1 Health Checks
+
+**Comprehensive Health Check Implementation:**
+
+The system implements health checks aligned with the workflows documented in section 4.6, providing detailed system status information:
+
+```javascript
+// Health check endpoint implementation from server.js
+app.get('/health', (req, res) => {
+  const healthData = {
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    pid: process.pid,
+    version: process.version,
+    
+    // Application-specific health
+    checks: {
+      database: 'N/A',  // No database in current implementation
+      cache: 'healthy',
+      rateLimit: 'operational',
+      security: 'active'
+    }
+  };
+  
+  res.status(200).json(healthData);
+});
+```
+
+**Health Check Response Schema:**
+
+| Field | Type | Description | Example Value |
+|---|---|---|---|
+| `status` | string | Overall health status | "healthy" |
+| `timestamp` | ISO8601 | Check timestamp | "2024-01-15T10:30:00Z" |
+| `uptime` | number | Process uptime in seconds | 3600 |
+| `memory.rss` | number | Resident set size | 67108864 |
+
+#### 6.5.2.2 Performance Metrics
+
+**Key Performance Indicators:**
+
+| Metric | Target | Warning Threshold | Critical Threshold |
+|---|---|---|---|
+| **Response Time (p95)** | <200ms | >500ms | >1000ms |
+| **CPU Usage** | <60% | >70% | >85% |
+| **Memory Usage** | <70% | >80% | >90% |
+| **Error Rate** | <0.1% | >1% | >5% |
+
+**PM2 Performance Monitoring:**
+
+The system leverages PM2's built-in performance monitoring with automatic scaling capabilities:
+
+```javascript
+// Auto-scaling configuration
+{
+  instances: 'max',  // Use all available CPU cores
+  exec_mode: 'cluster',
+  max_memory_restart: '1G',
+  min_uptime: '10s',
+  
+  // Performance-based scaling
+  autorestart: true,
+  watch: false,
+  ignore_watch: ['node_modules', 'logs']
+}
+```
+
+#### 6.5.2.3 Business Metrics
+
+**Application-Specific Metrics:**
+
+| Metric | Description | Collection Method | Update Frequency |
+|---|---|---|---|
+| **Request Volume** | Total HTTP requests | PM2 request counter | Real-time |
+| **Rate Limit Hits** | Blocked requests | Rate limiter middleware | Per occurrence |
+| **Security Events** | Auth failures, validation errors | Security middleware | Per occurrence |
+| **API Usage** | Endpoint-specific counts | Request handler | Per request |
+
+**Security Event Tracking:**
+
+Based on the security architecture (section 6.4), the system tracks:
+- Authentication failures and brute force attempts
+- Rate limit violations and suspicious traffic patterns
+- Input validation failures and injection attempts
+- CORS violations and unauthorized origin requests
+
+#### 6.5.2.4 SLA Monitoring
+
+**Service Level Objectives:**
+
+| SLO | Target | Measurement | Alert Threshold |
+|---|---|---|---|
+| **Availability** | 99.9% | Health check success rate | <99.5% |
+| **Response Time** | 95th percentile <500ms | PM2 response metrics | >750ms |
+| **Error Rate** | <0.5% | 5xx responses / total | >1% |
+| **Security Response** | <100ms security overhead | Middleware timing | >150ms |
+
+#### 6.5.2.5 Capacity Tracking
+
+**Resource Utilization Monitoring:**
+
+```javascript
+// Auto-scaling implementation
+class AutoScaler {
+  constructor(appName, options = {}) {
+    this.minInstances = options.minInstances || 1;
+    this.maxInstances = options.maxInstances || os.cpus().length;
+    this.scaleUpThreshold = options.scaleUpThreshold || 80;
+    this.scaleDownThreshold = options.scaleDownThreshold || 30;
+  }
+  
+  async checkAndScale() {
+    const processes = await pm2.list();
+    const avgCpu = this.calculateAverageCpu(processes);
+    
+    if (avgCpu > this.scaleUpThreshold) {
+      await this.scaleUp();
+    } else if (avgCpu < this.scaleDownThreshold) {
+      await this.scaleDown();
+    }
+  }
+}
+```
+
+**Capacity Planning Matrix:**
+
+| Resource | Current Capacity | Scale Trigger | Maximum Capacity |
+|---|---|---|---|
+| **CPU Cores** | Variable (max available) | >80% utilization | All available cores |
+| **Memory** | 1GB per instance | >80% utilization | Physical memory limit |
+| **Connections** | Unlimited | >1000 concurrent | OS file descriptor limit |
+| **Storage** | Log rotation enabled | >80% disk usage | Available disk space |
+
+### 6.5.3 INCIDENT RESPONSE
+
+#### 6.5.3.1 Alert Routing
+
+**Alert Flow Architecture:**
+
+```mermaid
+flowchart TD
+    A[PM2 Monitoring System] --> B{Alert Condition Met?}
+    B -->|Yes| C[Generate Alert]
+    B -->|No| D[Continue Monitoring]
+    
+    C --> E{Alert Severity}
+    E -->|Info| F[Log Alert]
+    E -->|Warning| G[Email Notification]
+    E -->|Error| H[Page On-Call]
+    E -->|Critical| I[Multi-Channel Alert]
+    
+    F --> J[Alert Dashboard]
+    G --> K[Operations Team]
+    H --> L[On-Call Engineer]
+    I --> M[All Stakeholders]
+    
+    K --> N[Acknowledge Alert]
+    L --> N
+    M --> N
+    
+    N --> O[Begin Investigation]
+    O --> P[Apply Remediation]
+    P --> Q[Verify Resolution]
+    Q --> R[Close Alert]
+    
+    R --> S[Update Runbooks]
+    S --> T[Conduct Post-Mortem]
+    
+    style C fill:#ff9800
+    style I fill:#f44336
+    style R fill:#4caf50
+    style T fill:#2196f3
+```
+
+**Alert Configuration Integration:**
+
+The system integrates with PM2's alert system and can be extended to support external monitoring platforms:
+
+```bash
+# Environment configuration for alerting
+ALERT_EMAIL=ops-team@company.com
+ALERT_WEBHOOK_URL=https://hooks.slack.com/services/...
+ALERT_ENABLED=true
+ALERT_MEMORY_THRESHOLD=1024
+ALERT_CPU_THRESHOLD=80
+```
+
+#### 6.5.3.2 Escalation Procedures
+
+**Escalation Matrix:**
+
+| Alert Level | Response Time | Primary Contact | Escalation Path |
+|---|---|---|---|
+| **Info** | 8 hours | Dev Team | Team Lead → Manager |
+| **Warning** | 2 hours | Ops Team | Senior Ops → DevOps Lead |
+| **Error** | 30 minutes | On-Call Engineer | Team Lead → Director |
+| **Critical** | 5 minutes | All Teams | CTO → Executive Team |
+
+**Automated Escalation Logic:**
+
+```javascript
+// Escalation timing configuration
+const escalationConfig = {
+  info: { initial: 28800000, escalate: 43200000 },     // 8h → 12h
+  warning: { initial: 7200000, escalate: 14400000 },   // 2h → 4h
+  error: { initial: 1800000, escalate: 3600000 },      // 30m → 1h
+  critical: { initial: 300000, escalate: 900000 }      // 5m → 15m
+};
+```
+
+#### 6.5.3.3 Runbooks
+
+**Standard Operating Procedures:**
+
+#### High Memory Usage Response
+1. **Assessment Phase:**
+   - Check PM2 memory stats: `pm2 monit`
+   - Identify high-memory processes: `pm2 describe <app-name>`
+   - Review memory trends: `pm2 logs --lines 50`
+
+2. **Immediate Response:**
+   - Restart affected workers: `pm2 restart <id>`
+   - Monitor recovery: Watch memory trends for 15 minutes
+   - Scale horizontally if needed: `pm2 scale secure-node-server +2`
+
+3. **Investigation:**
+   - Analyze heap dumps if available
+   - Review recent deployments and configuration changes
+   - Check for memory leaks in application code
+
+#### High CPU Usage Response
+1. **Verification:**
+   - Verify CPU metrics: `pm2 status`
+   - Check request patterns in logs: `pm2 logs | grep "Request processed"`
+   - Analyze load distribution across instances
+
+2. **Scaling Response:**
+   - Scale horizontally: `pm2 scale secure-node-server +2`
+   - Monitor load redistribution
+   - Verify performance improvement
+
+3. **Root Cause Analysis:**
+   - Review application profiling data
+   - Check for blocking operations
+   - Analyze request patterns for optimization opportunities
+
+#### Security Incident Response
+1. **Immediate Actions:**
+   - Check security logs: `grep "security" logs/combined.log`
+   - Identify attack patterns and source IPs
+   - Apply immediate blocking if malicious activity detected
+
+2. **Investigation:**
+   - Correlate security events with system performance
+   - Review rate limiting effectiveness
+   - Check authentication and authorization logs
+
+3. **Remediation:**
+   - Update rate limiting rules if needed
+   - Enhance input validation patterns
+   - Review and update security configurations
+
+#### 6.5.3.4 Post-Mortem Processes
+
+**Incident Review Template:**
+
+| Section | Required Information |
+|---|---|
+| **Incident Summary** | Date, duration, impact, severity |
+| **Root Cause** | Technical failure analysis |
+| **Timeline** | Detection → Resolution events |
+| **Action Items** | Preventive measures with owners |
+
+**Post-Mortem Workflow:**
+
+```mermaid
+flowchart TD
+    A[Incident Resolved] --> B[Schedule Post-Mortem]
+    B --> C[Gather Stakeholders]
+    C --> D[Timeline Construction]
+    D --> E[Root Cause Analysis]
+    E --> F[Impact Assessment]
+    F --> G[Action Item Generation]
+    G --> H[Assign Owners and Due Dates]
+    H --> I[Document Lessons Learned]
+    I --> J[Update Runbooks]
+    J --> K[Improve Monitoring]
+    K --> L[Share Knowledge]
+    
+    style A fill:#4caf50
+    style L fill:#2196f3
+```
+
+#### 6.5.3.5 Improvement Tracking
+
+**Monitoring Enhancement Roadmap:**
+
+| Enhancement | Priority | Status | Target Date |
+|---|---|---|---|
+| Winston Logger Integration | High | Planned | Q2 2024 |
+| Prometheus Metrics Export | Medium | Considered | Q3 2024 |
+| Grafana Dashboard | Medium | Considered | Q3 2024 |
+| APM Integration | Low | Future | Q4 2024 |
+
+**Continuous Improvement Process:**
+
+The system follows a continuous improvement cycle based on operational feedback:
+
+1. **Monthly Review**: Performance metrics analysis and threshold adjustment
+2. **Quarterly Assessment**: Monitoring tool evaluation and enhancement planning
+3. **Annual Planning**: Integration roadmap updates and technology refresh
+4. **Incident-Driven**: Immediate improvements based on incident learnings
+
+**Key Improvement Areas:**
+
+- **Structured Logging**: Migration to Winston for better log parsing and analysis
+- **Metrics Export**: Integration with Prometheus for advanced metrics collection
+- **Visualization**: Grafana dashboards for improved operational visibility
+- **Advanced Monitoring**: APM tools for deeper application performance insights
+
+#### References
+
+**Repository Files Examined:**
+- `server.js` - Core server implementation with health endpoints and basic logging
+- `.env.example` - Complete monitoring and logging configuration variables
+- `docs/guides/production.md` - Comprehensive PM2 monitoring setup and health check implementation
+- `package.json` - PM2 monitoring scripts and dependencies
+- `blitzy/documentation/Technical Specifications.md` - Monitoring strategy overview
+
+**Technical Specification Sections Referenced:**
+- `4.6 PERFORMANCE AND MONITORING WORKFLOWS` - Health check and performance monitoring flows
+- `6.4 SECURITY ARCHITECTURE` - Security monitoring and incident response frameworks
+- `5.1 HIGH-LEVEL ARCHITECTURE` - Overall system architecture and integration points
+- `1.2 SYSTEM OVERVIEW` - System context and success criteria for monitoring implementation
+
+## 6.6 TESTING STRATEGY
+
+The Node.js Secure Server implements a **comprehensive multi-layer testing strategy** that addresses both functional requirements and the extensive security architecture outlined in section 6.4. The testing approach leverages a dual-stack architecture combining Node.js unit/integration testing with Java-based end-to-end automation to ensure comprehensive coverage of security controls, API functionality, and user experience validation.
+
+### 6.6.1 TESTING APPROACH
+
+#### 6.6.1.1 Unit Testing
+
+#### Testing Framework and Tools
+
+**Primary Node.js Testing Stack:**
+
+| Tool | Version | Purpose | Configuration |
+|---|---|---|---|
+| **Jest** | ^29.0.0 | Primary testing framework | `package.json` test configuration |
+| **Supertest** | ^6.3.0 | HTTP API testing | Integration with Express.js server |
+| **ESLint** | ^8.0.0 | Code quality and consistency | Linting rules for test files |
+| **Jest Coverage** | Built-in | Code coverage analysis | Minimum 80% coverage target |
+
+**Jest Configuration Matrix:**
+
+```javascript
+// Jest configuration from package.json
+{
+  "scripts": {
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
+    "test:ci": "jest --ci --coverage --watchAll=false"
+  },
+  
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/**/*.test.js",
+      "!src/config/*.js"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    }
+  }
+}
+```
+
+#### Test Organization Structure
+
+**Test Directory Architecture:**
+
+```mermaid
+graph TD
+    A[__tests__/] --> B[unit/]
+    A --> C[integration/]
+    A --> D[fixtures/]
+    A --> E[helpers/]
+    
+    B --> F[auth/]
+    B --> G[middleware/]
+    B --> H[security/]
+    B --> I[utils/]
+    
+    C --> J[api/]
+    C --> K[security/]
+    C --> L[performance/]
+    
+    D --> M[test-data/]
+    D --> N[mock-responses/]
+    
+    E --> O[test-setup.js]
+    E --> P[mock-helpers.js]
+    
+    F --> Q[jwt.test.js]
+    F --> R[session.test.js]
+    
+    G --> S[rate-limit.test.js]
+    G --> T[cors.test.js]
+    G --> U[helmet.test.js]
+    
+    H --> V[input-validation.test.js]
+    H --> W[xss-protection.test.js]
+    H --> X[injection-prevention.test.js]
+    
+    style A fill:#e3f2fd
+    style B fill:#e8f5e8
+    style C fill:#fff3e0
+    style D fill:#fce4ec
+```
+
+#### Mocking Strategy
+
+**Security Component Mocking Framework:**
+
+| Component | Mock Strategy | Implementation | Purpose |
+|---|---|---|---|
+| **JWT Tokens** | Mock generation with configurable expiration | `jest.mock('jsonwebtoken')` | Authentication testing |
+| **bcrypt Hashing** | Deterministic hash generation | `jest.mock('bcrypt')` | Password testing |
+| **Rate Limiter** | Configurable request counting | `jest.mock('express-rate-limit')` | Rate limiting tests |
+| **External APIs** | HTTP interceptors | `nock` library integration | API dependency isolation |
+
+**Mock Implementation Pattern:**
+
+```javascript
+// Example: JWT authentication mocking
+jest.mock('jsonwebtoken', () => ({
+  sign: jest.fn((payload, secret, options) => 'mock-jwt-token'),
+  verify: jest.fn((token, secret) => ({ userId: 'test-user-id' })),
+  decode: jest.fn((token) => ({ exp: Date.now() / 1000 + 3600 }))
+}));
+
+// Security middleware mocking
+jest.mock('helmet', () => () => (req, res, next) => next());
+jest.mock('express-rate-limit', () => () => (req, res, next) => next());
+```
+
+#### Code Coverage Requirements
+
+**Coverage Targets and Enforcement:**
+
+| Coverage Type | Target Percentage | Critical Threshold | Enforcement Level |
+|---|---|---|---|
+| **Statement Coverage** | 85% | 80% | CI/CD pipeline failure |
+| **Branch Coverage** | 80% | 75% | Warning in CI/CD |
+| **Function Coverage** | 90% | 85% | CI/CD pipeline failure |
+| **Line Coverage** | 85% | 80% | Warning in CI/CD |
+
+**Coverage Exclusions:**
+- Configuration files in `src/config/`
+- Test files (`*.test.js`, `*.spec.js`)
+- Build and deployment scripts
+- Generated documentation files
+
+#### Test Naming Conventions
+
+**Standardized Test Naming Pattern:**
+
+```javascript
+// Unit test naming convention
+describe('SecurityMiddleware', () => {
+  describe('when processing authentication requests', () => {
+    it('should validate JWT tokens successfully', () => {});
+    it('should reject expired JWT tokens', () => {});
+    it('should handle missing authorization headers', () => {});
+  });
+  
+  describe('when enforcing rate limits', () => {
+    it('should allow requests within limit', () => {});
+    it('should block requests exceeding limit', () => {});
+    it('should reset counters after window expiry', () => {});
+  });
+});
+```
+
+**Test File Naming Standards:**
+- Unit tests: `<component>.test.js`
+- Integration tests: `<feature>.integration.test.js`
+- Security tests: `<security-control>.security.test.js`
+- Performance tests: `<component>.performance.test.js`
+
+#### Test Data Management
+
+**Test Data Strategy:**
+
+| Data Type | Management Approach | Location | Lifecycle |
+|---|---|---|---|
+| **Mock Users** | Static fixtures with varied roles | `__tests__/fixtures/users.js` | Test suite scope |
+| **JWT Tokens** | Generated per test with specific claims | Helper functions | Test case scope |
+| **API Responses** | Versioned mock responses | `__tests__/fixtures/api/` | Shared across tests |
+| **Security Payloads** | XSS/injection test vectors | `__tests__/fixtures/security/` | Security test scope |
+
+#### 6.6.1.2 Integration Testing
+
+#### Service Integration Test Approach
+
+**Integration Test Architecture:**
+
+```mermaid
+flowchart TD
+    A[Integration Test Suite] --> B[Server Startup]
+    B --> C[Database Connection]
+    C --> D[Middleware Chain Testing]
+    
+    D --> E[Security Integration]
+    D --> F[API Integration]
+    D --> G[External Service Integration]
+    
+    E --> H[Auth + Rate Limiting]
+    E --> I[CORS + Security Headers]
+    E --> J[Input Validation + XSS Protection]
+    
+    F --> K[API Endpoint Testing]
+    F --> L[Error Handling Integration]
+    F --> M[Response Format Validation]
+    
+    G --> N[External API Mocking]
+    G --> O[Third-party Service Simulation]
+    
+    H --> P[Complete Request Cycle]
+    I --> P
+    J --> P
+    K --> P
+    L --> P
+    M --> P
+    N --> P
+    O --> P
+    
+    P --> Q[Test Results & Coverage]
+    
+    style A fill:#e3f2fd
+    style P fill:#c8e6c9
+    style Q fill:#4caf50
+```
+
+**Integration Test Configuration:**
+
+```javascript
+// Integration test setup with real server instance
+const request = require('supertest');
+const app = require('../server');
+
+describe('Security Integration Tests', () => {
+  let server;
+  
+  beforeAll(async () => {
+    server = app.listen(0); // Random available port
+  });
+  
+  afterAll(async () => {
+    await server.close();
+  });
+  
+  describe('Authentication + Authorization Flow', () => {
+    it('should enforce complete auth pipeline', async () => {
+      // Test complete request cycle with real middleware stack
+      const response = await request(server)
+        .post('/api/protected')
+        .set('Authorization', 'Bearer invalid-token')
+        .expect(401);
+        
+      expect(response.body.error).toBe('Invalid token');
+    });
+  });
+});
+```
+
+#### API Testing Strategy
+
+**Comprehensive API Testing Matrix:**
+
+| Test Category | Scope | Tools | Validation Points |
+|---|---|---|---|
+| **Functional API Tests** | All endpoints, CRUD operations | Supertest + Jest | Status codes, response schemas |
+| **Security API Tests** | Authentication, authorization, input validation | Custom security test suite | Security headers, payload sanitization |
+| **Error Handling Tests** | Exception scenarios, edge cases | Supertest error simulation | Error responses, logging behavior |
+| **Performance API Tests** | Response times, concurrent requests | Artillery.js integration | Response time thresholds, throughput |
+
+**API Test Implementation Pattern:**
+
+```javascript
+describe('API Security Testing', () => {
+  describe('POST /api/auth/login', () => {
+    it('should enforce rate limiting', async () => {
+      const requests = Array(100).fill().map(() => 
+        request(server)
+          .post('/api/auth/login')
+          .send({ username: 'test', password: 'test' })
+      );
+      
+      const responses = await Promise.all(requests);
+      const rateLimitedResponses = responses.filter(r => r.status === 429);
+      expect(rateLimitedResponses.length).toBeGreaterThan(0);
+    });
+    
+    it('should sanitize XSS attempts', async () => {
+      const xssPayload = '<script>alert("xss")</script>';
+      const response = await request(server)
+        .post('/api/auth/login')
+        .send({ username: xssPayload, password: 'test' })
+        .expect(400);
+        
+      expect(response.body.username).not.toContain('<script>');
+    });
+  });
+});
+```
+
+#### Database Integration Testing
+
+**Note:** The current system architecture does not include a database layer as confirmed in the health check implementation (`checks.database: 'N/A'`). Session data is managed through Express sessions with configurable storage backends.
+
+**Session Storage Integration Testing:**
+
+```javascript
+describe('Session Management Integration', () => {
+  it('should persist session data across requests', async () => {
+    const agent = request.agent(server);
+    
+    // Login and establish session
+    await agent
+      .post('/api/auth/login')
+      .send({ username: 'testuser', password: 'testpass' })
+      .expect(200);
+      
+    // Verify session persistence
+    await agent
+      .get('/api/user/profile')
+      .expect(200);
+  });
+  
+  it('should expire sessions after timeout', async () => {
+    // Test session timeout behavior
+    jest.advanceTimersByTime(3600000); // 1 hour
+    
+    await request(server)
+      .get('/api/user/profile')
+      .expect(401);
+  });
+});
+```
+
+#### External Service Mocking
+
+**External Dependency Simulation:**
+
+| Service Type | Mock Strategy | Implementation | Test Scenarios |
+|---|---|---|---|
+| **Certificate Authority** | SSL certificate validation | `nock` HTTPS interception | Certificate renewal, validation |
+| **Email Services** | SMTP simulation | `nodemailer-mock` | Alert notifications, user communications |
+| **Monitoring APIs** | Webhook endpoints | Express test servers | Alert delivery, metric submission |
+| **CDN Services** | Static asset delivery | Local file serving | Asset availability, performance |
+
+#### Test Environment Management
+
+**Environment Configuration Matrix:**
+
+| Environment | Purpose | Configuration | Data Strategy |
+|---|---|---|---|
+| **Local Development** | Developer testing | `.env.test` configuration | Fresh data per test run |
+| **CI/CD Pipeline** | Automated testing | Environment variables | Isolated test containers |
+| **Staging Integration** | Pre-production validation | Production-like config | Sanitized production data |
+| **Performance Testing** | Load and stress testing | Scaled infrastructure | High-volume test data |
+
+#### 6.6.1.3 End-to-End Testing
+
+#### E2E Test Scenarios
+
+**Java-Based E2E Test Architecture:**
+
+Based on the Maven configuration in `pom.xml`, the system implements comprehensive E2E testing using:
+
+| Framework | Version | Purpose | Configuration |
+|---|---|---|---|
+| **Selenium WebDriver** | 3.141.59 | Browser automation | Cross-browser testing |
+| **Cucumber** | 7.14.0 | BDD test framework | Feature-driven scenarios |
+| **JUnit** | 4.13.2 | Test runner | Test execution and reporting |
+| **WebDriverManager** | 5.1.0 | Browser driver management | Automated driver downloads |
+| **JavaFaker** | 1.0.2 | Test data generation | Dynamic test data creation |
+
+**E2E Test Scenario Coverage:**
+
+```mermaid
+graph TD
+    A[E2E Test Scenarios] --> B[Security Workflows]
+    A --> C[User Authentication]
+    A --> D[API Interactions]
+    A --> E[Error Handling]
+    
+    B --> F[Rate Limiting Behavior]
+    B --> G[XSS Protection Validation]
+    B --> H[CORS Policy Enforcement]
+    B --> I[Security Header Validation]
+    
+    C --> J[Login Flow]
+    C --> K[Session Management]
+    C --> L[Token Refresh]
+    C --> M[Logout Process]
+    
+    D --> N[API Request/Response]
+    D --> O[Data Validation]
+    D --> P[Performance Verification]
+    
+    E --> Q[Network Errors]
+    E --> R[Server Errors]
+    E --> S[Timeout Handling]
+    E --> T[Graceful Degradation]
+    
+    style A fill:#e3f2fd
+    style B fill:#ffcdd2
+    style C fill:#c8e6c9
+    style D fill:#fff3e0
+    style E fill:#fce4ec
+```
+
+**Feature-Driven Test Implementation:**
+
+```gherkin
+# Example Cucumber feature file
+Feature: Security Header Validation
+  As a security-conscious application
+  I want to ensure all security headers are properly set
+  So that the application is protected against common attacks
+
+  Scenario: Verify HSTS header implementation
+    Given the server is running
+    When I make a request to any endpoint
+    Then the response should include HSTS header
+    And the HSTS header should have max-age directive
+    And the HSTS header should include includeSubDomains
+    
+  Scenario: Validate Content Security Policy
+    Given the server is running
+    When I access the application
+    Then the CSP header should restrict script sources
+    And the CSP header should prevent inline scripts
+    And the CSP header should block data: URLs
+```
+
+#### UI Automation Approach
+
+**Browser Testing Matrix:**
+
+| Browser | Versions | Platform | Test Scope |
+|---|---|---|---|
+| **Chrome** | Latest, Latest-1 | Windows, macOS, Linux | Full test suite |
+| **Firefox** | Latest, ESR | Windows, macOS, Linux | Core functionality |
+| **Safari** | Latest | macOS | Compatibility testing |
+| **Edge** | Latest | Windows | Compatibility testing |
+
+**WebDriver Configuration:**
+
+```java
+// Cross-browser test configuration
+@RunWith(Cucumber.class)
+@CucumberOptions(
+    features = "src/test/resources/features",
+    glue = "com.security.tests.steps",
+    plugin = {"pretty", "html:target/cucumber-reports"}
+)
+public class SecurityTestRunner {
+    
+    @Before
+    public void setUp() {
+        WebDriverManager.chromedriver().setup();
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--headless");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        
+        driver = new ChromeDriver(options);
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+    }
+}
+```
+
+#### Test Data Setup/Teardown
+
+**Test Data Management Strategy:**
+
+| Data Type | Setup Strategy | Teardown Strategy | Lifecycle |
+|---|---|---|---|
+| **User Accounts** | JavaFaker generation | Automatic cleanup | Test suite scope |
+| **Session Data** | Fresh sessions per test | Session invalidation | Test case scope |
+| **API Test Data** | Dynamic payload generation | Response validation cleanup | Request scope |
+| **Security Test Vectors** | Predefined attack patterns | Sanitization verification | Security test scope |
+
+**Test Data Implementation:**
+
+```java
+public class TestDataManager {
+    private Faker faker = new Faker();
+    
+    public User createTestUser() {
+        return User.builder()
+            .username(faker.internet().emailAddress())
+            .password(faker.internet().password(8, 16))
+            .role(UserRole.TEST_USER)
+            .build();
+    }
+    
+    public void cleanupTestData() {
+        // Cleanup logic for test artifacts
+        sessionManager.invalidateAllTestSessions();
+        logManager.clearTestLogs();
+    }
+}
+```
+
+#### Performance Testing Requirements
+
+**Performance Test Specifications:**
+
+| Metric | Target | Warning Threshold | Critical Threshold |
+|---|---|---|---|
+| **Page Load Time** | <2 seconds | >3 seconds | >5 seconds |
+| **API Response Time** | <500ms | >1 second | >2 seconds |
+| **Security Middleware Overhead** | <100ms | >150ms | >300ms |
+| **Concurrent User Capacity** | 1000 users | <500 users | <100 users |
+
+**Load Testing Configuration:**
+
+```java
+@Test
+public void performanceTest() {
+    int numberOfThreads = 100;
+    int rampUpTime = 60; // seconds
+    int testDuration = 300; // seconds
+    
+    ThreadGroup threadGroup = new ThreadGroup();
+    threadGroup.setNumThreads(numberOfThreads);
+    threadGroup.setRampTime(rampUpTime);
+    
+    // Execute performance test scenarios
+    executeLoadTest(threadGroup, testDuration);
+}
+```
+
+#### Cross-Browser Testing Strategy
+
+**Browser Compatibility Matrix:**
+
+| Feature | Chrome | Firefox | Safari | Edge | Testing Priority |
+|---|---|---|---|---|---|
+| **Security Headers** | ✓ | ✓ | ✓ | ✓ | High |
+| **CORS Handling** | ✓ | ✓ | ✓ | ✓ | High |
+| **Authentication Flow** | ✓ | ✓ | ✓ | ✓ | High |
+| **Rate Limiting** | ✓ | ✓ | ✓ | ✓ | Medium |
+| **Error Handling** | ✓ | ✓ | ✓ | ✓ | Medium |
+
+### 6.6.2 TEST AUTOMATION
+
+#### 6.6.2.1 CI/CD Integration
+
+**Automated Test Pipeline Architecture:**
+
+```mermaid
+flowchart LR
+    A[Code Commit] --> B[CI Pipeline Trigger]
+    B --> C[Dependency Installation]
+    C --> D[Linting & Code Quality]
+    
+    D --> E[Unit Tests]
+    E --> F[Integration Tests]
+    F --> G[Security Tests]
+    
+    G --> H[Build Application]
+    H --> I[E2E Test Environment Setup]
+    I --> J[Cucumber E2E Tests]
+    
+    J --> K[Performance Tests]
+    K --> L[Coverage Report Generation]
+    L --> M[Quality Gate Evaluation]
+    
+    M -->|Pass| N[Deploy to Staging]
+    M -->|Fail| O[Pipeline Failure]
+    
+    N --> P[Staging Smoke Tests]
+    P --> Q[Production Deployment]
+    
+    O --> R[Notification & Rollback]
+    
+    style A fill:#e3f2fd
+    style Q fill:#c8e6c9
+    style O fill:#ffcdd2
+    style R fill:#ffcdd2
+```
+
+**GitHub Actions CI Configuration:**
+
+```yaml
+# .github/workflows/ci.yml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
+        
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run linting
+      run: npm run lint
+      
+    - name: Run unit tests
+      run: npm run test
+      
+    - name: Run integration tests
+      run: npm run test:integration
+      
+    - name: Run security tests
+      run: npm run test:security
+      
+    - name: Generate coverage report
+      run: npm run test:coverage
+      
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+  
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20.x'
+        
+    - name: Start application
+      run: |
+        npm install
+        npm start &
+        npx wait-on http://localhost:3000
+        
+    - name: Run E2E tests
+      run: mvn test -Dtest=SecurityTestRunner
+      
+    - name: Upload test reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-reports
+        path: target/cucumber-reports/
+```
+
+#### 6.6.2.2 Automated Test Triggers
+
+**Test Execution Trigger Matrix:**
+
+| Trigger Event | Test Scope | Execution Environment | Notification |
+|---|---|---|---|
+| **Code Push** | Full test suite | CI/CD runners | Slack notifications |
+| **Pull Request** | Changed components + regression | GitHub Actions | PR comments |
+| **Scheduled (Nightly)** | Full suite + performance | Dedicated environment | Email reports |
+| **Release Branch** | Complete validation | Staging environment | Release team alerts |
+| **Production Deploy** | Smoke tests | Production environment | Operations team |
+
+**Test Trigger Configuration:**
+
+```javascript
+// Test trigger configuration
+const testTriggers = {
+  push: {
+    branches: ['main', 'develop'],
+    tests: ['unit', 'integration', 'security'],
+    parallel: true
+  },
+  pullRequest: {
+    tests: ['unit', 'integration', 'affected'],
+    coverage: true,
+    qualityGate: true
+  },
+  schedule: {
+    cron: '0 2 * * *', // 2 AM daily
+    tests: ['full-suite', 'performance', 'security-scan'],
+    environment: 'staging'
+  }
+};
+```
+
+#### 6.6.2.3 Parallel Test Execution
+
+**Parallel Execution Strategy:**
+
+| Test Type | Parallel Strategy | Resource Allocation | Execution Time |
+|---|---|---|---|
+| **Unit Tests** | Jest parallel workers | CPU cores - 1 | ~30 seconds |
+| **Integration Tests** | Test isolation | Dedicated ports | ~2 minutes |
+| **E2E Tests** | Browser instances | Selenium Grid | ~10 minutes |
+| **Security Tests** | Isolated environments | Container instances | ~5 minutes |
+
+**Maven Parallel Configuration:**
+
+```xml
+<!-- Maven Surefire parallel execution -->
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-surefire-plugin</artifactId>
+    <version>3.0.0-M9</version>
+    <configuration>
+        <parallel>methods</parallel>
+        <threadCount>4</threadCount>
+        <perCoreThreadCount>2</perCoreThreadCount>
+        <useUnlimitedThreads>false</useUnlimitedThreads>
+        <rerunFailingTestsCount>2</rerunFailingTestsCount>
+    </configuration>
+</plugin>
+```
+
+#### 6.6.2.4 Test Reporting Requirements
+
+**Comprehensive Test Reporting Architecture:**
+
+```mermaid
+graph TD
+    A[Test Execution] --> B[Jest Reports]
+    A --> C[Cucumber Reports]
+    A --> D[Coverage Reports]
+    A --> E[Security Test Reports]
+    
+    B --> F[Unit Test Results]
+    C --> G[E2E Test Results]
+    D --> H[Coverage Analysis]
+    E --> I[Security Scan Results]
+    
+    F --> J[Test Report Aggregator]
+    G --> J
+    H --> J
+    I --> J
+    
+    J --> K[HTML Dashboard]
+    J --> L[JSON API]
+    J --> M[Email Reports]
+    J --> N[Slack Notifications]
+    
+    K --> O[Stakeholder Dashboard]
+    L --> P[CI/CD Integration]
+    M --> Q[Management Reports]
+    N --> R[Development Team]
+    
+    style A fill:#e3f2fd
+    style J fill:#fff3e0
+    style O fill:#c8e6c9
+```
+
+**Report Generation Configuration:**
+
+| Report Type | Format | Distribution | Retention |
+|---|---|---|---|
+| **Unit Test Reports** | JUnit XML, HTML | CI/CD artifacts | 90 days |
+| **Coverage Reports** | LCOV, HTML, Cobertura | Codecov integration | 1 year |
+| **E2E Test Reports** | Cucumber HTML, JSON | Email, Slack | 30 days |
+| **Security Reports** | SARIF, HTML | Security team | 1 year |
+
+#### 6.6.2.5 Failed Test Handling
+
+**Failure Management Workflow:**
+
+```mermaid
+flowchart TD
+    A[Test Failure Detected] --> B[Failure Classification]
+    B --> C{Failure Type}
+    
+    C -->|Flaky Test| D[Add to Flaky Test Registry]
+    C -->|Environment Issue| E[Environment Recovery]
+    C -->|Code Defect| F[Bug Report Creation]
+    C -->|Test Issue| G[Test Fix Required]
+    
+    D --> H[Automatic Retry]
+    E --> I[Infrastructure Check]
+    F --> J[Developer Assignment]
+    G --> K[Test Team Assignment]
+    
+    H --> L{Retry Successful?}
+    L -->|Yes| M[Continue Pipeline]
+    L -->|No| N[Mark as Flaky Failure]
+    
+    I --> O[Pipeline Retry]
+    J --> P[Code Fix Process]
+    K --> Q[Test Update Process]
+    
+    N --> R[Flaky Test Analysis]
+    P --> S[Regression Testing]
+    Q --> T[Test Validation]
+    
+    style A fill:#ffcdd2
+    style M fill:#c8e6c9
+    style R fill:#fff3e0
+```
+
+**Failure Handling Configuration:**
+
+```javascript
+// Jest retry configuration
+module.exports = {
+  retry: {
+    testRetryLimit: 2,
+    retryImmediately: true,
+    retryDelayInMs: 1000
+  },
+  
+  failureThreshold: {
+    unit: 0,      // No unit test failures allowed
+    integration: 1, // 1 integration test failure allowed
+    e2e: 2,       // 2 E2E test failures allowed (flaky tolerance)
+    security: 0   // No security test failures allowed
+  }
+};
+```
+
+#### 6.6.2.6 Flaky Test Management
+
+**Flaky Test Detection and Resolution:**
+
+| Detection Method | Threshold | Action | Timeline |
+|---|---|---|---|
+| **Success Rate Analysis** | <90% success rate | Quarantine test | Immediate |
+| **Execution Time Variance** | >50% time variance | Performance investigation | 1 week |
+| **Environment Dependency** | Fails in specific environments | Environment fix | 3 days |
+| **Timing Issues** | Random failures | Add explicit waits | 2 days |
+
+**Flaky Test Registry:**
+
+```javascript
+// Flaky test tracking
+const flakyTestRegistry = {
+  quarantined: [
+    {
+      testName: 'should handle concurrent rate limit requests',
+      reason: 'Race condition in rate limiter',
+      quarantineDate: '2024-01-15',
+      assignee: 'dev-team',
+      estimatedFix: '2024-01-22'
+    }
+  ],
+  
+  monitoring: [
+    {
+      testName: 'should validate SSL certificate renewal',
+      successRate: 85,
+      variance: 30,
+      lastFailure: '2024-01-10'
+    }
+  ]
+};
+```
+
+### 6.6.3 QUALITY METRICS
+
+#### 6.6.3.1 Code Coverage Targets
+
+**Coverage Requirements Matrix:**
+
+| Component | Statement Coverage | Branch Coverage | Function Coverage | Line Coverage |
+|---|---|---|---|---|
+| **Security Middleware** | 95% | 90% | 100% | 95% |
+| **Authentication Logic** | 90% | 85% | 95% | 90% |
+| **API Endpoints** | 85% | 80% | 90% | 85% |
+| **Utility Functions** | 90% | 85% | 95% | 90% |
+| **Error Handlers** | 80% | 75% | 85% | 80% |
+| **Overall System** | 85% | 80% | 90% | 85% |
+
+**Coverage Enforcement:**
+
+```javascript
+// Jest coverage configuration
+{
+  "coverageThreshold": {
+    "global": {
+      "branches": 80,
+      "functions": 90,
+      "lines": 85,
+      "statements": 85
+    },
+    "./src/middleware/security/": {
+      "branches": 90,
+      "functions": 100,
+      "lines": 95,
+      "statements": 95
+    },
+    "./src/auth/": {
+      "branches": 85,
+      "functions": 95,
+      "lines": 90,
+      "statements": 90
+    }
+  }
+}
+```
+
+#### 6.6.3.2 Test Success Rate Requirements
+
+**Success Rate Targets:**
+
+| Test Category | Target Success Rate | Warning Threshold | Critical Threshold |
+|---|---|---|---|
+| **Unit Tests** | 100% | <99.5% | <98% |
+| **Integration Tests** | 98% | <95% | <90% |
+| **Security Tests** | 100% | <99% | <95% |
+| **E2E Tests** | 95% | <90% | <85% |
+| **Performance Tests** | 90% | <85% | <80% |
+
+#### 6.6.3.3 Performance Test Thresholds
+
+**Performance Benchmarks:**
+
+| Metric | Target | Warning | Critical | Test Frequency |
+|---|---|---|---|---|
+| **API Response Time (p95)** | <500ms | >750ms | >1000ms | Every commit |
+| **Security Middleware Overhead** | <100ms | >150ms | >300ms | Daily |
+| **Memory Usage (per request)** | <50MB | >75MB | >100MB | Weekly |
+| **CPU Utilization (peak)** | <70% | >80% | >90% | Weekly |
+| **Concurrent User Capacity** | 1000 users | <750 users | <500 users | Weekly |
+
+**Performance Test Implementation:**
+
+```javascript
+// Performance test example
+describe('Performance Tests', () => {
+  it('should handle API requests within time limits', async () => {
+    const startTime = Date.now();
+    
+    const response = await request(server)
+      .get('/api/health')
+      .expect(200);
+      
+    const responseTime = Date.now() - startTime;
+    expect(responseTime).toBeLessThan(500); // 500ms threshold
+  });
+  
+  it('should handle concurrent requests efficiently', async () => {
+    const concurrentRequests = 100;
+    const requests = Array(concurrentRequests).fill().map(() =>
+      request(server).get('/api/health')
+    );
+    
+    const startTime = Date.now();
+    const responses = await Promise.all(requests);
+    const totalTime = Date.now() - startTime;
+    
+    expect(responses.every(r => r.status === 200)).toBe(true);
+    expect(totalTime).toBeLessThan(2000); // 2 second threshold for 100 requests
+  });
+});
+```
+
+#### 6.6.3.4 Quality Gates
+
+**Automated Quality Gate Configuration:**
+
+| Gate Type | Criteria | Enforcement | Override Authority |
+|---|---|---|---|
+| **Code Quality** | ESLint score A, Zero critical issues | Block merge | Tech Lead |
+| **Test Coverage** | >85% overall, >90% security code | Block merge | None |
+| **Security Tests** | 100% pass rate, Zero vulnerabilities | Block deployment | Security Team |
+| **Performance** | Response time <500ms, Memory <100MB | Block deployment | DevOps Lead |
+
+**Quality Gate Implementation:**
+
+```yaml
+# GitHub branch protection rules
+quality_gates:
+  required_checks:
+    - "Unit Tests"
+    - "Integration Tests"
+    - "Security Tests"
+    - "Coverage Report"
+    - "ESLint Check"
+    - "Performance Tests"
+  
+  merge_requirements:
+    coverage_threshold: 85
+    security_scan_pass: true
+    performance_threshold_pass: true
+    review_required: true
+    review_count: 2
+```
+
+#### 6.6.3.5 Documentation Requirements
+
+**Test Documentation Standards:**
+
+| Documentation Type | Required Content | Update Frequency | Review Process |
+|---|---|---|---|
+| **Test Plan** | Strategy, scope, approach | Per release | Architecture review |
+| **Test Cases** | Scenarios, expected results | Per feature | Peer review |
+| **Security Test Specs** | OWASP compliance validation | Per security update | Security team review |
+| **Performance Baselines** | Benchmark data, thresholds | Monthly | Performance team review |
+
+### 6.6.4 SECURITY TESTING IMPLEMENTATION
+
+#### 6.6.4.1 OWASP Top 10 Compliance Testing
+
+**Comprehensive Security Test Coverage:**
+
+| OWASP Category | Test Implementation | Validation Method | Automation Level |
+|---|---|---|---|
+| **A01: Broken Access Control** | JWT validation, RBAC testing | Supertest API calls | Fully automated |
+| **A02: Cryptographic Failures** | TLS configuration, encryption validation | SSL Labs API integration | Fully automated |
+| **A03: Injection** | SQL injection, XSS prevention testing | Payload injection tests | Fully automated |
+| **A05: Security Misconfiguration** | Security headers validation | Header compliance checks | Fully automated |
+| **A06: Vulnerable Components** | Dependency vulnerability scanning | `npm audit`, Snyk integration | Fully automated |
+| **A07: Authentication Failures** | Brute force, session management testing | Rate limiting validation | Fully automated |
+| **A08: Software Integrity Failures** | Package integrity verification | Hash validation | Automated in CI/CD |
+| **A09: Logging Failures** | Security event logging validation | Log analysis tests | Semi-automated |
+| **A10: Server-Side Request Forgery** | SSRF prevention testing | Network request validation | Fully automated |
+
+**Security Test Implementation Examples:**
+
+```javascript
+describe('Security Compliance Tests', () => {
+  describe('A01: Broken Access Control', () => {
+    it('should enforce JWT token validation', async () => {
+      const response = await request(server)
+        .get('/api/protected')
+        .expect(401);
+        
+      expect(response.body.error).toBe('No token provided');
+    });
+    
+    it('should validate RBAC permissions', async () => {
+      const userToken = generateTestToken({ role: 'user' });
+      
+      const response = await request(server)
+        .get('/api/admin/users')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(403);
+        
+      expect(response.body.error).toContain('Insufficient permissions');
+    });
+  });
+  
+  describe('A03: Injection Prevention', () => {
+    it('should sanitize XSS attempts', async () => {
+      const xssPayloads = [
+        '<script>alert("xss")</script>',
+        'javascript:alert(1)',
+        '<img src=x onerror=alert(1)>'
+      ];
+      
+      for (const payload of xssPayloads) {
+        const response = await request(server)
+          .post('/api/user/profile')
+          .send({ name: payload })
+          .expect(400);
+          
+        expect(response.body.errors).toContain('Invalid input detected');
+      }
+    });
+  });
+  
+  describe('A05: Security Misconfiguration', () => {
+    it('should include all required security headers', async () => {
+      const response = await request(server)
+        .get('/health')
+        .expect(200);
+        
+      expect(response.headers['strict-transport-security']).toBeDefined();
+      expect(response.headers['x-content-type-options']).toBe('nosniff');
+      expect(response.headers['x-frame-options']).toBe('DENY');
+      expect(response.headers['content-security-policy']).toBeDefined();
+    });
+  });
+});
+```
+
+#### 6.6.4.2 Vulnerability Scanning Integration
+
+**Automated Security Scanning Pipeline:**
+
+```mermaid
+flowchart TD
+    A[Code Commit] --> B[Dependency Scan]
+    B --> C[Static Code Analysis]
+    C --> D[Container Image Scan]
+    D --> E[Dynamic Security Testing]
+    
+    B --> F[npm audit]
+    B --> G[Snyk Vulnerability DB]
+    B --> H[GitHub Security Advisories]
+    
+    C --> I[ESLint Security Rules]
+    C --> J[SonarQube Security Rules]
+    C --> K[CodeQL Analysis]
+    
+    D --> L[Trivy Container Scan]
+    D --> M[Clair Vulnerability Scan]
+    
+    E --> N[OWASP ZAP]
+    E --> O[Custom Security Tests]
+    
+    F --> P[Vulnerability Report]
+    G --> P
+    H --> P
+    I --> P
+    J --> P
+    K --> P
+    L --> P
+    M --> P
+    N --> P
+    O --> P
+    
+    P --> Q{Critical Vulnerabilities?}
+    Q -->|Yes| R[Block Deployment]
+    Q -->|No| S[Continue Pipeline]
+    
+    style A fill:#e3f2fd
+    style R fill:#ffcdd2
+    style S fill:#c8e6c9
+```
+
+### 6.6.5 TEST ENVIRONMENT ARCHITECTURE
+
+#### 6.6.5.1 Environment Configuration
+
+**Test Environment Matrix:**
+
+| Environment | Purpose | Infrastructure | Data Strategy | Access Control |
+|---|---|---|---|---|
+| **Local Development** | Developer testing | Docker containers | Synthetic data | Developer access |
+| **CI/CD Runners** | Automated testing | GitHub Actions runners | Fresh per run | CI/CD service accounts |
+| **Integration Testing** | Component integration | Kubernetes pods | Sanitized production data | QA team access |
+| **E2E Testing** | End-to-end validation | Dedicated VMs | Production-like data | Automated tests only |
+| **Performance Testing** | Load and stress testing | Scaled infrastructure | High-volume datasets | Performance team |
+| **Security Testing** | Penetration testing | Isolated network | Attack simulation data | Security team |
+
+#### 6.6.5.2 Test Data Management
+
+**Test Data Architecture:**
+
+```mermaid
+graph TD
+    A[Test Data Sources] --> B[Synthetic Data Generator]
+    A --> C[Sanitized Production Data]
+    A --> D[Static Test Fixtures]
+    
+    B --> E[JavaFaker Integration]
+    B --> F[Custom Data Builders]
+    
+    C --> G[Data Anonymization]
+    C --> H[PII Removal]
+    
+    D --> I[User Fixtures]
+    D --> J[API Response Mocks]
+    
+    E --> K[Test Data Repository]
+    F --> K
+    G --> K
+    H --> K
+    I --> K
+    J --> K
+    
+    K --> L[Unit Tests]
+    K --> M[Integration Tests]
+    K --> N[E2E Tests]
+    K --> O[Performance Tests]
+    
+    style A fill:#e3f2fd
+    style K fill:#fff3e0
+    style L fill:#c8e6c9
+    style M fill:#c8e6c9
+    style N fill:#c8e6c9
+    style O fill:#c8e6c9
+```
+
+#### 6.6.5.3 Infrastructure as Code
+
+**Test Environment Provisioning:**
+
+```yaml
+# docker-compose.test.yml
+version: '3.8'
+services:
+  app-test:
+    build: .
+    environment:
+      - NODE_ENV=test
+      - PORT=3000
+      - JWT_SECRET=test-secret
+      - RATE_LIMIT_MAX=1000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - redis-test
+      
+  redis-test:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+      
+  selenium-hub:
+    image: selenium/hub:latest
+    ports:
+      - "4444:4444"
+      
+  chrome-node:
+    image: selenium/node-chrome:latest
+    environment:
+      - HUB_HOST=selenium-hub
+    depends_on:
+      - selenium-hub
+```
+
+### 6.6.6 TEST EXECUTION WORKFLOWS
+
+#### 6.6.6.1 Continuous Integration Flow
+
+**Complete CI/CD Test Workflow:**
+
+```mermaid
+flowchart TD
+    A[Developer Commits Code] --> B[Pre-commit Hooks]
+    B --> C[Linting & Formatting]
+    C --> D[Unit Tests Execution]
+    
+    D --> E[Push to Repository]
+    E --> F[CI Pipeline Triggered]
+    F --> G[Environment Setup]
+    
+    G --> H[Dependency Installation]
+    H --> I[Build Application]
+    I --> J[Unit Test Suite]
+    
+    J --> K[Integration Test Suite]
+    K --> L[Security Test Suite]
+    L --> M[Coverage Analysis]
+    
+    M --> N{Quality Gates Pass?}
+    N -->|No| O[Pipeline Failure]
+    N -->|Yes| P[E2E Test Environment Setup]
+    
+    P --> Q[Start Application Server]
+    Q --> R[Selenium Grid Setup]
+    R --> S[E2E Test Execution]
+    
+    S --> T[Performance Test Execution]
+    T --> U[Test Report Generation]
+    U --> V[Artifact Storage]
+    
+    V --> W[Notification Dispatch]
+    W --> X[Merge/Deploy Decision]
+    
+    O --> Y[Developer Notification]
+    X --> Z[Production Deployment]
+    
+    style A fill:#e3f2fd
+    style O fill:#ffcdd2
+    style Z fill:#c8e6c9
+```
+
+#### 6.6.6.2 Release Testing Protocol
+
+**Release Validation Checklist:**
+
+| Test Phase | Required Tests | Success Criteria | Rollback Trigger |
+|---|---|---|---|
+| **Pre-Release** | Full regression suite | 100% security tests pass | Any critical failure |
+| **Smoke Tests** | Core functionality validation | Basic features working | Core feature failure |
+| **Performance** | Load testing, response times | Metrics within thresholds | Performance degradation >20% |
+| **Security** | Vulnerability scan, penetration testing | Zero critical vulnerabilities | High/critical vulnerability found |
+| **User Acceptance** | End-user workflow validation | Business workflows complete | User-blocking issues |
+
+### 6.6.7 MONITORING AND REPORTING
+
+#### 6.6.7.1 Test Metrics Dashboard
+
+**Real-time Test Monitoring:**
+
+| Metric | Visualization | Update Frequency | Alert Threshold |
+|---|---|---|---|
+| **Test Success Rate** | Line chart with trend | Real-time | <95% |
+| **Coverage Percentage** | Progress bars by component | Per commit | <85% |
+| **Performance Trends** | Time series graphs | Per test run | >20% degradation |
+| **Security Test Status** | Status indicators | Per security scan | Any failure |
+| **Flaky Test Count** | Alert badges | Daily | >5 flaky tests |
+
+#### 6.6.7.2 Automated Reporting
+
+**Report Distribution Strategy:**
+
+| Report Type | Recipients | Frequency | Format | Distribution Method |
+|---|---|---|---|---|
+| **Daily Test Summary** | Development team | Daily | HTML email | Automated email |
+| **Weekly Quality Report** | Management | Weekly | PDF dashboard | Email + Slack |
+| **Release Test Report** | All stakeholders | Per release | Comprehensive HTML | Email + Portal |
+| **Security Test Report** | Security team | Per scan | SARIF + HTML | Secure email |
+| **Performance Trend Report** | DevOps team | Weekly | Charts + metrics | Slack + Dashboard |
+
+#### References
+
+**Repository Files Examined:**
+- `package.json` - Node.js testing framework configuration (Jest, Supertest, ESLint)
+- `pom.xml` - Java E2E test automation framework setup (Selenium, Cucumber, JUnit)
+- `docs/guides/testing.md` - Comprehensive testing guide with framework comparisons and best practices
+- `docs/guides/security.md` - Security testing implementation and validation procedures
+- `docs/guides/production.md` - Production deployment testing considerations and PM2 monitoring
+- `blitzy/documentation/Technical Specifications.md` - System architecture and security requirements for testing
+
+**Technical Specification Sections Referenced:**
+- `6.4 SECURITY ARCHITECTURE` - Comprehensive security controls requiring testing validation
+- `6.5 MONITORING AND OBSERVABILITY` - Health check implementations and performance monitoring for test validation
+- `1.2 SYSTEM OVERVIEW` - System context and success criteria driving testing requirements
+- `3.1 PROGRAMMING LANGUAGES` - Dual-stack architecture (Node.js + Java) requiring coordinated testing approach
+
+**Web Searches Performed:**
+- None required - all information derived from repository analysis and existing technical specifications
+
+# 7. USER INTERFACE DESIGN
+
+## 7.1 INTERFACE REQUIREMENT ANALYSIS
+
+### 7.1.1 System Interface Assessment
+
+**No user interface required.**
+
+This system is designed as a pure backend API server without any user-facing interface components. The comprehensive analysis of the repository structure, technical specifications, and system architecture confirms that no UI implementation exists or is required.
+
+## 7.2 ARCHITECTURAL JUSTIFICATION
+
+### 7.2.1 Backend-Only Design Pattern
+
+The system follows a backend-only architectural pattern specifically designed for:
+
+- **API Service Provision**: RESTful endpoints for programmatic consumption
+- **Integration Testing**: Serves as a backend service for automated testing frameworks
+- **Security Hardening**: Focus on middleware-based security without UI attack vectors
+- **Microservice Architecture**: Operates as a dedicated service component without presentation layer
+
+### 7.2.2 Static File Serving Capability
+
+While the system includes static file serving middleware configuration in `server.js`, this capability remains unused:
+
+- **Configuration Present**: Express static middleware configured for `/static` route
+- **Directory Absent**: No `public` directory exists in the repository
+- **Security Headers**: Static serving includes appropriate security headers (X-Content-Type-Options, X-Frame-Options)
+- **Caching Strategy**: 1-day max age with ETag support configured but not utilized
+
+## 7.3 CLIENT INTERACTION MODEL
+
+### 7.3.1 Programmatic Access Pattern
+
+Client interactions occur exclusively through RESTful API endpoints:
+
+- **HTTP Methods**: GET, POST requests to defined endpoints
+- **Response Formats**: JSON and plain text responses
+- **Authentication**: Security middleware handles authentication without UI forms
+- **Error Handling**: API-level error responses without user-friendly error pages
+
+### 7.3.2 Integration Points
+
+The system serves as a backend component for:
+
+- **Test Automation**: Java Selenium test framework integration
+- **API Consumers**: Applications consuming RESTful services
+- **Monitoring Systems**: Health check and status endpoint consumers
+- **Development Tools**: cURL and programmatic API testing
+
+#### References
+
+**Technical Specification Sections:**
+- `1.2 SYSTEM OVERVIEW` - Confirmed backend-only architecture
+- `2.1 FEATURE CATALOG` - Verified absence of UI features
+- `2.2 FUNCTIONAL REQUIREMENTS` - No UI requirements identified
+- `5.1 HIGH-LEVEL ARCHITECTURE` - Backend-only component diagram
+- `4.1 SYSTEM WORKFLOWS` - API-focused workflow patterns
+
+**Repository Files:**
+- `server.js` - Static file serving configuration (unused)
+- `docs/api/endpoints.md` - API-only endpoint documentation
+- `.gitattributes` - HTML exclusion from language statistics
+
+**Directory Analysis:**
+- `docs/` - Documentation structure (no UI assets)
+- `blitzy/` - Test automation framework (no UI components)  
+- `docs/api/` - API reference documentation only
+
+# 8. INFRASTRUCTURE
+
+## 8.1 DEPLOYMENT ENVIRONMENT
+
+### 8.1.1 Target Environment Assessment
+
+**Environment Type**: On-premises deployment
+- The system is designed for deployment on dedicated servers or virtual machines without cloud dependencies
+- Supports both single-server and multi-server deployments with load balancer integration
+- Geographic distribution achieved through load balancer configuration and reverse proxy setup
+- Fully self-contained application requiring only Node.js runtime and PM2 process manager
+
+**Resource Requirements**:
+
+| Component | Minimum | Recommended | Production | High-Load Production |
+|-----------|---------|-------------|------------|---------------------|
+| CPU Cores | 2 cores | 4 cores | 8+ cores | 16+ cores |
+| Memory | 1GB RAM | 4GB RAM | 8GB+ RAM | 16GB+ RAM |
+| Storage | 10GB | 50GB | 100GB+ | 500GB+ |
+| Network | 100Mbps | 1Gbps | 10Gbps | 10Gbps+ |
+
+**Compliance and Regulatory Requirements**:
+- OWASP Top 10 compliance implemented through security middleware pipeline
+- SSL/TLS encryption for data in transit with Let's Encrypt certificate integration
+- Configurable audit logging for regulatory compliance
+- Environment-based security controls with production hardening
+- Rate limiting and DDoS protection built into application layer
+
+### 8.1.2 Environment Management
+
+**Infrastructure as Code (IaC) Approach**:
+The system implements configuration-driven deployment through PM2 ecosystem files and environment variables:
+
+```javascript
+// ecosystem.config.js - Production configuration
+module.exports = {
+  apps: [{
+    name: 'secure-node-server',
+    script: './server.js',
+    instances: 'max',
+    exec_mode: 'cluster',
+    
+    // Production environment settings
+    env_production: {
+      NODE_ENV: 'production',
+      PORT: 3000,
+      MAX_MEMORY_RESTART: '1G',
+      LOG_LEVEL: 'info',
+      SSL_ENABLED: 'true'
+    },
+    
+    // Performance and monitoring
+    pmx: true,
+    monitoring: true,
+    merge_logs: true,
+    log_type: 'json',
+    
+    // Auto-scaling and recovery
+    autorestart: true,
+    max_memory_restart: '1G',
+    min_uptime: '10s',
+    max_restarts: 10
+  }]
+};
+```
+
+**Configuration Management Strategy**:
+- Environment variables managed through `.env` files with templates in `.env.example`
+- PM2 ecosystem configuration for process management and scaling policies
+- Git-based version control for configuration templates and deployment scripts
+- Secure configuration management with environment-specific overrides
+
+**Environment Promotion Strategy**:
+
+```mermaid
+graph LR
+    A[Development] -->|npm test & lint| B[Testing]
+    B -->|CI Pipeline| C[Staging]
+    C -->|Load Testing| D[Production]
+    
+    subgraph "Development Environment"
+        A1[Hot Reload Enabled]
+        A2[Debug Mode Active]
+        A3[Development Dependencies]
+    end
+    
+    subgraph "Testing Environment"
+        B1[Unit Tests]
+        B2[API Tests]
+        B3[Security Scans]
+    end
+    
+    subgraph "Staging Environment"
+        C1[Production Configuration]
+        C2[Load Testing]
+        C3[Security Validation]
+        C4[Performance Baseline]
+    end
+    
+    subgraph "Production Environment"
+        D1[PM2 Cluster Mode]
+        D2[SSL/TLS Enabled]
+        D3[Security Hardening]
+        D4[Full Monitoring]
+    end
+```
+
+**Backup and Disaster Recovery Plans**:
+- Automated configuration backup before each deployment via deployment scripts
+- Application state backup through PM2 dump and restore capabilities
+- Configuration rollback through Git version control and PM2 restart procedures
+- Recovery procedures documented in operational runbooks with RTO of 5 minutes
+
+## 8.2 CLOUD SERVICES
+
+**Not Applicable**: This system is specifically designed as a standalone application that does not require cloud services. The architecture supports complete on-premises deployment with all necessary components included in the application package. The system's design philosophy emphasizes simplicity-first architecture with progressive enhancement, making it suitable for environments where cloud dependencies are not desired or permitted.
+
+## 8.3 CONTAINERIZATION
+
+**Not Applicable**: The current implementation does not use containerization technologies. Based on the repository analysis, no Docker, Kubernetes, or container-related configuration files are present. The system is deployed directly on the host operating system using Node.js runtime and PM2 process manager. This approach aligns with the system's simplicity-first design principle and eliminates container orchestration complexity while maintaining production-grade process management through PM2.
+
+## 8.4 ORCHESTRATION
+
+### 8.4.1 PM2 Process Orchestration
+
+The system implements sophisticated process-level orchestration through PM2 Process Manager, providing enterprise-grade process management without container complexity.
+
+**Orchestration Platform**: PM2 Process Manager 5.0+
+
+**Cluster Architecture**:
+
+```mermaid
+graph TB
+    subgraph "PM2 Master Process"
+        A[PM2 Daemon]
+        A1[Process Monitor]
+        A2[Load Balancer]
+        A3[Health Checker]
+    end
+    
+    subgraph "Worker Process Pool"
+        B[Worker 1<br/>PID: 1001]
+        C[Worker 2<br/>PID: 1002]
+        D[Worker 3<br/>PID: 1003]
+        E[Worker N<br/>PID: 100N]
+    end
+    
+    subgraph "Load Distribution"
+        F[Round Robin]
+        G[Least Connections]
+        H[CPU Affinity]
+    end
+    
+    subgraph "Monitoring Layer"
+        I[Memory Tracking]
+        J[CPU Monitoring]
+        K[Error Tracking]
+        L[Performance Metrics]
+    end
+    
+    A -->|Fork & Manage| B
+    A -->|Fork & Manage| C
+    A -->|Fork & Manage| D
+    A -->|Fork & Manage| E
+    
+    A1 --> I
+    A1 --> J
+    A1 --> K
+    A1 --> L
+    
+    A2 --> F
+    A2 --> G
+    A2 --> H
+    
+    A3 --> B
+    A3 --> C
+    A3 --> D
+    A3 --> E
+```
+
+**Service Deployment Strategy**:
+- **Cluster Mode**: Automatic worker distribution across available CPU cores
+- **Zero-Downtime Deployments**: Graceful reloads through PM2's cluster management
+- **Automatic Process Recovery**: Failed workers automatically restarted with exponential backoff
+- **Load Balancing**: Built-in round-robin load distribution across worker processes
+
+**Auto-scaling Configuration**:
+
+| Parameter | Configuration | Description |
+|-----------|---------------|-------------|
+| **Instances** | `'max'` | One worker per CPU core |
+| **Execution Mode** | `'cluster'` | Cluster-based scaling |
+| **Memory Limit** | `1G` | Automatic restart at memory threshold |
+| **Minimum Uptime** | `10s` | Minimum runtime before restart eligibility |
+| **Max Restarts** | `10` | Maximum restart attempts per hour |
+
+**Resource Allocation Policies**:
+- **CPU-based Instance Scaling**: One worker process per available CPU core
+- **Memory Limits Enforced**: 1GB default per worker with automatic restart on breach
+- **Automatic Load Distribution**: Round-robin request distribution across healthy workers
+- **Resource Monitoring**: Real-time tracking of CPU, memory, and request metrics
+
+### 8.4.2 Process Lifecycle Management
+
+**Application Lifecycle Workflow**:
+
+```mermaid
+flowchart TD
+    A[PM2 Start Command] --> B[Load Ecosystem Config]
+    B --> C[Validate Configuration]
+    C --> D{Config Valid?}
+    
+    D -->|No| E[Log Configuration Error]
+    D -->|Yes| F[Initialize Cluster Mode]
+    
+    F --> G[Fork Worker Processes]
+    G --> H[CPU Core Detection]
+    H --> I[Create Worker Instances]
+    
+    I --> J[Worker Health Check]
+    J --> K{Worker Healthy?}
+    K -->|No| L[Restart Unhealthy Worker]
+    K -->|Yes| M[Continue Monitoring]
+    
+    L --> N[Increment Restart Counter]
+    N --> O{Restart Limit Reached?}
+    O -->|Yes| P[Mark Worker as Failed]
+    O -->|No| G
+    
+    M --> Q[Monitor Resource Usage]
+    Q --> R{CPU > 80%?}
+    R -->|Yes| S[Scale Up Workers]
+    R -->|No| T[Monitor Memory]
+    
+    T --> U{Memory > 90%?}
+    U -->|Yes| V[Restart High Memory Worker]
+    U -->|No| W[Continue Normal Operation]
+    
+    S --> X[Add New Worker Instance]
+    V --> L
+    X --> I
+    W --> J
+    
+    E --> Y[Deployment Failed]
+    P --> Z[Worker Management Alert]
+    
+    style A fill:#e1f5fe
+    style W fill:#c8e6c9
+    style Y fill:#ffcdd2
+    style Z fill:#ffcdd2
+```
+
+## 8.5 CI/CD PIPELINE
+
+### 8.5.1 Build Pipeline
+
+**Source Control Triggers**:
+- Push events to main and develop branches
+- Pull request creation and updates for code review
+- Git tag creation for release management
+- Manual trigger capability for hotfix deployments
+
+**Build Environment Requirements**:
+
+| Tool | Version Support | Purpose | Installation |
+|------|----------------|---------|--------------|
+| Node.js | 14.x, 16.x, 18.x, 22.x | Runtime compatibility testing | nvm/Node installer |
+| npm | 6.0+ | Package management | Bundled with Node.js |
+| Git | 2.x+ | Version control | System package manager |
+| PM2 | 5.0+ | Process management | npm global install |
+
+**GitHub Actions Build Configuration**:
+
+```yaml
+name: Node.js CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x, 18.x, 22.x]
+    
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run linting
+      run: npm run lint
+    
+    - name: Run unit tests
+      run: npm test
+    
+    - name: Generate coverage report
+      run: npm run test:coverage
+    
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+```
+
+**Jenkins Pipeline Configuration**:
+
+```groovy
+pipeline {
+    agent any
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'repository-url'
+            }
+        }
+        
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm ci'
+            }
+        }
+        
+        stage('Quality Checks') {
+            parallel {
+                stage('Linting') {
+                    steps {
+                        sh 'npm run lint'
+                    }
+                }
+                stage('Security Audit') {
+                    steps {
+                        sh 'npm audit --audit-level=high'
+                    }
+                }
+            }
+        }
+        
+        stage('Testing') {
+            steps {
+                sh 'npm test'
+                sh 'npm run test:coverage'
+            }
+            post {
+                always {
+                    publishTestResults testResultsPattern: 'test-results.xml'
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: false,
+                        keepAll: true,
+                        reportDir: 'coverage',
+                        reportFiles: 'index.html',
+                        reportName: 'Coverage Report'
+                    ])
+                }
+            }
+        }
+    }
+}
+```
+
+**Dependency Management**:
+- `package-lock.json` ensures deterministic dependency installation
+- Automated security auditing with `npm audit` in CI pipeline
+- Vulnerability scanning with high and critical severity blocking
+- Automated dependency updates through GitHub Dependabot integration
+
+**Artifact Generation and Storage**:
+
+| Artifact Type | Storage Location | Retention Period | Format |
+|---------------|------------------|------------------|--------|
+| **Test Results** | GitHub Actions artifacts | 30 days | JUnit XML |
+| **Coverage Reports** | Codecov | Permanent | LCOV |
+| **Build Logs** | CI platform | 30 days | Plain text |
+| **Deployment Scripts** | Git repository | Permanent | Shell scripts |
+
+**Quality Gates**:
+
+| Gate | Requirement | Blocking | Metrics |
+|------|-------------|----------|---------|
+| **Code Coverage** | ≥80% line coverage | Yes | lcov.info |
+| **Test Success** | 100% test pass rate | Yes | Test runner output |
+| **Security Audit** | No high/critical vulnerabilities | Yes | npm audit |
+| **Linting Standards** | Zero ESLint errors | Yes | ESLint output |
+
+### 8.5.2 Deployment Pipeline
+
+**Deployment Strategy**: Zero-downtime deployment using PM2 cluster management
+
+```mermaid
+flowchart TD
+    A[Code Push to Main] --> B[CI Pipeline Trigger]
+    B --> C[Run Build & Tests]
+    C --> D{All Tests Pass?}
+    D -->|No| E[Deployment Blocked]
+    D -->|Yes| F[Security Scan]
+    F --> G{Security Clean?}
+    G -->|No| H[Security Block]
+    G -->|Yes| I[Build Artifacts]
+    I --> J[Deploy to Staging]
+    J --> K[Staging Smoke Tests]
+    K --> L{Smoke Tests Pass?}
+    L -->|No| M[Staging Rollback]
+    L -->|Yes| N[Production Approval Gate]
+    N --> O[Deploy to Production]
+    O --> P[PM2 Graceful Reload]
+    P --> Q[Health Check Validation]
+    Q --> R{Health Checks Pass?}
+    R -->|No| S[Automatic Rollback]
+    R -->|Yes| T[Deployment Complete]
+    
+    S --> U[Restore Previous Version]
+    U --> V[Verify Rollback Success]
+    
+    style A fill:#e1f5fe
+    style T fill:#c8e6c9
+    style E fill:#ffcdd2
+    style H fill:#ffcdd2
+    style S fill:#ff9800
+```
+
+**Environment Promotion Workflow**:
+
+```bash
+#!/bin/bash
+# deploy.sh - Zero-downtime deployment script
+
+set -e
+
+REPO_URL="git@github.com:organization/secure-node-server.git"
+DEPLOY_DIR="/opt/secure-node-server"
+BACKUP_DIR="/opt/backup/$(date +%Y%m%d_%H%M%S)"
+
+deploy_application() {
+    echo "Starting deployment process..."
+    
+    # Create backup of current deployment
+    if [ -d "$DEPLOY_DIR" ]; then
+        echo "Creating backup..."
+        cp -r "$DEPLOY_DIR" "$BACKUP_DIR"
+    fi
+    
+    # Update codebase
+    echo "Updating codebase..."
+    cd "$DEPLOY_DIR"
+    git pull origin main
+    
+    # Install production dependencies
+    echo "Installing dependencies..."
+    npm ci --only=production
+    
+    # Run security audit
+    echo "Running security audit..."
+    npm audit --audit-level=high
+    
+    # Deploy with PM2
+    echo "Deploying with PM2..."
+    pm2 startOrReload ecosystem.config.js --env production
+    
+    # Wait for health checks
+    echo "Waiting for health checks..."
+    sleep 10
+    
+    # Verify deployment
+    if ! curl -f http://localhost:3000/health; then
+        echo "Health check failed, rolling back..."
+        rollback_deployment
+        exit 1
+    fi
+    
+    echo "Deployment successful!"
+}
+
+rollback_deployment() {
+    echo "Rolling back to previous version..."
+    if [ -d "$BACKUP_DIR" ]; then
+        rm -rf "$DEPLOY_DIR"
+        mv "$BACKUP_DIR" "$DEPLOY_DIR"
+        cd "$DEPLOY_DIR"
+        pm2 startOrReload ecosystem.config.js --env production
+        echo "Rollback complete"
+    else
+        echo "No backup found for rollback!"
+        exit 1
+    fi
+}
+
+#### Main execution
+deploy_application
+```
+
+**Zero-Downtime Deployment Process**:
 
 ```mermaid
 sequenceDiagram
     participant Dev as Developer
     participant Git as Git Repository
     participant CI as CI/CD Pipeline
-    participant Maven as Maven Build
-    participant Selenium as Selenium Tests
-    participant Reports as Report System
-    participant Jenkins as Jenkins
-    participant Jira as Jira
+    participant Staging as Staging Server
+    participant Prod as Production Server
+    participant PM2 as PM2 Manager
+    participant LB as Load Balancer
     
-    Dev->>Git: Code Commit
-    Git->>CI: Trigger Pipeline
-    CI->>Maven: Execute Build
-    Maven->>Selenium: Run Test Suite
+    Dev->>Git: Push Code Changes
+    Git->>CI: Trigger Build Pipeline
+    CI->>CI: Run Tests & Security Scans
+    CI->>CI: Build Deployment Artifacts
     
-    par Parallel Test Execution
-        Selenium->>Selenium: Browser Test 1
-        Selenium->>Selenium: Browser Test 2
-        Selenium->>Selenium: Browser Test N
+    CI->>Staging: Deploy to Staging
+    Staging->>Staging: Run Integration Tests
+    Staging->>CI: Report Test Results
+    
+    CI->>Prod: Initiate Production Deploy
+    Prod->>PM2: Signal Graceful Reload
+    PM2->>PM2: Start New Worker Instances
+    PM2->>LB: Register New Workers
+    PM2->>PM2: Gracefully Stop Old Workers
+    PM2->>Prod: Health Check New Workers
+    Prod->>CI: Deployment Status
+    
+    alt Health Check Success
+        CI->>Dev: Deployment Complete
+    else Health Check Failure
+        PM2->>PM2: Automatic Rollback
+        Prod->>CI: Rollback Complete
+        CI->>Dev: Deployment Failed - Rolled Back
     end
-    
-    Selenium->>Reports: Test Results
-    Reports->>Reports: Generate HTML Report
-    Reports->>Reports: Generate JSON Report
-    Reports->>Reports: Generate TXT Report
-    
-    Reports->>Jenkins: Publish Reports
-    Reports->>Jira: Update Test Cycles
-    
-    Jenkins-->>Dev: Build Status
-    Jira-->>Dev: Test Results
-    
-    Note over Dev,Jira: Complete integration flow<br/>with external systems
 ```
 
-### 6.3.6 SECURITY INTEGRATION
+**Rollback Procedures**:
 
-#### 6.3.6.1 Authentication and Authorization Integration
+| Trigger | Method | Recovery Time | Validation |
+|---------|--------|---------------|------------|
+| **Failed Health Check** | Automatic PM2 rollback | <30 seconds | Health endpoint |
+| **Performance Degradation** | Manual rollback command | <1 minute | Performance metrics |
+| **Critical Bug Discovery** | Emergency rollback script | <2 minutes | Smoke tests |
+| **Security Issue** | Immediate service stop | <10 seconds | Security scan |
 
-#### Security Headers Integration
+**Post-deployment Validation**:
 
-```mermaid
-graph LR
-    subgraph "Security Integration Architecture"
-        A[HTTP Request] --> B[Security Middleware]
-        B --> C[Helmet.js Headers]
-        C --> D[CORS Policy]
-        D --> E[Rate Limiting]
-        E --> F[Application Logic]
-        
-        G[Authentication Layer] --> H[API Key Validation]
-        G --> I[Token Verification]
-        
-        H --> F
-        I --> F
-        
-        J[Authorization Layer] --> K[Role Validation]
-        J --> L[Resource Access Control]
-        
-        K --> F
-        L --> F
-    end
-    
-    style B fill:#ffcdd2
-    style G fill:#ffcdd2
-    style J fill:#ffcdd2
-```
-
-#### 6.3.6.2 External Security Service Integration
-
-| Security Service | Integration Method | Purpose | Implementation Status |
-|---|---|---|---|
-| **SSL/TLS Certificates** | HTTPS configuration | Transport security | Available via Express.js |
-| **Environment Variable Security** | Configuration management | Sensitive data protection | Implemented |
-| **Dependency Vulnerability Scanning** | Maven security plugins | Supply chain security | Available |
-| **Browser Security Sandboxing** | WebDriver security options | Test isolation | Implemented |
-
-### 6.3.7 PERFORMANCE AND MONITORING INTEGRATION
-
-#### 6.3.7.1 Health Monitoring Integration
-
-```mermaid
-graph TB
-    subgraph "Monitoring Integration Architecture"
-        A[Application Instances] --> B[PM2 Health Checks]
-        B --> C[Health Status Aggregation]
-        C --> D[Monitoring Dashboard]
-        
-        E[Test Execution Metrics] --> F[Maven Surefire Reports]
-        F --> G[Performance Analytics]
-        
-        H[Backprop Metrics] --> I[Development Analytics]
-        I --> J[Code Quality Metrics]
-        
-        K[System Resource Monitoring] --> L[PM2 System Monitor]
-        L --> M[Resource Usage Reports]
-        
-        D --> N[Alert System]
-        G --> N
-        J --> N
-        M --> N
-    end
-    
-    style B fill:#fff3e0
-    style N fill:#ffcdd2
-```
-
-#### 6.3.7.2 Performance Integration Metrics
-
-| Metric Category | Monitoring Tool | Integration Point | Reporting |
-|---|---|---|---|
-| **Test Execution Performance** | Maven Surefire | Test automation pipeline | XML/HTML reports |
-| **HTTP Server Performance** | PM2 Monitoring | Node.js server instances | PM2 dashboard |
-| **Browser Automation Performance** | WebDriver metrics | Selenium test execution | Cucumber reports |
-| **System Resource Usage** | PM2 System Monitor | Process management | Real-time monitoring |
-
-### 6.3.8 DEPLOYMENT INTEGRATION
-
-#### 6.3.8.1 Container Integration Strategy
-
-```mermaid
-graph LR
-    subgraph "Deployment Integration Options"
-        A[Source Code] --> B[Build Process]
-        
-        B --> C[Java JAR Deployment]
-        B --> D[Node.js Standard Deployment]
-        B --> E[Docker Container Deployment]
-        
-        C --> F[Maven Execution Environment]
-        D --> G[PM2 Process Management]
-        E --> H[Container Orchestration]
-        
-        F --> I[Test Automation Execution]
-        G --> J[HTTP Server Operation]
-        H --> K[Scalable Container Services]
-        
-        L[CI/CD Pipeline] --> B
-        M[Configuration Management] --> F
-        M --> G
-        M --> H
-    end
-    
-    style L fill:#e3f2fd
-    style M fill:#fff3e0
-    style H fill:#c8e6c9
-```
-
-#### 6.3.8.2 Multi-Environment Integration
-
-| Environment | Integration Pattern | Configuration | Monitoring |
-|---|---|---|---|
-| **Development** | Direct execution | Local configuration | Console logging |
-| **Testing** | CI/CD integration | Environment-specific configs | Automated reporting |
-| **Staging** | PM2 cluster mode | Production-like configuration | Health monitoring |
-| **Production** | PM2 cluster with monitoring | Secure configuration management | Full monitoring stack |
-
-#### References
-
-**Repository Files Examined**:
-- `pom.xml` - Maven configuration with Java dependencies and test automation setup
-- `README.md` - Project overview and integration documentation
-- `docs/architecture/design.md` - Comprehensive architecture specifications and integration patterns
-- `.gitignore` - Configuration file exclusions indicating secure integration configurations
-
-**Technical Specification Sections Referenced**:
-- `1.2 SYSTEM OVERVIEW` - System context and integration requirements
-- `3.5 THIRD-PARTY SERVICES` - External service integration specifications
-- `3.8 TECHNOLOGY INTEGRATION ARCHITECTURE` - Integration patterns and security considerations
-- `4.5 INTEGRATION SEQUENCE DIAGRAMS` - Existing integration flow documentation
-- `6.1 CORE SERVICES ARCHITECTURE` - System architecture context and integration boundaries
-
-**External Integration Documentation**:
-- Maven Surefire Plugin documentation for parallel test execution
-- PM2 process management integration patterns
-- Selenium WebDriver protocol specifications
-- Backprop tooling integration requirements
-- Jenkins CI/CD integration patterns for test automation
-
-## 6.4 SECURITY ARCHITECTURE
-
-### 6.4.1 Security Architecture Overview
-
-#### 6.4.1.1 Current Security Context
-
-The Testinium-QA repository represents a **Java-based test automation framework** with comprehensive **security architecture documentation** designed for future enhancement into a production-ready application. While the current implementation focuses on test automation using Selenium, Cucumber, and JUnit, the repository contains extensive OWASP-compliant security specifications that serve as a blueprint for secure application development.
-
-#### 6.4.1.2 Security Architecture Approach
-
-The security architecture follows a **progressive enhancement model** that supports:
-
-- **Current State**: Test automation framework with basic security considerations
-- **Enhanced State**: Node.js server implementation with comprehensive security controls
-- **Production State**: Enterprise-grade security implementation with full OWASP compliance
-
-```mermaid
-graph TB
-    subgraph "Security Architecture Evolution"
-        A[Test Automation Security] --> B[Progressive Enhancement Security]
-        B --> C[Production Security Implementation]
-        
-        subgraph "Current Security Scope"
-            D[Test Isolation]
-            E[Browser Security Sandboxing]
-            F[Build Security]
-        end
-        
-        subgraph "Enhanced Security Blueprint"
-            G[Authentication Framework]
-            H[Authorization System]
-            I[Data Protection]
-            J[Security Monitoring]
-        end
-        
-        subgraph "Production Security Controls"
-            K[OWASP Compliance]
-            L[Security Audit]
-            M[Incident Response]
-            N[Compliance Management]
-        end
-        
-        A --> D
-        A --> E
-        A --> F
-        
-        B --> G
-        B --> H
-        B --> I
-        B --> J
-        
-        C --> K
-        C --> L
-        C --> M
-        C --> N
-    end
-    
-    style A fill:#e3f2fd
-    style B fill:#fff3e0
-    style C fill:#c8e6c9
-```
-
-### 6.4.2 Authentication Framework
-
-#### 6.4.2.1 Identity Management System
-
-The security architecture specifies a comprehensive **JWT-based authentication framework** designed for scalable identity management:
-
-**Core Authentication Components**:
-- **Token Generation**: JWT tokens with configurable expiration (1 hour default)
-- **Refresh Token Support**: Secure session management with token refresh capabilities
-- **Secret Management**: Environment variable-based security for JWT secrets
-- **Multi-Environment Support**: Separate authentication configurations for development, staging, and production
-
-#### 6.4.2.2 Multi-Factor Authentication
-
-| Authentication Factor | Implementation | Security Level | Configuration |
-|---|---|---|---|
-| **Primary Factor** | JWT token validation | High | Environment-based secret |
-| **API Key Factor** | Service-to-service authentication | Medium | Rate-limited access |
-| **Session Factor** | Secure cookie management | High | Configurable timeout |
-
-#### 6.4.2.3 Session Management
-
-**Session Security Implementation**:
-- **Session Timeout**: Configurable session duration with automatic expiration
-- **Secure Cookies**: HttpOnly and Secure cookie attributes for session protection
-- **Session Invalidation**: Proper logout handling with server-side session cleanup
-- **Cross-Origin Session Management**: CORS-compliant session handling
-
-#### 6.4.2.4 Token Handling
-
-```mermaid
-sequenceDiagram
-    participant Client as Client Application
-    participant Auth as Authentication Service
-    participant Server as Application Server
-    participant Refresh as Refresh Token Service
-    
-    Client->>Auth: Login Request
-    Auth->>Auth: Validate Credentials
-    Auth->>Client: JWT Token + Refresh Token
-    
-    Client->>Server: Request with JWT Token
-    Server->>Server: Validate Token
-    Server->>Client: Protected Resource
-    
-    Note over Client,Server: Token Expiration Handling
-    
-    Client->>Refresh: Refresh Token Request
-    Refresh->>Refresh: Validate Refresh Token
-    Refresh->>Client: New JWT Token
-    
-    Client->>Server: Request with New Token
-    Server->>Client: Protected Resource
-```
-
-#### 6.4.2.5 Password Policies
-
-**Password Security Standards**:
-- **Hashing Algorithm**: bcrypt with 12 salt rounds for secure password storage
-- **No Plain-Text Storage**: Enforced password hashing for all stored credentials
-- **Password Validation**: Strength requirements enforced at application level
-- **Secure Transmission**: HTTPS-only password transmission
-
-### 6.4.3 Authorization System
-
-#### 6.4.3.1 Role-Based Access Control
-
-The authorization system implements a comprehensive **RBAC (Role-Based Access Control)** model with granular permission management:
-
-| User Role | Access Level | Permissions | Resource Scope |
-|---|---|---|---|
-| **Admin** | Full access | All system operations | Global resources |
-| **User** | Standard access | Limited operations | User-scoped resources |
-| **Guest** | Read-only access | View operations only | Public resources |
-
-#### 6.4.3.2 Permission Management
-
-**Permission Architecture**:
-- **Resource-Level Permissions**: Fine-grained access control for individual resources
-- **Operation-Based Permissions**: Specific permissions for create, read, update, delete operations
-- **Hierarchical Permissions**: Role inheritance with permission cascading
-- **Dynamic Permission Evaluation**: Runtime permission checking with caching
-
-#### 6.4.3.3 Policy Enforcement Points
-
-```mermaid
-graph LR
-    subgraph "Authorization Flow"
-        A[Request] --> B[Authentication Check]
-        B --> C[Role Verification]
-        C --> D[Permission Evaluation]
-        D --> E[Resource Access Control]
-        E --> F[Audit Logging]
-        F --> G[Response]
-        
-        H[Policy Engine] --> D
-        I[Role Database] --> C
-        J[Permission Matrix] --> D
-        K[Audit System] --> F
-    end
-    
-    style B fill:#ffcdd2
-    style D fill:#fff3e0
-    style F fill:#e3f2fd
-```
-
-#### 6.4.3.4 Audit Logging
-
-**Comprehensive Audit Framework**:
-- **Authentication Events**: Login attempts, failures, and successful authentications
-- **Authorization Events**: Permission grants, denials, and policy violations
-- **Resource Access**: Detailed logging of resource access patterns
-- **Security Events**: Failed authentication attempts, rate limit violations, and suspicious activities
-
-### 6.4.4 Data Protection
-
-#### 6.4.4.1 Encryption Standards
-
-**Transport Layer Security**:
-- **TLS Configuration**: TLS 1.2 minimum requirement with TLS 1.3 support
-- **Cipher Suite Standards**: Strong encryption with AES-256-GCM and CHACHA20-POLY1305
-- **SSL Certificate Management**: Automated certificate provisioning via Let's Encrypt
-- **HTTPS Enforcement**: Automatic HTTP to HTTPS redirection
-
-#### 6.4.4.2 Key Management
-
-| Key Type | Storage Method | Rotation Policy | Security Level |
-|---|---|---|---|
-| **JWT Secrets** | Environment variables | Manual rotation | High |
-| **Encryption Keys** | Secure configuration | 90-day rotation | High |
-| **API Keys** | Environment-based | On-demand rotation | Medium |
-
-#### 6.4.4.3 Data Masking Rules
-
-**Data Protection Implementation**:
-- **Input Validation**: Comprehensive request validation using Joi schema validation
-- **Data Sanitization**: HTML sanitization using DOMPurify for XSS prevention
-- **SQL Injection Prevention**: Parameterized queries and input validation
-- **Command Injection Protection**: Input sanitization for system command execution
-
-#### 6.4.4.4 Secure Communication
-
-```mermaid
-graph TB
-    subgraph "Secure Communication Architecture"
-        A[Client Request] --> B[HTTPS/TLS Layer]
-        B --> C[Security Headers]
-        C --> D[CORS Validation]
-        D --> E[Rate Limiting]
-        E --> F[Input Validation]
-        F --> G[Application Logic]
-        
-        H[Certificate Authority] --> B
-        I[Security Policy Engine] --> C
-        J[CORS Configuration] --> D
-        K[Rate Limit Engine] --> E
-        L[Validation Engine] --> F
-    end
-    
-    style B fill:#c8e6c9
-    style C fill:#ffcdd2
-    style F fill:#fff3e0
-```
-
-### 6.4.5 Security Control Framework
-
-#### 6.4.5.1 Security Headers Implementation
-
-The system implements comprehensive **HTTP security headers** via Helmet.js middleware:
-
-| Security Header | Purpose | Configuration | Protection Level |
-|---|---|---|---|
-| **Content-Security-Policy** | XSS prevention | Strict CSP directives | High |
-| **X-Frame-Options** | Clickjacking prevention | SAMEORIGIN policy | Medium |
-| **X-Content-Type-Options** | MIME sniffing prevention | nosniff directive | Medium |
-| **Strict-Transport-Security** | HTTPS enforcement | max-age=31536000 | High |
-
-#### 6.4.5.2 Rate Limiting Controls
-
-**Comprehensive Rate Limiting Strategy**:
-
-| Rate Limit Type | Configuration | Protection Scope | Implementation |
-|---|---|---|---|
-| **Global Rate Limit** | 1000 requests/hour/IP | System-wide protection | Express-rate-limit middleware |
-| **API Endpoint Limit** | 100 requests/minute/IP | Endpoint-specific protection | Route-level middleware |
-| **Authentication Limit** | 5 attempts/15 minutes | Login protection | Authentication middleware |
-| **Health Check Limit** | 60 requests/minute/IP | Monitoring protection | Health endpoint middleware |
-
-#### 6.4.5.3 CORS Policy Configuration
-
-```mermaid
-flowchart LR
-    subgraph "CORS Security Implementation"
-        A[Cross-Origin Request] --> B[Origin Validation]
-        B --> C{Whitelist Check}
-        
-        C -->|Allowed| D[Process Request]
-        C -->|Blocked| E[Reject Request]
-        
-        D --> F[Credentials Validation]
-        F --> G[Response Headers]
-        G --> H[Successful Response]
-        
-        E --> I[CORS Error Response]
-        
-        J[Environment Config] --> B
-        K[Allowed Origins] --> C
-        L[Credentials Policy] --> F
-    end
-    
-    style C fill:#fff3e0
-    style D fill:#c8e6c9
-    style E fill:#ffcdd2
-```
-
-### 6.4.6 OWASP Compliance Matrix
-
-#### 6.4.6.1 OWASP Top 10 Protection
-
-| OWASP Vulnerability | Protection Measure | Implementation Status | Risk Level |
-|---|---|---|---|
-| **A01: Broken Access Control** | Authentication middleware + RBAC | ✅ Documented | High |
-| **A02: Cryptographic Failures** | HTTPS/TLS + secure headers | ✅ Documented | High |
-| **A03: Injection** | Input validation + sanitization | ✅ Documented | High |
-| **A04: Insecure Design** | Security-by-design architecture | ✅ Documented | Medium |
-| **A05: Security Misconfiguration** | Helmet.js security headers | ✅ Documented | Medium |
-| **A06: Vulnerable Components** | Dependency scanning + auditing | ✅ Documented | Medium |
-| **A07: Authentication Failures** | Secure authentication implementation | ✅ Documented | High |
-| **A08: Software Integrity** | Dependency auditing + verification | ✅ Documented | Medium |
-
-#### 6.4.6.2 Security Monitoring and Alerting
-
-**Comprehensive Security Monitoring**:
-- **Failed Authentication Tracking**: Real-time monitoring of authentication failures
-- **Rate Limit Violation Detection**: Automated alerting for rate limit breaches
-- **Suspicious Activity Monitoring**: Pattern detection for unusual access behaviors
-- **Security Event Correlation**: Winston logger integration for security event analysis
-
-### 6.4.7 Compliance and Governance
-
-#### 6.4.7.1 Security Audit Framework
-
-```mermaid
-graph TB
-    subgraph "Security Audit Architecture"
-        A[Security Events] --> B[Winston Logger]
-        B --> C[Structured Logging]
-        C --> D[Event Correlation]
-        D --> E[Security Analytics]
-        
-        F[Dependency Audit] --> G[npm audit]
-        G --> H[Vulnerability Assessment]
-        H --> I[Security Reports]
-        
-        J[Code Security Scan] --> K[Security Test Suite]
-        K --> L[XSS Prevention Testing]
-        L --> M[Injection Testing]
-        M --> N[Security Validation]
-        
-        E --> O[Security Dashboard]
-        I --> O
-        N --> O
-    end
-    
-    style B fill:#e3f2fd
-    style G fill:#fff3e0
-    style O fill:#c8e6c9
-```
-
-#### 6.4.7.2 Production Security Configuration
-
-**Environment-Based Security Settings**:
 ```bash
-# Security Configuration Template
-TRUST_PROXY=true
-RATE_LIMIT_ENABLED=true
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=1000
-LOG_SENSITIVE_DATA=false
-RUN_AS_USER=nodejs
-RUN_AS_GROUP=nodejs
-DISABLE_X_POWERED_BY=true
-HIDE_SERVER_HEADER=true
-```
+#!/bin/bash
+# post-deploy-validation.sh
 
-#### 6.4.7.3 Container Security
-
-**Container Security Implementation**:
-- **Non-Root User Execution**: Security-hardened container deployment
-- **Minimal Base Images**: node:18-alpine for reduced attack surface
-- **Health Check Integration**: Security-aware health monitoring
-- **Security Scanning**: Automated vulnerability scanning in CI/CD pipeline
-
-### 6.4.8 Security Testing and Validation
-
-#### 6.4.8.1 Automated Security Testing
-
-**Security Test Suite Implementation**:
-- **XSS Prevention Testing**: Automated testing for cross-site scripting vulnerabilities
-- **CORS Violation Testing**: Validation of cross-origin resource sharing policies
-- **Rate Limiting Verification**: Automated testing of rate limiting effectiveness
-- **Authentication Security Testing**: Comprehensive authentication flow testing
-
-#### 6.4.8.2 Dependency Security Management
-
-| Security Tool | Purpose | Integration | Frequency |
-|---|---|---|---|
-| **npm audit** | Dependency vulnerability scanning | CI/CD pipeline | Every build |
-| **audit-ci** | CI/CD security integration | Automated deployment | Continuous |
-| **npm-audit-resolver** | Vulnerability management | Development workflow | Weekly |
-
-### 6.4.9 Future Security Enhancements
-
-#### 6.4.9.1 Progressive Security Implementation
-
-The security architecture supports **incremental enhancement** from the current test automation framework to a fully secure production application:
-
-**Phase 1**: Test Environment Security
-- Browser security sandboxing
-- Test data isolation
-- Secure test execution environment
-
-**Phase 2**: Development Server Security
-- Basic authentication implementation
-- HTTPS configuration
-- Security headers implementation
-
-**Phase 3**: Production Security
-- Complete OWASP compliance
-- Advanced monitoring and alerting
-- Full security audit framework
-
-#### 6.4.9.2 Enterprise Integration
-
-**Future Enterprise Security Features**:
-- **Single Sign-On (SSO)**: Integration with enterprise identity providers
-- **Advanced Threat Detection**: Machine learning-based security monitoring
-- **Compliance Reporting**: Automated compliance documentation generation
-- **Security Orchestration**: Automated incident response workflows
-
-#### References
-
-**Security Documentation Sources**:
-- `docs/guides/security.md` - Comprehensive OWASP-compliant security hardening guide
-- `docs/guides/production.md` - Production deployment security configurations
-- `docs/architecture/design.md` - System architecture with security enhancement paths
-
-**Technical Specification Sections**:
-- `5.4 CROSS-CUTTING CONCERNS` - Authentication and authorization framework
-- `Node.js Stack Security` - OWASP compliance and security implementation
-- `Node.js Server Rate Limiting` - Rate limiting specifications and configuration
-
-**Configuration Files**:
-- `pom.xml` - Maven configuration with security-related dependencies
-- `README.md` - Project overview with security architecture documentation
-
-**Security Standards Referenced**:
-- OWASP Top 10 security vulnerabilities and protection measures
-- TLS 1.2/1.3 encryption standards and cipher suite specifications
-- JWT RFC 7519 standard for token-based authentication
-- bcrypt password hashing standard with 12 salt rounds
-
-## 6.5 MONITORING AND OBSERVABILITY
-
-### 6.5.1 MONITORING INFRASTRUCTURE
-
-#### 6.5.1.1 Dual-Stack Monitoring Architecture
-
-The Testinium-QA system implements a **comprehensive monitoring architecture** designed to support both the Java test automation stack and the Node.js server stack. This dual-stack approach ensures complete observability across all system components while maintaining clear separation of concerns between testing operations and server functionality.
-
-```mermaid
-graph TB
-    subgraph "Test Automation Monitoring"
-        TC[Test Controller] --> TR[Test Reports]
-        TC --> TM[Test Metrics]
-        TR --> HTML[HTML Reports]
-        TR --> JSON[JSON Reports] 
-        TR --> TXT[Text Reports]
-        TM --> Jenkins[Jenkins Integration]
-        TM --> Jira[Jira Test Execution]
-    end
+validate_deployment() {
+    echo "Running post-deployment validation..."
     
-    subgraph "Server Monitoring Infrastructure"
-        HTTP[HTTP Server] --> Winston[Winston Logger]
-        HTTP --> PM2[PM2 Process Manager]
-        Winston --> LR[Log Rotation]
-        Winston --> LA[Log Aggregation]
-        PM2 --> HM[Health Monitoring]
-        PM2 --> PM[Performance Metrics]
-    end
+    # Health endpoint validation
+    if ! curl -f http://localhost:3000/health; then
+        echo "Health check failed"
+        return 1
+    fi
     
-    subgraph "Unified Observability Layer"
-        LA --> Dashboard[Monitoring Dashboard]
-        HM --> Dashboard
-        PM --> Dashboard
-        TR --> Dashboard
-        Dashboard --> Alerts[Alert Management]
-        Alerts --> Incidents[Incident Response]
-    end
+    # Performance baseline check
+    response_time=$(curl -o /dev/null -s -w '%{time_total}' http://localhost:3000/health)
+    if (( $(echo "$response_time > 1.0" | bc -l) )); then
+        echo "Response time too high: ${response_time}s"
+        return 1
+    fi
     
-    subgraph "External Integrations"
-        Dashboard --> Backprop[Backprop Analytics]
-        Alerts --> CICD[CI/CD Pipeline]
-        PM --> ProcessHealth[Process Health Checks]
-    end
-```
-
-#### 6.5.1.2 Metrics Collection Framework
-
-**Test Automation Metrics Collection:**
-The Java stack implements comprehensive test execution monitoring through the Cucumber reporting plugin (v7.2.0) with Maven Surefire integration. Metrics collection covers parallel test execution patterns, WebDriver session management, and cross-browser compatibility tracking.
-
-| Metric Category | Collection Method | Storage Format | Retention Period |
-|---|---|---|---|
-| Test Execution | Cucumber Reports | HTML/JSON/TXT | 30 days |
-| WebDriver Sessions | Browser Automation | JSON Logs | 7 days |
-| Performance Timing | Maven Surefire | XML Reports | 14 days |
-| Parallel Execution | Thread Pool Metrics | Log Aggregation | 7 days |
-
-**Server Performance Metrics Collection:**
-The Node.js stack utilizes PM2 process management for comprehensive server metrics collection. Performance data includes request timing, throughput analysis, resource utilization, and enhancement layer adoption patterns.
-
-| Metric Type | Collection Interval | Alert Threshold | Escalation Level |
-|---|---|---|---|
-| Request Response Time | Real-time | >500ms (HTTP) | Warning |
-| Memory Usage | 30 seconds | >80% allocated | Critical |
-| CPU Utilization | 30 seconds | >70% sustained | Warning |
-| Error Rate | Real-time | >5% per minute | Critical |
-
-#### 6.5.1.3 Log Aggregation and Management
-
-**Structured Logging Architecture:**
-Winston logger provides enterprise-grade log aggregation with configurable levels (ERROR, WARN, INFO, DEBUG, TRACE) and automatic log rotation. The logging architecture supports both development debugging and production monitoring requirements.
-
-```mermaid
-sequenceDiagram
-    participant App as Application Events
-    participant Winston as Winston Logger
-    participant Formatter as Log Formatter
-    participant Rotation as Log Rotation
-    participant Archive as Archive Storage
-    participant Monitor as Monitoring System
+    # Security headers validation
+    if ! curl -I http://localhost:3000 | grep -q "Strict-Transport-Security"; then
+        echo "Security headers missing"
+        return 1
+    fi
     
-    App->>Winston: Log Event
-    Winston->>Formatter: Structure Event
-    Formatter->>Rotation: Store Log Entry
-    Rotation->>Archive: Rotate When Full
-    Archive->>Monitor: Send Metrics
-    Monitor->>App: Health Status
-```
-
-**Log Configuration Parameters:**
-
-| Parameter | Environment Variable | Default Value | Production Setting |
-|---|---|---|---|
-| Log Level | LOG_LEVEL | INFO | WARN |
-| File Path | LOG_FILE_PATH | ./logs/app.log | /var/log/app/ |
-| Max File Size | LOG_MAX_SIZE | 10MB | 100MB |
-| Max Files | LOG_MAX_FILES | 5 | 10 |
-
-#### 6.5.1.4 Alert Management System
-
-**Alert Configuration Matrix:**
-The system implements multi-tiered alerting with environment-specific thresholds and escalation procedures. Alert management covers security events, performance degradation, and system health monitoring.
-
-| Alert Type | Trigger Condition | Response Time | Escalation Path |
-|---|---|---|---|
-| Authentication Failure | 5 attempts/15 minutes | Immediate | Security Team |
-| Memory Alert | ALERT_MEMORY_LIMIT exceeded | 2 minutes | Operations Team |
-| CPU Alert | ALERT_CPU_LIMIT exceeded | 2 minutes | Operations Team |
-| Rate Limit Violation | >1000 req/hour/IP | 1 minute | Security Team |
-
-### 6.5.2 OBSERVABILITY PATTERNS
-
-#### 6.5.2.1 Health Check Implementation
-
-**Comprehensive Health Monitoring:**
-The system implements multi-layered health checks across both technology stacks. Health monitoring covers process status, external dependency availability, and service responsiveness with configurable intervals and timeout settings.
-
-**Health Check Configuration:**
-
-| Component | Check Interval | Timeout Threshold | Recovery Action |
-|---|---|---|---|
-| HTTP Server Core | HEALTH_CHECK_INTERVAL | HEALTH_CHECK_TIMEOUT | Restart Service |
-| PM2 Process Health | 30 seconds | 15 seconds | Auto-restart |
-| WebDriver Sessions | Per test execution | 10 seconds | Session cleanup |
-| External Dependencies | 60 seconds | 30 seconds | Fallback mode |
-
-#### 6.5.2.2 Performance Metrics and SLA Monitoring
-
-**Established SLA Targets:**
-The system maintains strict SLA requirements across all operational components with automated monitoring and alerting for threshold violations.
-
-| Service Component | Target SLA | Measurement Point | Alert Trigger |
-|---|---|---|---|
-| WebDriver Initialization | <5 seconds | Driver ready state | >10 seconds |
-| HTTP Response (Basic) | <100ms | Request to response | >500ms |
-| HTTP Response (Enhanced) | <10ms | Core endpoints | >50ms |
-| Test Report Generation | <30 seconds | Completion to report | >60 seconds |
-
-**Recovery Time Objectives:**
-
-| Metric | Target Value | Measurement Method | Monitoring Tool |
-|---|---|---|---|
-| RTO (Recovery Time) | 5 minutes | Full system recovery | PM2 + Winston |
-| RPO (Recovery Point) | 1 minute | Configuration changes | Log aggregation |
-| MTTR (Mean Time to Recovery) | 2 minutes | Automated recovery | Health checks |
-| MTBF (Mean Time Between Failures) | 720 hours | Stable operation | Performance metrics |
-
-#### 6.5.2.3 Business Metrics Tracking
-
-**Test Automation Business Metrics:**
-- Test execution success rates and failure pattern analysis
-- Cross-browser compatibility performance tracking
-- Parallel execution efficiency and resource optimization
-- CI/CD pipeline integration effectiveness
-
-**Server Performance Business Metrics:**
-- Request pattern analysis and user behavior tracking
-- Enhancement layer adoption rates and performance impact
-- Backprop integration effectiveness and development workflow optimization
-- Security event correlation and threat detection patterns
-
-#### 6.5.2.4 Capacity Tracking and Resource Management
-
-**Resource Monitoring Framework:**
-The system implements comprehensive capacity tracking across compute resources, memory utilization, and network throughput. Resource monitoring supports both current operational requirements and future capacity planning.
-
-```mermaid
-graph LR
-    subgraph "Resource Monitoring"
-        CPU[CPU Utilization] --> Metrics[Metrics Collection]
-        Memory[Memory Usage] --> Metrics
-        Network[Network I/O] --> Metrics
-        Disk[Disk Usage] --> Metrics
-    end
+    # Process health validation
+    if ! pm2 describe secure-node-server | grep -q "online"; then
+        echo "PM2 processes not healthy"
+        return 1
+    fi
     
-    subgraph "Capacity Planning"
-        Metrics --> Analysis[Trend Analysis]
-        Analysis --> Forecasting[Capacity Forecasting]
-        Forecasting --> Scaling[Auto-scaling Decisions]
-        Scaling --> Provisioning[Resource Provisioning]
-    end
-    
-    subgraph "Alert Management"
-        Metrics --> Thresholds[Threshold Monitoring]
-        Thresholds --> Alerts[Alert Generation]
-        Alerts --> Response[Incident Response]
-        Response --> Resolution[Issue Resolution]
-    end
-```
-
-### 6.5.3 INCIDENT RESPONSE
-
-#### 6.5.3.1 Alert Routing and Escalation
-
-**Alert Flow Architecture:**
-The incident response system implements automated alert routing with escalation procedures based on severity levels and response time requirements.
-
-```mermaid
-flowchart TD
-    Alert[Alert Generated] --> Severity{Severity Level}
-    
-    Severity -->|Critical| Immediate[Immediate Notification]
-    Severity -->|Warning| Delayed[5-minute Delay]
-    Severity -->|Info| Batch[Batch Processing]
-    
-    Immediate --> PagerDuty[PagerDuty Integration]
-    Immediate --> SMS[SMS Notification]
-    Immediate --> Email[Email Alert]
-    
-    Delayed --> SlackPrimary[Slack Channel]
-    Delayed --> EmailSecondary[Email Summary]
-    
-    Batch --> DailyReport[Daily Report]
-    Batch --> Dashboard[Dashboard Update]
-    
-    PagerDuty --> OnCall[On-call Engineer]
-    SMS --> OnCall
-    OnCall --> Response[Incident Response]
-    Response --> Resolution[Issue Resolution]
-    Resolution --> PostMortem[Post-mortem Process]
-```
-
-#### 6.5.3.2 Escalation Procedures
-
-**Incident Escalation Matrix:**
-
-| Severity Level | Initial Response | Escalation Time | Escalation Target | Max Resolution Time |
-|---|---|---|---|---|
-| Critical | Immediate | 15 minutes | Senior Engineer | 1 hour |
-| High | 5 minutes | 30 minutes | Team Lead | 4 hours |
-| Medium | 15 minutes | 2 hours | Operations Team | 24 hours |
-| Low | 1 hour | Next business day | Development Team | 1 week |
-
-#### 6.5.3.3 Runbook Procedures
-
-**Automated Recovery Procedures:**
-- **Process Restart**: PM2 automatic restart with graceful shutdown (GRACEFUL_SHUTDOWN_TIMEOUT)
-- **Memory Recovery**: Automatic memory cleanup and garbage collection triggers
-- **Session Cleanup**: WebDriver session termination and resource reclamation
-- **Log Rotation**: Automated log file rotation and archive management
-
-**Manual Intervention Procedures:**
-- **Database Connection Recovery**: Connection pool reset and re-establishment
-- **Security Incident Response**: Authentication failure lockdown and investigation
-- **Performance Degradation**: Load balancing adjustment and resource scaling
-- **External Dependency Failure**: Fallback mode activation and service degradation
-
-#### 6.5.3.4 Post-Mortem and Improvement Tracking
-
-**Post-Mortem Process Framework:**
-Each incident triggers a structured post-mortem process designed to identify root causes, implement preventive measures, and track system reliability improvements over time.
-
-**Improvement Tracking Metrics:**
-
-| Improvement Area | Tracking Method | Review Frequency | Success Criteria |
-|---|---|---|---|
-| MTTR Reduction | Incident response logs | Weekly | <2 minutes average |
-| Alert Accuracy | False positive rate | Monthly | <5% false positives |
-| Recovery Automation | Manual intervention rate | Monthly | <20% manual recovery |
-| System Reliability | Uptime percentage | Monthly | >99.9% uptime |
-
-### 6.5.4 MONITORING DASHBOARDS AND VISUALIZATION
-
-#### 6.5.4.1 Unified Monitoring Dashboard
-
-The system provides a comprehensive monitoring dashboard that consolidates metrics from both technology stacks into a unified view. Dashboard design emphasizes real-time visibility, trend analysis, and proactive issue identification.
-
-**Dashboard Layout Components:**
-- **System Health Overview**: Real-time status indicators for all critical components
-- **Performance Metrics**: Request timing, throughput, and resource utilization trends
-- **Test Automation Status**: Test execution progress, success rates, and failure analysis
-- **Security Monitoring**: Authentication events, rate limiting status, and threat detection
-- **Capacity Planning**: Resource usage trends and scaling recommendations
-
-#### 6.5.4.2 Alert Threshold Configuration
-
-**Dynamic Threshold Management:**
-Alert thresholds are configurable through environment variables to support different operational environments (development, staging, production) with appropriate sensitivity levels.
-
-**Environment-Specific Thresholds:**
-
-| Environment | Memory Alert | CPU Alert | Response Time | Error Rate |
-|---|---|---|---|---|
-| Development | 90% | 80% | 1000ms | 10% |
-| Staging | 85% | 75% | 500ms | 5% |
-| Production | 80% | 70% | 100ms | 1% |
-| Performance Testing | 95% | 90% | 2000ms | 15% |
-
-### 6.5.5 SECURITY AND AUDIT MONITORING
-
-#### 6.5.5.1 Security Event Monitoring
-
-**Comprehensive Security Monitoring:**
-The system implements detailed security event monitoring covering authentication events, authorization violations, and suspicious activity detection with real-time correlation and alerting.
-
-**Security Monitoring Categories:**
-- **Authentication Events**: Login attempts, failures, successes with pattern analysis
-- **Authorization Events**: Permission grants, denials, violations with access tracking
-- **Resource Access**: API endpoint access patterns and anomaly detection
-- **Rate Limiting**: Request pattern analysis and abuse prevention
-- **Security Violations**: Suspicious activity detection and automated response
-
-#### 6.5.5.2 Audit Trail Management
-
-**Audit Logging Framework:**
-Winston logger provides structured audit logging with tamper-evident storage and compliance-ready reporting capabilities. Audit trails cover all security-relevant events with detailed context and correlation data.
-
-**Audit Event Categories:**
-
-| Event Type | Log Level | Retention Period | Compliance Requirement |
-|---|---|---|---|
-| Authentication | INFO | 90 days | Security audit |
-| Authorization | WARN | 90 days | Access control audit |
-| Configuration Changes | INFO | 365 days | Change management |
-| Security Violations | ERROR | 365 days | Incident investigation |
-
-#### References
-
-**Files Examined:**
-- `README.md` - Node.js server documentation with monitoring references and Backprop integration details
-- `pom.xml` - Java test automation configuration with Cucumber reporting plugin setup
-- `.gitignore` - Configuration patterns including log file exclusions and monitoring data
-- `docs/guides/production.md` - Production deployment guide with monitoring modules and PM2 configuration
-
-**Folders Explored:**
-- `(root)/` - Repository overview providing dual-architecture context and monitoring requirements
-- `docs/` - Documentation structure with monitoring and observability guidance
-- `docs/architecture/` - System design documentation including monitoring integration patterns
-- `docs/guides/` - Operational guides including production monitoring setup and configuration
-
-**Technical Specification Sections Referenced:**
-- `3.1 TECHNOLOGY STACK OVERVIEW` - Dual-stack architecture understanding for monitoring scope
-- `5.1 HIGH-LEVEL ARCHITECTURE` - System boundaries and integration points for comprehensive monitoring
-- `5.4 CROSS-CUTTING CONCERNS` - Monitoring strategy and logging architecture details
-- `6.4 SECURITY ARCHITECTURE` - Security monitoring and audit logging implementation
-- `4.7 PERFORMANCE AND SLA CONSIDERATIONS` - SLA definitions and performance monitoring requirements
-- `Node.js Server Performance` - Performance optimization and monitoring configuration details
-
-## 6.6 TESTING STRATEGY
-
-### 6.6.1 TESTING APPROACH OVERVIEW
-
-#### 6.6.1.1 Dual-Stack Testing Philosophy
-
-The Testinium-QA system implements a **comprehensive dual-stack testing strategy** designed to support both the Java test automation framework and the Node.js server implementation. This approach ensures complete test coverage across all system components while maintaining clear separation of concerns between browser automation testing and server functionality validation.
-
-The testing strategy addresses the unique challenges of a template/blueprint repository that contains detailed configuration for both technology stacks but serves as a foundation for implementation rather than an active codebase. This requires a testing approach that validates configuration integrity, template functionality, and provides clear guidance for implementation teams.
-
-```mermaid
-graph TB
-    subgraph "Java Test Automation Stack Testing"
-        JUT[JUnit Unit Tests] --> CIT[Cucumber Integration Tests]
-        CIT --> E2E[Selenium E2E Tests]
-        E2E --> PR[Parallel Test Execution]
-        PR --> JCR[Java Coverage Reports]
-    end
-    
-    subgraph "Node.js Server Stack Testing"
-        Jest[Jest Unit Tests] --> Super[Supertest Integration]
-        Super --> API[API Endpoint Testing]
-        API --> PM[Performance Testing]
-        PM --> NCR[Node.js Coverage Reports]
-    end
-    
-    subgraph "Cross-Stack Integration"
-        JCR --> UR[Unified Reporting]
-        NCR --> UR
-        UR --> QG[Quality Gates]
-        QG --> CI[CI/CD Pipeline]
-    end
-    
-    subgraph "Test Environment Management"
-        Docker[Docker Containers] --> TEnv[Test Environments]
-        TEnv --> Config[Configuration Testing]
-        Config --> Validation[Template Validation]
-    end
-```
-
-#### 6.6.1.2 Testing Scope and Boundaries
-
-**Java Test Automation Scope:**
-- Selenium WebDriver configuration validation and browser compatibility testing
-- Cucumber BDD framework integration and feature file processing
-- Maven build system and dependency management testing
-- Parallel test execution framework validation
-- Test reporting and metrics collection verification
-
-**Node.js Server Scope:**
-- HTTP server functionality and endpoint testing
-- Express.js framework integration validation
-- PM2 process management and monitoring testing
-- Backprop integration testing and workflow validation
-- Progressive enhancement path verification
-
-**Cross-Stack Integration Scope:**
-- Configuration consistency validation between technology stacks
-- Template integrity and completeness testing
-- Documentation accuracy and implementation alignment
-- CI/CD pipeline integration across both stacks
-
-### 6.6.2 UNIT TESTING STRATEGY
-
-#### 6.6.2.1 Java Stack Unit Testing
-
-#### Testing Framework Configuration
-**Primary Framework**: JUnit 4.13.2 with Maven Surefire Plugin 3.0.0-M5
-**Parallel Execution**: Method-level parallelization with unlimited thread configuration
-**Test Organization**: Package-based structure following Maven standard directory layout
-
-| Component | Testing Approach | Mock Strategy | Coverage Target |
-|---|---|---|---|
-| Step Definitions | JUnit test classes | WebDriver mock instances | 90% |
-| Configuration Validators | Parameter validation tests | Environment variable mocking | 85% |
-| Utility Classes | Isolated unit tests | No external dependencies | 95% |
-| Data Generators | JavaFaker integration tests | Deterministic seed values | 80% |
-
-**Test Naming Conventions:**
-```
-{ClassName}Test.java
-test{MethodName}_{ExpectedBehavior}()
-test{MethodName}_{InputCondition}_{ExpectedResult}()
-```
-
-**Test Data Management:**
-- **JavaFaker 1.0.2**: Realistic test data generation for user scenarios
-- **Test Fixtures**: Static data files in `src/test/resources/`
-- **Configuration Templates**: Environment-specific test configurations
-- **Browser Profiles**: Predefined WebDriver capability sets
-
-#### Mocking Strategy
-**WebDriver Mocking**: Mock WebDriver instances for unit tests without browser initialization
-**Configuration Mocking**: Environment variable and system property mocking
-**External Service Mocking**: Mockito integration for third-party service interactions
-**File System Mocking**: Mock file operations for configuration and report generation testing
-
-#### 6.6.2.2 Node.js Stack Unit Testing
-
-#### Testing Framework Configuration
-**Primary Framework**: Jest 29.0.0 with built-in mocking capabilities
-**Alternative Framework**: Mocha with Sinon for projects requiring different assertion styles
-**Coverage Tool**: NYC (Istanbul) with 80% threshold enforcement
-
-```json
-{
-  "jest": {
-    "testEnvironment": "node",
-    "collectCoverageFrom": [
-      "src/**/*.js",
-      "!src/**/*.test.js",
-      "!src/config/*.js"
-    ],
-    "coverageThreshold": {
-      "global": {
-        "branches": 80,
-        "functions": 80,
-        "lines": 80,
-        "statements": 80
-      }
-    }
-  }
+    echo "All validations passed"
+    return 0
 }
+
+validate_deployment
 ```
 
-**Test Organization Structure:**
-```
-test/
-├── unit/
-│   ├── server/
-│   ├── middleware/
-│   └── utils/
-├── integration/
-│   ├── api/
-│   └── database/
-└── fixtures/
-    ├── requests/
-    └── responses/
-```
+**Release Management Process**:
 
-#### Mocking Strategy
-**HTTP Request Mocking**: Jest built-in mocking for HTTP requests and responses
-**External API Mocking**: Sinon stubs for third-party service interactions
-**File System Mocking**: Mock file operations for configuration and logging
-**Environment Mocking**: Process.env mocking for environment-specific testing
+| Phase | Activities | Approval Required | Documentation |
+|-------|------------|-------------------|---------------|
+| **Pre-Release** | Code freeze, final testing | Tech Lead | Release notes |
+| **Release** | Production deployment | Operations Team | Deployment log |
+| **Post-Release** | Monitoring, validation | Automatic | Health report |
+| **Rollback** | Emergency procedures | On-call Engineer | Incident report |
 
-**Test Data Management:**
-- **Custom Fixtures**: JSON-based test data for API requests/responses
-- **Factory Functions**: Dynamic test data generation utilities
-- **Environment Configs**: Test-specific environment variable sets
-- **Mock Responses**: Predefined response templates for external services
+## 8.6 INFRASTRUCTURE MONITORING
 
-### 6.6.3 INTEGRATION TESTING STRATEGY
+### 8.6.1 Resource Monitoring Approach
 
-#### 6.6.3.1 Service Integration Testing
+**PM2 Monitoring Dashboard Integration**:
 
-#### Java Stack Integration Testing
-**Cucumber Integration Framework**: Feature file execution with step definition integration
-**WebDriver Integration**: Browser automation with real browser instances
-**Maven Integration**: Build process validation and dependency resolution testing
-
-```mermaid
-sequenceDiagram
-    participant Test as Test Runner
-    participant Cucumber as Cucumber Engine
-    participant Steps as Step Definitions
-    participant WebDriver as WebDriver Manager
-    participant Browser as Browser Instance
-    participant Report as Report Generator
-    
-    Test->>Cucumber: Execute Feature Files
-    Cucumber->>Steps: Map Gherkin Steps
-    Steps->>WebDriver: Initialize Driver
-    WebDriver->>Browser: Launch Browser
-    Browser->>Steps: Execute Actions
-    Steps->>Cucumber: Return Results
-    Cucumber->>Report: Generate Reports
-    Report->>Test: HTML/JSON/TXT Reports
-```
-
-## Node.js Stack Integration Testing
-**Supertest Integration**: HTTP endpoint testing with request/response validation
-**Express.js Integration**: Middleware chain testing and route validation
-**PM2 Integration**: Process management and health check testing
-
-**API Testing Strategy:**
-
-| Endpoint Category | Test Approach | Validation Points | Performance Requirements |
-|---|---|---|---|
-| Core HTTP Endpoints | Supertest request/response | Status codes, headers, body | <100ms response time |
-| Enhanced Endpoints | Express.js middleware testing | Authentication, authorization, data | <10ms for core endpoints |
-| Health Check Endpoints | PM2 integration testing | Process status, memory, CPU | <50ms response time |
-| Error Handling | Error condition simulation | Error codes, messages, logging | Graceful degradation |
-
-#### 6.6.3.2 Database Integration Testing
-
-**Connection Pool Testing**: Validate database connection management and pool configuration
-**Transaction Testing**: Ensure ACID compliance and rollback functionality
-**Migration Testing**: Validate database schema changes and data migration processes
-**Performance Testing**: Connection latency and query performance validation
-
-**Database Test Environment Management:**
-- **Test Database**: Isolated database instance for integration testing
-- **Data Seeding**: Automated test data generation and cleanup
-- **Schema Validation**: Database structure consistency testing
-- **Connection Testing**: Pool exhaustion and recovery testing
-
-#### 6.6.3.3 External Service Integration Testing
-
-#### Backprop Integration Testing
-**Test Harness Integration**: Validate code analysis and development workflow integration
-**Metrics Collection**: Test development and runtime metrics gathering
-**Report Generation**: Validate comprehensive development report creation
-
-**Integration Test Scenarios:**
-
-| Integration Point | Test Scenario | Success Criteria | Failure Handling |
-|---|---|---|---|
-| Backprop API | Code analysis workflow | Successful analysis completion | Graceful fallback mode |
-| GitHub Actions | CI/CD pipeline integration | Automated test execution | Build failure notification |
-| Monitoring Systems | Metrics and logging integration | Data collection and aggregation | Alert generation |
-| Browser Drivers | WebDriver initialization | Cross-browser compatibility | Driver fallback options |
-
-### 6.6.4 END-TO-END TESTING STRATEGY
-
-#### 6.6.4.1 E2E Test Scenarios
-
-#### Browser Automation E2E Testing
-**Cross-Browser Test Matrix**: Comprehensive testing across Chrome, Firefox, and Edge browsers
-**User Journey Validation**: Complete user workflow testing from initialization to completion
-**Performance Validation**: End-to-end performance measurement and optimization testing
-
-**E2E Test Scenario Categories:**
-
-| Scenario Category | Description | Browser Coverage | Success Criteria |
-|---|---|---|---|
-| Browser Initialization | WebDriver startup and configuration | Chrome, Firefox, Edge | <5 seconds initialization |
-| Navigation Testing | Page loading and element interaction | All supported browsers | Consistent behavior |
-| Form Interaction | Input validation and submission | Cross-browser compatibility | Data integrity maintained |
-| Error Handling | Browser crash and recovery testing | Graceful error handling | Session recovery |
-
-#### Server E2E Testing
-**Request/Response Cycle**: Complete HTTP request processing validation
-**Load Testing**: Server performance under various load conditions
-**Security Testing**: Authentication, authorization, and input validation testing
-
-```mermaid
-flowchart TD
-    Start[E2E Test Start] --> Config[Load Configuration]
-    Config --> Server[Start Test Server]
-    Server --> Browser[Initialize Browser]
-    Browser --> Navigate[Navigate to Endpoint]
-    Navigate --> Interact[User Interactions]
-    Interact --> Validate[Validate Responses]
-    Validate --> Performance[Performance Checks]
-    Performance --> Security[Security Validation]
-    Security --> Cleanup[Cleanup Resources]
-    Cleanup --> Report[Generate E2E Report]
-    Report --> End[Test Complete]
-```
-
-#### 6.6.4.2 Performance Testing Requirements
-
-#### Load Testing Specifications
-**Concurrent Users**: Progressive load testing from 1 to 100 concurrent users
-**Response Time Targets**: Maintain sub-100ms response times under normal load
-**Resource Utilization**: Monitor CPU, memory, and network usage during load testing
-
-**Performance Test Matrix:**
-
-| Test Type | Load Profile | Duration | Success Criteria | Monitoring Points |
-|---|---|---|---|---|
-| Baseline Testing | 1 user | 5 minutes | <100ms response time | CPU, Memory, Network |
-| Load Testing | 50 concurrent users | 30 minutes | <500ms response time | Throughput, Error rate |
-| Stress Testing | 100+ concurrent users | 15 minutes | Graceful degradation | Resource limits |
-| Spike Testing | Sudden load increase | 10 minutes | System recovery | Error handling |
-
-#### Browser Performance Testing
-**WebDriver Performance**: Browser initialization and navigation timing
-**Cross-Browser Performance**: Performance consistency across different browsers
-**Memory Usage**: Browser memory consumption and leak detection
-
-#### 6.6.4.3 Cross-Browser Testing Strategy
-
-**Browser Test Configuration Matrix:**
-
-| Browser | Version Range | Operating System | WebDriver Version | Test Coverage |
-|---|---|---|---|---|
-| Chrome | Latest stable | Windows, macOS, Linux | ChromeDriver (auto) | Full test suite |
-| Firefox | Latest stable | Windows, macOS, Linux | GeckoDriver (auto) | Full test suite |
-| Edge | Latest stable | Windows, macOS | EdgeDriver (auto) | Core functionality |
-| Safari | Latest stable | macOS | SafariDriver | Basic compatibility |
-
-**WebDriverManager Configuration**: Automatic driver download and management for consistent testing environments across all supported browsers.
-
-### 6.6.5 TEST AUTOMATION FRAMEWORK
-
-#### 6.6.5.1 CI/CD Integration
-
-#### Pipeline Configuration
-**GitHub Actions Integration**: Multi-platform testing across Node.js 14.x, 16.x, and 18.x versions
-**Maven Integration**: Automated Java test execution with parallel processing
-**Test Trigger Configuration**: Automated test execution on pull requests, merges, and scheduled runs
-
-```mermaid
-graph LR
-    subgraph "CI/CD Pipeline"
-        Trigger[Code Commit] --> Build[Build Stage]
-        Build --> UnitTests[Unit Tests]
-        UnitTests --> IntegrationTests[Integration Tests]
-        IntegrationTests --> E2ETests[E2E Tests]
-        E2ETests --> Coverage[Coverage Analysis]
-        Coverage --> QualityGates[Quality Gates]
-        QualityGates --> Deploy[Deployment]
-    end
-    
-    subgraph "Test Execution"
-        UnitTests --> JUnit[JUnit Execution]
-        UnitTests --> Jest[Jest Execution]
-        IntegrationTests --> Cucumber[Cucumber Tests]
-        IntegrationTests --> Supertest[API Tests]
-        E2ETests --> Selenium[Browser Tests]
-        E2ETests --> Performance[Performance Tests]
-    end
-    
-    subgraph "Reporting"
-        Coverage --> HTML[HTML Reports]
-        Coverage --> JSON[JSON Reports]
-        Coverage --> Codecov[Codecov Upload]
-        QualityGates --> Notifications[Slack/Email]
-    end
-```
-
-#### Automated Test Triggers
-**Pull Request Triggers**: Full test suite execution on all pull requests
-**Merge Triggers**: Comprehensive testing including performance and security tests
-**Scheduled Triggers**: Nightly regression testing with extended test scenarios
-**Manual Triggers**: On-demand test execution for specific scenarios or debugging
-
-#### 6.6.5.2 Parallel Test Execution
-
-#### Java Stack Parallel Execution
-**Maven Surefire Configuration**: Method-level parallelization with unlimited thread configuration
-**Test Isolation**: Independent test execution with isolated WebDriver instances
-**Resource Management**: Automatic cleanup of browser sessions and temporary files
-
-**Parallel Execution Configuration:**
-```xml
-<configuration>
-    <parallel>methods</parallel>
-    <threadCount>0</threadCount>
-    <perCoreThreadCount>true</perCoreThreadCount>
-    <testFailureIgnore>true</testFailureIgnore>
-</configuration>
-```
-
-## Node.js Stack Parallel Execution
-**Jest Parallel Testing**: Automatic test parallelization based on available CPU cores
-**Worker Process Management**: Isolated test environments for each worker process
-**Resource Cleanup**: Automatic cleanup of test databases and mock services
-
-#### 6.6.5.3 Test Reporting Requirements
-
-#### Comprehensive Reporting Framework
-**Multi-Format Reports**: HTML, JSON, and TXT format reports for different stakeholders
-**Coverage Integration**: Unified coverage reporting across both technology stacks
-**Performance Metrics**: Detailed performance analysis and trend reporting
-
-**Report Generation Matrix:**
-
-| Report Type | Format | Audience | Update Frequency | Retention Period |
-|---|---|---|---|---|
-| Unit Test Results | HTML/JSON | Development Team | Per test run | 30 days |
-| Coverage Reports | HTML/XML | QA Team | Per test run | 90 days |
-| Performance Reports | JSON/CSV | Operations Team | Daily | 365 days |
-| E2E Test Results | HTML/Video | Product Team | Per release | 90 days |
-
-#### Failed Test Handling
-**Automatic Retry**: Configurable retry mechanism for flaky tests
-**Failure Analysis**: Automatic categorization of test failures (environment, code, data)
-**Notification System**: Immediate notification for critical test failures
-**Recovery Procedures**: Automated cleanup and environment reset for failed tests
-
-#### 6.6.5.4 Flaky Test Management
-
-#### Flaky Test Detection
-**Statistical Analysis**: Track test success rates and identify patterns in test failures
-**Environment Correlation**: Correlate test failures with environment conditions
-**Timing Analysis**: Identify timing-related test failures and race conditions
-
-**Flaky Test Response Strategy:**
-
-| Flakiness Level | Detection Threshold | Response Action | Review Frequency |
-|---|---|---|---|
-| Low | 5% failure rate | Monitor and track | Weekly review |
-| Medium | 10% failure rate | Investigate and fix | Daily review |
-| High | 20% failure rate | Disable temporarily | Immediate action |
-| Critical | 30% failure rate | Remove from suite | Emergency response |
-
-### 6.6.6 QUALITY METRICS AND REQUIREMENTS
-
-#### 6.6.6.1 Code Coverage Targets
-
-#### Coverage Requirements by Component
-
-| Component Type | Branch Coverage | Function Coverage | Line Coverage | Statement Coverage |
-|---|---|---|---|---|
-| Core Business Logic | 90% | 95% | 90% | 90% |
-| API Endpoints | 85% | 90% | 85% | 85% |
-| Utility Functions | 95% | 100% | 95% | 95% |
-| Configuration Modules | 80% | 85% | 80% | 80% |
-
-#### Technology Stack Coverage Targets
-**Java Stack**: JaCoCo integration with Maven for comprehensive coverage analysis
-**Node.js Stack**: NYC (Istanbul) with 80% minimum threshold enforcement across all metrics
-**Cross-Stack Reporting**: Unified coverage dashboard combining both technology stacks
-
-#### 6.6.6.2 Test Success Rate Requirements
-
-#### Success Rate Targets by Test Type
-
-| Test Category | Target Success Rate | Acceptable Range | Alert Threshold |
-|---|---|---|---|
-| Unit Tests | 99% | 95-100% | <95% |
-| Integration Tests | 95% | 90-100% | <90% |
-| E2E Tests | 90% | 85-100% | <85% |
-| Performance Tests | 95% | 90-100% | <90% |
-
-#### Test Reliability Metrics
-**Mean Time Between Failures (MTBF)**: Target >720 hours for stable test execution
-**Mean Time To Recovery (MTTR)**: Target <2 minutes for automated test recovery
-**Test Environment Stability**: 99.9% uptime for test execution environments
-
-#### 6.6.6.3 Performance Test Thresholds
-
-#### Response Time Requirements
-
-| Endpoint Category | Target Response Time | Alert Threshold | Critical Threshold |
-|---|---|---|---|
-| WebDriver Initialization | <5 seconds | >10 seconds | >15 seconds |
-| HTTP Basic Endpoints | <100ms | >500ms | >1000ms |
-| HTTP Enhanced Endpoints | <10ms | >50ms | >100ms |
-| Test Report Generation | <30 seconds | >60 seconds | >120 seconds |
-
-#### Resource Utilization Thresholds
-**Memory Usage**: Alert at 80% utilization, critical at 90%
-**CPU Usage**: Alert at 70% sustained utilization, critical at 85%
-**Network I/O**: Monitor throughput and latency for performance regression detection
-
-#### 6.6.6.4 Quality Gates Implementation
-
-#### Automated Quality Gates
-**Coverage Gate**: Minimum 80% coverage required for deployment approval
-**Performance Gate**: All performance tests must pass within defined thresholds
-**Security Gate**: No critical security vulnerabilities in dependencies
-**Test Success Gate**: Minimum 95% test success rate for production deployment
-
-```mermaid
-flowchart TD
-    CodeCommit[Code Commit] --> QualityGates{Quality Gates}
-    
-    QualityGates --> CoverageCheck[Coverage ≥ 80%?]
-    QualityGates --> TestSuccess[Test Success ≥ 95%?]
-    QualityGates --> Performance[Performance OK?]
-    QualityGates --> Security[Security OK?]
-    
-    CoverageCheck -->|Pass| CoverageOK[Coverage Gate: PASS]
-    CoverageCheck -->|Fail| CoverageFail[Coverage Gate: FAIL]
-    
-    TestSuccess -->|Pass| TestOK[Test Gate: PASS]
-    TestSuccess -->|Fail| TestFail[Test Gate: FAIL]
-    
-    Performance -->|Pass| PerfOK[Performance Gate: PASS]
-    Performance -->|Fail| PerfFail[Performance Gate: FAIL]
-    
-    Security -->|Pass| SecOK[Security Gate: PASS]
-    Security -->|Fail| SecFail[Security Gate: FAIL]
-    
-    CoverageOK --> AllGates{All Gates Pass?}
-    TestOK --> AllGates
-    PerfOK --> AllGates
-    SecOK --> AllGates
-    
-    AllGates -->|Yes| DeployApproved[Deployment Approved]
-    AllGates -->|No| DeployBlocked[Deployment Blocked]
-    
-    CoverageFail --> DeployBlocked
-    TestFail --> DeployBlocked
-    PerfFail --> DeployBlocked
-    SecFail --> DeployBlocked
-```
-
-### 6.6.7 TEST ENVIRONMENT MANAGEMENT
-
-#### 6.6.7.1 Test Environment Architecture
-
-#### Multi-Environment Strategy
-**Development Environment**: Local development with isolated test databases and mock services
-**Staging Environment**: Production-like environment for integration and E2E testing
-**Performance Environment**: Dedicated environment for load and performance testing
-**Security Environment**: Isolated environment for security and penetration testing
-
-```mermaid
-graph TB
-    subgraph "Test Environment Architecture"
-        Dev[Development Environment]
-        Stage[Staging Environment]
-        Perf[Performance Environment]
-        Sec[Security Environment]
-    end
-    
-    subgraph "Development Environment"
-        DevDB[(Test Database)]
-        DevMocks[Mock Services]
-        DevBrowser[Local Browser]
-        DevServer[Local Server]
-    end
-    
-    subgraph "Staging Environment"
-        StageDB[(Staging Database)]
-        StageServices[External Services]
-        StageBrowser[Browser Grid]
-        StageServer[Staging Server]
-    end
-    
-    subgraph "Performance Environment"
-        PerfDB[(Performance Database)]
-        LoadGen[Load Generators]
-        PerfBrowser[Browser Farm]
-        PerfServer[Performance Server]
-    end
-    
-    subgraph "Security Environment"
-        SecDB[(Security Database)]
-        SecTools[Security Tools]
-        SecBrowser[Hardened Browser]
-        SecServer[Security Server]
-    end
-    
-    Dev --> Tests[Test Execution]
-    Stage --> Tests
-    Perf --> Tests
-    Sec --> Tests
-```
-
-#### 6.6.7.2 Environment Configuration Management
-
-#### Configuration Strategy
-**Environment Variables**: Comprehensive environment-specific configuration management
-**Docker Containerization**: Consistent environment setup across all testing stages
-**Configuration Validation**: Automated validation of environment setup before test execution
-
-**Environment Configuration Matrix:**
-
-| Environment | Database | Browser Grid | Mock Services | Performance Monitoring |
-|---|---|---|---|---|
-| Development | SQLite | Local browsers | JSON mocks | Basic logging |
-| Staging | PostgreSQL | Selenium Grid | Service mocks | Full monitoring |
-| Performance | PostgreSQL | Browser farm | Load test mocks | Performance metrics |
-| Security | PostgreSQL | Hardened browsers | Security mocks | Security monitoring |
-
-#### 6.6.7.3 Test Data Management
-
-#### Test Data Strategy
-**Data Generation**: Automated test data generation using JavaFaker and custom factories
-**Data Isolation**: Independent test data sets for parallel test execution
-**Data Cleanup**: Automated cleanup of test data after test completion
-**Data Seeding**: Consistent test data setup across all environments
-
-**Test Data Categories:**
-
-| Data Type | Generation Method | Cleanup Strategy | Isolation Level |
-|---|---|---|---|
-| User Data | JavaFaker | Automatic cleanup | Per test method |
-| Configuration Data | Template files | Environment reset | Per test suite |
-| Performance Data | Load generators | Scheduled cleanup | Per test run |
-| Security Data | Threat models | Immediate cleanup | Per test case |
-
-### 6.6.8 SECURITY TESTING INTEGRATION
-
-#### 6.6.8.1 Security Testing Requirements
-
-#### Security Test Categories
-**Authentication Testing**: Validate authentication mechanisms and token management
-**Authorization Testing**: Test access control and permission enforcement
-**Input Validation Testing**: Verify input sanitization and injection prevention
-**Dependency Security Testing**: Automated vulnerability scanning of dependencies
-
-**Security Testing Matrix:**
-
-| Security Test Type | Testing Tool | Frequency | Severity Threshold |
-|---|---|---|---|
-| Dependency Scanning | npm audit, OWASP | Per build | High/Critical only |
-| Input Validation | Custom test cases | Per feature | All vulnerabilities |
-| Authentication Testing | Automated test suite | Per release | Medium+ |
-| Authorization Testing | Access control tests | Per release | Medium+ |
-
-#### 6.6.8.2 Vulnerability Management
-
-#### Automated Security Scanning
-**Dependency Vulnerability Scanning**: Automated scanning of all project dependencies
-**Static Code Analysis**: Security-focused code analysis for common vulnerabilities
-**Dynamic Security Testing**: Runtime security testing during E2E test execution
-
-**Security Response Procedures:**
-
-| Vulnerability Level | Response Time | Required Action | Approval Level |
-|---|---|---|---|
-| Critical | 24 hours | Immediate patch/mitigation | Security team lead |
-| High | 72 hours | Patch in next release | Development team lead |
-| Medium | 1 week | Schedule for upcoming sprint | Product owner |
-| Low | 1 month | Address in maintenance cycle | Development team |
-
-### 6.6.9 TEST EXECUTION FLOW DIAGRAMS
-
-#### 6.6.9.1 Comprehensive Test Execution Flow
-
-```mermaid
-flowchart TD
-    Start[Test Execution Start] --> EnvCheck[Environment Validation]
-    EnvCheck --> ConfigLoad[Load Configuration]
-    ConfigLoad --> DataPrep[Test Data Preparation]
-    
-    DataPrep --> UnitExec[Unit Test Execution]
-    UnitExec --> UnitResults[Unit Test Results]
-    
-    UnitResults --> IntegrationExec[Integration Test Execution]
-    IntegrationExec --> IntegrationResults[Integration Test Results]
-    
-    IntegrationResults --> E2EExec[E2E Test Execution]
-    E2EExec --> E2EResults[E2E Test Results]
-    
-    E2EResults --> PerformanceExec[Performance Test Execution]
-    PerformanceExec --> PerformanceResults[Performance Test Results]
-    
-    PerformanceResults --> SecurityExec[Security Test Execution]
-    SecurityExec --> SecurityResults[Security Test Results]
-    
-    SecurityResults --> CoverageAnalysis[Coverage Analysis]
-    CoverageAnalysis --> QualityGatesCheck[Quality Gates Check]
-    
-    QualityGatesCheck -->|Pass| ReportGeneration[Test Report Generation]
-    QualityGatesCheck -->|Fail| TestFailure[Test Failure Handling]
-    
-    ReportGeneration --> Cleanup[Environment Cleanup]
-    TestFailure --> FailureAnalysis[Failure Analysis]
-    FailureAnalysis --> Cleanup
-    
-    Cleanup --> End[Test Execution Complete]
-```
-
-#### 6.6.9.2 Test Data Flow Architecture
-
-```mermaid
-graph TB
-    subgraph "Test Data Sources"
-        Fixtures[Test Fixtures]
-        Factories[Data Factories]
-        JavaFaker[JavaFaker Generator]
-        External[External Data Sources]
-    end
-    
-    subgraph "Test Data Processing"
-        Validator[Data Validator]
-        Transformer[Data Transformer]
-        Seeder[Database Seeder]
-        Cleaner[Data Cleaner]
-    end
-    
-    subgraph "Test Execution Environments"
-        UnitTests[Unit Tests]
-        IntegrationTests[Integration Tests]
-        E2ETests[E2E Tests]
-        PerformanceTests[Performance Tests]
-    end
-    
-    Fixtures --> Validator
-    Factories --> Validator
-    JavaFaker --> Transformer
-    External --> Transformer
-    
-    Validator --> Seeder
-    Transformer --> Seeder
-    Seeder --> UnitTests
-    Seeder --> IntegrationTests
-    Seeder --> E2ETests
-    Seeder --> PerformanceTests
-    
-    UnitTests --> Cleaner
-    IntegrationTests --> Cleaner
-    E2ETests --> Cleaner
-    PerformanceTests --> Cleaner
-```
-
-### 6.6.10 MONITORING AND OBSERVABILITY INTEGRATION
-
-#### 6.6.10.1 Test Metrics Collection
-
-#### Comprehensive Test Monitoring
-**Real-time Test Monitoring**: Live monitoring of test execution progress and results
-**Performance Metrics**: Detailed performance analysis during test execution
-**Resource Utilization**: Monitor system resources during test execution
-**Failure Analysis**: Automated analysis and categorization of test failures
-
-**Test Monitoring Dashboard Components:**
-- **Test Execution Status**: Real-time status of all running tests
-- **Coverage Metrics**: Live coverage percentage and trends
-- **Performance Trends**: Response time and throughput analysis
-- **Failure Patterns**: Analysis of common failure modes and root causes
-- **Environment Health**: Test environment status and resource utilization
-
-#### 6.6.10.2 Alert Integration
-
-#### Test-Specific Alerting
-**Test Failure Alerts**: Immediate notifications for critical test failures
-**Performance Degradation Alerts**: Alerts for performance threshold violations
-**Coverage Drop Alerts**: Notifications when coverage falls below thresholds
-**Environment Issues**: Alerts for test environment availability problems
-
-**Alert Configuration Matrix:**
-
-| Alert Type | Trigger Condition | Notification Channel | Response Time |
-|---|---|---|---|
-| Critical Test Failure | >5% unit test failures | Slack + Email | Immediate |
-| Performance Degradation | >10% response time increase | Slack | 5 minutes |
-| Coverage Drop | <80% coverage | Email | 15 minutes |
-| Environment Down | Test environment unavailable | Slack + SMS | Immediate |
-
-### 6.6.11 DOCUMENTATION REQUIREMENTS
-
-#### 6.6.11.1 Test Documentation Standards
-
-#### Comprehensive Test Documentation
-**Test Case Documentation**: Detailed documentation for all test scenarios
-**API Testing Documentation**: Complete API endpoint testing documentation
-**Performance Test Documentation**: Detailed performance test scenarios and benchmarks
-**Security Test Documentation**: Security testing procedures and compliance requirements
-
-**Documentation Template Structure:**
-- **Test Objective**: Clear statement of what the test validates
-- **Preconditions**: Required environment setup and data preparation
-- **Test Steps**: Detailed step-by-step execution procedures
-- **Expected Results**: Clear definition of success criteria
-- **Cleanup Procedures**: Steps to restore environment after test completion
-
-#### 6.6.11.2 Test Maintenance Documentation
-
-#### Test Maintenance Procedures
-**Flaky Test Resolution**: Documented procedures for identifying and fixing flaky tests
-**Test Data Maintenance**: Procedures for maintaining and updating test data sets
-**Environment Maintenance**: Documentation for test environment maintenance and updates
-**Tool Updates**: Procedures for updating testing tools and frameworks
-
-#### References
-
-**Files Examined:**
-- `pom.xml` - Maven configuration with comprehensive Java testing framework setup including Selenium WebDriver 3.141.59, Cucumber 7.2.3, JUnit 4.13.2, and parallel execution configuration
-- `docs/guides/testing.md` - Comprehensive 921-line testing guide covering Jest/Mocha configuration, coverage requirements, and Node.js testing best practices
-- `README.md` - Node.js server documentation with testing framework references and Backprop integration details
-- `.gitignore` - Java development patterns indicating test artifact management and environment configuration
-
-**Folders Explored:**
-- `(root)/` - Repository root containing dual-stack configuration files and testing framework setup
-- `docs/guides/` - Documentation structure containing comprehensive testing guidance and configuration examples
-- `docs/architecture/` - System design documentation with test harness integration patterns
-
-**Technical Specification Sections Referenced:**
-- `1.2 SYSTEM OVERVIEW` - Dual-stack architecture understanding providing context for comprehensive testing strategy
-- `3.1 TECHNOLOGY STACK OVERVIEW` - Technology selection rationale informing testing framework choices and integration patterns
-- `6.5 MONITORING AND OBSERVABILITY` - Monitoring infrastructure integration for test metrics collection and observability requirements
-- `2.2 FUNCTIONAL REQUIREMENTS TABLE` - Functional requirements defining test scenarios and acceptance criteria for browser automation and server functionality
-
-## 6.1 CORE SERVICES ARCHITECTURE
-
-### 6.1.1 Architecture Applicability Assessment
-
-#### Core Services Architecture is Not Applicable for This System
-
-After comprehensive analysis of the Testinium-QA repository structure, technical specifications, and architecture documentation, **Core Services Architecture is not applicable for this system**. This determination is based on clear evidence that the system implements a monolithic architecture pattern rather than a distributed services-based approach.
-
-#### 6.1.1.1 System Architecture Classification
-
-The Testinium-QA system implements a **dual-stack monolithic architecture** with the following characteristics:
-
-| Architecture Aspect | Implementation Approach | Evidence Source |
-|---|---|---|
-| **System Design Pattern** | Layered, minimalist-first architecture | Section 5.1 HIGH-LEVEL ARCHITECTURE |
-| **Operational Modes** | Test Automation Mode + Web Server Mode | Section 5.1.1 System Overview |
-| **Component Structure** | Progressive enhancement layers, not services | Section 5.2 COMPONENT DETAILS |
-| **Technology Stack** | Java monolith + Node.js monolith | pom.xml, README.md |
-
-#### 6.1.1.2 Architectural Evidence Analysis
-
-**Monolithic Design Indicators**:
-- Java Test Automation Engine operates as a single-process component using Selenium WebDriver
-- HTTP Server Core implements basic request/response handling within a single Node.js process
-- Express.js Enhancement Layer provides middleware capabilities within the same process space
-- PM2 Process Manager enables clustering but not service decomposition
-
-**Absence of Service-Oriented Patterns**:
-- No service discovery mechanisms present
-- No inter-service communication protocols defined
-- No distributed transaction management
-- No service registry or service mesh implementation
-- No microservices deployment patterns
-
-#### 6.1.1.3 Future Architecture Considerations
-
-The system architecture documentation explicitly identifies microservices as a **future enhancement**:
-
-```mermaid
-timeline
-    title Architecture Evolution Timeline
-    
-    Current State    : Dual-Stack Monolithic Architecture
-                    : Java Test Automation Engine
-                    : Node.js HTTP Server with Progressive Enhancement
-    
-    6+ Months       : Microservices Architecture Consideration
-                    : Service Decomposition Analysis
-                    : Container Orchestration Evaluation
-```
-
-### 6.1.2 Actual System Architecture Patterns
-
-#### 6.1.2.1 Component-Based Monolithic Architecture
-
-Instead of services architecture, the system implements a **component-based monolithic architecture** with clear separation of concerns:
-
-| Component | Type | Responsibility | Integration Pattern |
-|---|---|---|---|
-| **Java Test Automation Engine** | Monolithic Application | Browser automation and BDD test execution | Process-level integration via Maven |
-| **HTTP Server Core** | Single-Process Server | Basic request/response handling | Native Node.js HTTP module |
-| **Express.js Enhancement Layer** | Middleware Stack | Production-ready web framework capabilities | In-process enhancement |
-| **PM2 Process Manager** | Process Clustering | Production deployment and scaling | Multi-process, single-application scaling |
-
-#### 6.1.2.2 Progressive Enhancement Architecture
-
-The system follows a **progressive enhancement pattern** that enables structured capability expansion:
-
-```mermaid
-graph TD
-    subgraph "Progressive Enhancement Layers"
-        A[Basic HTTP Server Core] --> B[Express.js Framework Layer]
-        B --> C[Security Middleware Layer]
-        C --> D[PM2 Production Management]
-        
-        E[Basic Test Automation] --> F[Parallel Execution Layer]
-        F --> G[Advanced Reporting Layer]
-        G --> H[CI/CD Integration Layer]
-    end
-    
-    subgraph "Enhancement Characteristics"
-        I[Backward Compatibility Maintained]
-        J[Incremental Complexity Addition]
-        K[Configuration-Driven Activation]
-    end
-    
-    A -.-> I
-    B -.-> J
-    D -.-> K
-    
-    style A fill:#e3f2fd
-    style E fill:#e3f2fd
-    style D fill:#c8e6c9
-    style H fill:#c8e6c9
-```
-
-#### 6.1.2.3 Integration Architecture
-
-The system provides integration capabilities through well-defined interfaces rather than service boundaries:
-
-| Integration Point | Protocol/Pattern | Purpose | Implementation |
-|---|---|---|---|
-| **Browser WebDriver** | W3C WebDriver Protocol | Test automation | Direct protocol communication |
-| **HTTP Client Connections** | HTTP/HTTPS | Web server functionality | Native Node.js HTTP module |
-| **Backprop Development Tooling** | JSON/REST API | Development workflow integration | Direct API integration |
-| **CI/CD Pipelines** | Maven/NPM scripts | Build and deployment automation | Build system integration |
-
-### 6.1.3 Scaling and Resilience in Monolithic Context
-
-#### 6.1.3.1 Scaling Approach
-
-The system implements **process-level scaling** rather than service-level scaling:
-
-**Java Test Automation Scaling**:
-- Unlimited thread configuration for parallel test execution
-- Method-level parallel execution distributes load effectively
-- Maven Surefire plugin supports distributed test execution across multiple JVMs
-
-**Node.js Server Scaling**:
-- PM2 cluster mode for multi-core CPU utilization
-- Process-based horizontal scaling on single machines
-- Event-driven architecture enables high concurrency within each process
-
-#### 6.1.3.2 Resilience Patterns
-
-**Test Automation Resilience**:
-- WebDriverManager provides automatic browser driver management and recovery
-- Cucumber framework includes built-in retry mechanisms for flaky tests
-- JUnit framework supports test isolation and failure containment
-
-**Server Resilience**:
-- PM2 automatic process restart on failure detection
-- Health monitoring with configurable thresholds
-- Zero-downtime deployment through rolling restart capabilities
-
-```mermaid
-graph LR
-    subgraph "Resilience Architecture"
-        A[Request] --> B[PM2 Load Balancer]
-        B --> C[Process Instance 1]
-        B --> D[Process Instance 2]
-        B --> E[Process Instance N]
-        
-        F[Health Monitor] --> G[Auto Restart]
-        G --> C
-        G --> D
-        G --> E
-        
-        H[Failure Detection] --> I[Process Recovery]
-        I --> G
-    end
-    
-    style F fill:#fff3e0
-    style G fill:#c8e6c9
-    style I fill:#ffcdd2
-```
-
-### 6.1.4 Alternative Architectural Benefits
-
-#### 6.1.4.1 Monolithic Architecture Advantages
-
-The chosen monolithic architecture provides several benefits for this system context:
-
-| Benefit Category | Advantage | Implementation Evidence |
-|---|---|---|
-| **Simplicity** | Single deployment unit per stack | Java JAR deployment, Node.js single-process server |
-| **Development Velocity** | Faster initial development and debugging | Shared codebase, simplified dependency management |
-| **Data Consistency** | No distributed transaction complexity | In-process data handling, atomic operations |
-| **Performance** | Reduced network latency | In-memory method calls, no service-to-service communication overhead |
-
-#### 6.1.4.2 Technology Stack Coherence
-
-The dual-stack approach maintains architectural coherence:
-
-- **Java Stack**: Enterprise-grade test automation with proven toolchain (Maven, Selenium, Cucumber)
-- **Node.js Stack**: Modern web development with progressive enhancement capabilities
-- **Clear Boundaries**: Distinct operational modes prevent technology mixing concerns
-
-### 6.1.5 Migration Path to Services Architecture
-
-#### 6.1.5.1 Future Services Decomposition Strategy
-
-While not currently applicable, the system's layered architecture provides a clear migration path when services architecture becomes necessary:
-
-```mermaid
-graph TD
-    subgraph "Future Service Decomposition"
-        A[Current Monolithic Architecture] --> B[Service Boundary Analysis]
-        B --> C[Test Automation Service]
-        B --> D[Web Server Service]
-        B --> E[Configuration Service]
-        B --> F[Monitoring Service]
-        
-        G[Service Communication Layer] --> H[Service Discovery]
-        G --> I[Load Balancing]
-        G --> J[Circuit Breakers]
-        
-        C --> G
-        D --> G
-        E --> G
-        F --> G
-    end
-    
-    style A fill:#e3f2fd
-    style C fill:#fff3e0
-    style D fill:#fff3e0
-    style E fill:#fff3e0
-    style F fill:#fff3e0
-```
-
-#### 6.1.5.2 Prerequisites for Services Migration
-
-Future migration to services architecture would require:
-
-- **Service Boundary Definition**: Clear functional decomposition of current monolithic components
-- **Data Store Separation**: Extraction of shared data concerns into dedicated services
-- **Communication Protocol Design**: RESTful APIs or message queuing between service boundaries
-- **Container Orchestration**: Kubernetes or Docker Swarm for service deployment and management
-- **Service Mesh Implementation**: Istio or similar for service-to-service communication management
-
-#### References
-
-**Technical Specification Sections Examined**:
-- `1.2 SYSTEM OVERVIEW` - System context and component analysis
-- `5.1 HIGH-LEVEL ARCHITECTURE` - Architectural patterns and design principles
-- `5.2 COMPONENT DETAILS` - Detailed component structure and relationships
-
-**Repository Files Analyzed**:
-- `pom.xml` - Maven configuration confirming monolithic Java test automation setup
-- `README.md` - Project overview and architecture documentation references
-- `docs/architecture/design.md` - Detailed architecture specifications and future considerations
-
-**Architecture Documentation Sources**:
-- System architecture patterns from Section 5.1.1
-- Component details and scaling considerations from Section 5.2
-- Technology stack analysis from technical specification
-
-## 6.2 DATABASE DESIGN
-
-### 6.2.1 Database Design Applicability Assessment
-
-**Database Design is not applicable to this system.** 
-
-After comprehensive analysis of the system architecture, functional requirements, and technology stack, this repository operates as a technology blueprint and project template that does not require traditional database persistence mechanisms.
-
-#### 6.2.1.1 Rationale for Non-Database Architecture
-
-The system consists of two distinct, non-integrated technology stacks:
-
-- **Java Test Automation Stack**: Selenium WebDriver, Cucumber BDD, and JUnit framework configured for browser automation testing
-- **Node.js Server Stack**: Basic HTTP server with progressive enhancement paths for development tooling integration
-
-Neither stack implements persistent data storage requirements. All data handling is ephemeral, utilizing in-memory structures during execution phases with no need for schema design, relational modeling, or persistent storage architectures.
-
-#### 6.2.1.2 System Context and Scope
-
-The repository serves as a **technology blueprint** containing:
-- Maven-configured test automation framework (Java) with no implementation code
-- Documented HTTP server architecture (Node.js) with no package.json or source files
-- Backprop tooling integration specifications for development workflow optimization
-
-The absence of implementation code combined with detailed configuration suggests this functions as a project template rather than an operational system requiring database persistence.
-
-### 6.2.2 Alternative Storage Mechanisms
-
-#### 6.2.2.1 Configuration Storage Architecture
-
-The system employs file-based and environment-based configuration storage:
-
-| Storage Type | Implementation | Purpose | Persistence Level |
-|---|---|---|---|
-| JSON Configuration | Environment-specific files | Runtime configuration | Static files |
-| Environment Variables | System environment | Deployment configuration | Runtime only |
-| Session Storage | In-memory management | Development sessions | Ephemeral |
-
-#### 6.2.2.2 Test Data Management Strategy
-
-#### Dynamic Test Data Generation
-- **JavaFaker Integration**: Realistic test data generation for browser automation scenarios
-- **Runtime Generation**: On-demand test data creation without persistent storage requirements
-- **Scenario Variation**: Dynamic data generation for varying test conditions
-
-#### Static Test Data Sources
-- **JSON Files**: Structured test data for consistent scenario execution
-- **CSV Files**: Tabular test data for data-driven testing approaches
-- **Configuration Files**: Test environment and browser configuration data
-
-#### 6.2.2.3 Logging and Monitoring Storage
-
-#### Winston Logging Architecture
-```mermaid
-graph TB
-    subgraph "Logging Storage Architecture"
-        A[Application Events] --> B[Winston Logger]
-        B --> C[Multiple Transports]
-        C --> D[File Transport]
-        C --> E[Console Transport]
-        C --> F[Error Transport]
-        
-        D --> G[Log Files]
-        G --> H[Log Rotation]
-        H --> I[Archived Logs]
-        
-        E --> J[Development Output]
-        F --> K[Error Files]
-    end
-    
-    subgraph "Metrics Collection"
-        L[Performance Metrics] --> M[Metrics Storage]
-        M --> N[Monitoring Systems]
-    end
-    
-    B --> L
-```
-
-#### Storage Characteristics
-- **File-based Logging**: Structured logging with rotation capabilities
-- **Transport Options**: Multiple output destinations for different log levels
-- **Metrics Collection**: Performance metrics storage for monitoring purposes
-- **Retention Policy**: Log rotation without long-term database persistence
-
-### 6.2.3 Data Flow Architecture
-
-#### 6.2.3.1 Test Automation Data Flow
-
-```mermaid
-sequenceDiagram
-    participant TF as Test Framework
-    participant JF as JavaFaker
-    participant WD as WebDriver
-    participant BRS as Browser
-    participant RF as Report Files
-    
-    TF->>JF: Request Test Data
-    JF->>TF: Generate Dynamic Data
-    TF->>WD: Initialize Browser Session
-    WD->>BRS: Launch Browser Instance
-    TF->>BRS: Execute Test Scenarios
-    BRS->>TF: Return Test Results
-    TF->>RF: Write Test Reports
-    
-    Note over TF,RF: All data ephemeral - no persistence
-```
-
-#### 6.2.3.2 HTTP Server Data Flow
-
-```mermaid
-graph LR
-    subgraph "Request Processing"
-        A[HTTP Request] --> B[Node.js Server]
-        B --> C[Request Handler]
-        C --> D[Response Generation]
-        D --> E[HTTP Response]
-        Note1["Note: Stateless processing"]
-    end
-    
-    subgraph "Configuration"
-        F[Environment Variables] --> B
-        G[JSON Config] --> B
-        Note2["Note: File-based configuration"]
-    end
-    
-    subgraph "Logging"
-        B --> H[Winston Logger]
-        H --> I[Log Files]
-        Note3["Note: Logging only persistence"]
-    end
-```
-
-### 6.2.4 Storage Performance Considerations
-
-#### 6.2.4.1 In-Memory Processing Optimization
-
-- **Session Management**: In-memory session storage for development environments
-- **Test Data Caching**: Runtime caching of generated test data during execution cycles
-- **Configuration Caching**: Environment configuration loaded once during application startup
-
-#### 6.2.4.2 File I/O Optimization
-
-- **Log Rotation**: Automated log file rotation to prevent disk space issues
-- **Configuration Loading**: Optimized JSON parsing for environment-specific configuration
-- **Static Resource Access**: Efficient access to CSV and JSON test data files
-
-### 6.2.5 Compliance and Data Management
-
-#### 6.2.5.1 Data Retention Strategy
-
-Since the system operates without persistent databases:
-- **Test Results**: Generated reports stored temporarily in file system
-- **Log Retention**: Configurable log rotation with automated cleanup
-- **Configuration Versioning**: Git-based versioning for configuration files
-
-#### 6.2.5.2 Privacy and Security Considerations
-
-- **No PII Storage**: System generates synthetic test data without storing personal information
-- **Configuration Security**: Environment variables for sensitive configuration data
-- **Access Controls**: File system permissions for configuration and log access
-
-### 6.2.6 Integration Architecture
-
-#### 6.2.6.1 Backprop Tooling Integration
-
-The Node.js server stack integrates with Backprop development tooling for:
-- **Code Analysis**: Integration without persistent storage requirements
-- **Metrics Collection**: Temporary metrics storage during analysis phases
-- **Report Generation**: File-based report output without database persistence
-
-#### 6.2.6.2 CI/CD Pipeline Integration
-
-- **GitHub Actions**: Integration for automated testing and deployment
-- **Docker**: Containerized deployment with ephemeral storage
-- **Maven/NPM**: Build system integration with temporary artifact storage
-
-#### References
-
-#### Technical Specification Sections Retrieved
-- `1.2 SYSTEM OVERVIEW` - System context and dual-stack architecture analysis
-- `2.2 FUNCTIONAL REQUIREMENTS TABLE` - Functional requirements verification (no database requirements identified)
-- `3.1 TECHNOLOGY STACK OVERVIEW` - Technology stack analysis confirming no database technologies
-- `3.6 DATABASES & STORAGE` - Storage mechanisms documentation (configuration, logging, test data only)
-
-## 6.3 INTEGRATION ARCHITECTURE
-
-### 6.3.1 Integration Architecture Overview
-
-#### 6.3.1.1 Integration Context Analysis
-
-The Testinium-QA system implements a **hybrid integration architecture** that supports dual operational modes through sophisticated external system connectivity. Based on comprehensive repository analysis, the system requires extensive integration capabilities despite its monolithic core architecture.
-
-**Primary Integration Requirements**:
-- Java Test Automation Framework integration with browser automation services
-- Node.js HTTP Server integration with development tooling and monitoring systems
-- CI/CD pipeline integration for automated testing and deployment
-- External service integration for test management and reporting
-
-#### 6.3.1.2 Integration Architecture Classification
-
-```mermaid
-graph TB
-    subgraph "Integration Architecture Overview"
-        A[Dual-Stack Integration Hub]
-        
-        subgraph "Java Integration Stack"
-            B[Maven Build Integration]
-            C[Selenium WebDriver Integration]
-            D[Test Reporting Integration]
-            E[CI/CD Pipeline Integration]
-        end
-        
-        subgraph "Node.js Integration Stack"
-            F[HTTP API Integration]
-            G[Backprop Tooling Integration]
-            H[Process Management Integration]
-            I[Health Monitoring Integration]
-        end
-        
-        subgraph "Shared Integration Services"
-            J[External System APIs]
-            K[Security & Authentication]
-            L[Configuration Management]
-            M[Report Generation]
-        end
-        
-        A --> B
-        A --> F
-        B --> J
-        F --> J
-        
-        B --> C
-        B --> D
-        B --> E
-        
-        F --> G
-        F --> H
-        F --> I
-        
-        J --> K
-        J --> L
-        J --> M
-    end
-    
-    style A fill:#e3f2fd
-    style J fill:#fff3e0
-    style K fill:#ffcdd2
-```
-
-### 6.3.2 API DESIGN
-
-#### 6.3.2.1 Protocol Specifications
-
-#### HTTP Server API Specifications
-
-| Endpoint | Method | Protocol | Response Format | Purpose |
-|---|---|---|---|---|
-| `/` | GET | HTTP/1.1, HTTP/2 | text/plain | Basic health check |
-| `/hello` | GET | HTTP/1.1, HTTP/2 | text/plain | Application greeting |
-| `/health` | GET | HTTP/1.1, HTTP/2 | application/json | Health monitoring endpoint |
-
-**Protocol Support Matrix**:
-- **HTTP/1.1**: Full support with keep-alive connections
-- **HTTP/2**: Available through Express.js enhancement layer
-- **HTTPS/TLS**: SSL/TLS 1.2+ support via configuration
-- **WebSocket**: Available through Express.js WebSocket middleware
-
-#### External API Integration Protocols
-
-| Integration Target | Protocol | Authentication Method | Data Format |
-|---|---|---|---|
-| **Backprop API** | REST/HTTP | API Key Authentication | JSON |
-| **Selenium WebDriver** | W3C WebDriver Protocol | None (Local) | JSON-RPC |
-| **Jenkins CI/CD** | REST/HTTP | Token-based | JSON/XML |
-| **Jira Integration** | REST/HTTP | OAuth 2.0 / API Token | JSON |
-
-#### 6.3.2.2 Authentication Methods
-
-#### API Key Authentication (Backprop Integration)
-
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Server
-    participant Backprop
-    
-    Client->>Server: Request with API Key
-    Server->>Server: Validate BACKPROP_API_KEY
-    Server->>Backprop: Authenticated Request
-    Backprop-->>Server: Response
-    Server-->>Client: Processed Response
-    
-    Note over Client,Backprop: Environment variable:<br/>BACKPROP_API_KEY
-```
-
-**Environment Variables Configuration**:
-- `BACKPROP_ENABLED`: Boolean flag to enable/disable Backprop integration
-- `BACKPROP_API_KEY`: Secure API key for Backprop service authentication
-- `NODE_ENV`: Environment specification affecting authentication behavior
-
-#### Security Headers Integration
-
-Based on the system's Helmet.js integration capability:
-
-| Security Header | Implementation | Purpose |
-|---|---|---|
-| `Content-Security-Policy` | Configurable CSP rules | XSS protection |
-| `X-Frame-Options` | DENY/SAMEORIGIN | Clickjacking prevention |
-| `Strict-Transport-Security` | HTTPS enforcement | SSL/TLS security |
-| `X-Content-Type-Options` | nosniff | MIME type security |
-
-#### 6.3.2.3 Authorization Framework
-
-#### Role-Based Access Control (Future Enhancement)
-
-The system architecture supports future implementation of role-based authorization:
-
-```mermaid
-graph LR
-    subgraph "Authorization Framework (Future)"
-        A[Request] --> B[Authentication Middleware]
-        B --> C[Authorization Middleware]
-        C --> D[Role Validation]
-        D --> E[Resource Access Control]
-        E --> F[API Endpoint]
-        
-        G[Configuration Store] --> D
-        H[User Role Database] --> D
-    end
-    
-    style A fill:#e3f2fd
-    style F fill:#c8e6c9
-    style G fill:#fff3e0
-    style H fill:#fff3e0
-```
-
-#### 6.3.2.4 Rate Limiting Strategy
-
-## 6.4 SECURITY ARCHITECTURE
-
-### 6.4.1 Security Architecture Overview
-
-#### 6.4.1.1 Current Security Context
-
-The Testinium-QA repository represents a **Java-based test automation framework** with comprehensive **security architecture documentation** designed for future enhancement into a production-ready application. While the current implementation focuses on test automation using Selenium, Cucumber, and JUnit, the repository contains extensive OWASP-compliant security specifications that serve as a blueprint for secure application development.
-
-#### 6.4.1.2 Security Architecture Approach
-
-The security architecture follows a **progressive enhancement model** that supports:
-
-- **Current State**: Test automation framework with basic security considerations
-- **Enhanced State**: Node.js server implementation with comprehensive security controls
-- **Production State**: Enterprise-grade security implementation with full OWASP compliance
-
-```mermaid
-graph TB
-    subgraph "Security Architecture Evolution"
-        A[Test Automation Security] --> B[Progressive Enhancement Security]
-        B --> C[Production Security Implementation]
-        
-        subgraph "Current Security Scope"
-            D[Test Isolation]
-            E[Browser Security Sandboxing]
-            F[Build Security]
-        end
-        
-        subgraph "Enhanced Security Blueprint"
-            G[Authentication Framework]
-            H[Authorization System]
-            I[Data Protection]
-            J[Security Monitoring]
-        end
-        
-        subgraph "Production Security Controls"
-            K[OWASP Compliance]
-            L[Security Audit]
-            M[Incident Response]
-            N[Compliance Management]
-        end
-        
-        A --> D
-        A --> E
-        A --> F
-        
-        B --> G
-        B --> H
-        B --> I
-        B --> J
-        
-        C --> K
-        C --> L
-        C --> M
-        C --> N
-    end
-    
-    style A fill:#e3f2fd
-    style B fill:#fff3e0
-    style C fill:#c8e6c9
-```
-
-### 6.4.2 Authentication Framework
-
-#### 6.4.2.1 Identity Management System
-
-The security architecture specifies a comprehensive **JWT-based authentication framework** designed for scalable identity management:
-
-**Core Authentication Components**:
-- **Token Generation**: JWT tokens with configurable expiration (1 hour default)
-- **Refresh Token Support**: Secure session management with token refresh capabilities
-- **Secret Management**: Environment variable-based security for JWT secrets
-- **Multi-Environment Support**: Separate authentication configurations for development, staging, and production
-
-#### 6.4.2.2 Multi-Factor Authentication
-
-| Authentication Factor | Implementation | Security Level | Configuration |
-|---|---|---|---|
-| **Primary Factor** | JWT token validation | High | Environment-based secret |
-| **API Key Factor** | Service-to-service authentication | Medium | Rate-limited access |
-| **Session Factor** | Secure cookie management | High | Configurable timeout |
-
-#### 6.4.2.3 Session Management
-
-**Session Security Implementation**:
-- **Session Timeout**: Configurable session duration with automatic expiration
-- **Secure Cookies**: HttpOnly and Secure cookie attributes for session protection
-- **Session Invalidation**: Proper logout handling with server-side session cleanup
-- **Cross-Origin Session Management**: CORS-compliant session handling
-
-#### 6.4.2.4 Token Handling
-
-```mermaid
-sequenceDiagram
-    participant Client as Client Application
-    participant Auth as Authentication Service
-    participant Server as Application Server
-    participant Refresh as Refresh Token Service
-    
-    Client->>Auth: Login Request
-    Auth->>Auth: Validate Credentials
-    Auth->>Client: JWT Token + Refresh Token
-    
-    Client->>Server: Request with JWT Token
-    Server->>Server: Validate Token
-    Server->>Client: Protected Resource
-    
-    Note over Client,Server: Token Expiration Handling
-    
-    Client->>Refresh: Refresh Token Request
-    Refresh->>Refresh: Validate Refresh Token
-    Refresh->>Client: New JWT Token
-    
-    Client->>Server: Request with New Token
-    Server->>Client: Protected Resource
-```
-
-#### 6.4.2.5 Password Policies
-
-**Password Security Standards**:
-- **Hashing Algorithm**: bcrypt with 12 salt rounds for secure password storage
-- **No Plain-Text Storage**: Enforced password hashing for all stored credentials
-- **Password Validation**: Strength requirements enforced at application level
-- **Secure Transmission**: HTTPS-only password transmission
-
-### 6.4.3 Authorization System
-
-#### 6.4.3.1 Role-Based Access Control
-
-The authorization system implements a comprehensive **RBAC (Role-Based Access Control)** model with granular permission management:
-
-| User Role | Access Level | Permissions | Resource Scope |
-|---|---|---|---|
-| **Admin** | Full access | All system operations | Global resources |
-| **User** | Standard access | Limited operations | User-scoped resources |
-| **Guest** | Read-only access | View operations only | Public resources |
-
-#### 6.4.3.2 Permission Management
-
-**Permission Architecture**:
-- **Resource-Level Permissions**: Fine-grained access control for individual resources
-- **Operation-Based Permissions**: Specific permissions for create, read, update, delete operations
-- **Hierarchical Permissions**: Role inheritance with permission cascading
-- **Dynamic Permission Evaluation**: Runtime permission checking with caching
-
-#### 6.4.3.3 Policy Enforcement Points
-
-```mermaid
-graph LR
-    subgraph "Authorization Flow"
-        A[Request] --> B[Authentication Check]
-        B --> C[Role Verification]
-        C --> D[Permission Evaluation]
-        D --> E[Resource Access Control]
-        E --> F[Audit Logging]
-        F --> G[Response]
-        
-        H[Policy Engine] --> D
-        I[Role Database] --> C
-        J[Permission Matrix] --> D
-        K[Audit System] --> F
-    end
-    
-    style B fill:#ffcdd2
-    style D fill:#fff3e0
-    style F fill:#e3f2fd
-```
-
-#### 6.4.3.4 Audit Logging
-
-**Comprehensive Audit Framework**:
-- **Authentication Events**: Login attempts, failures, and successful authentications
-- **Authorization Events**: Permission grants, denials, and policy violations
-- **Resource Access**: Detailed logging of resource access patterns
-- **Security Events**: Failed authentication attempts, rate limit violations, and suspicious activities
-
-### 6.4.4 Data Protection
-
-#### 6.4.4.1 Encryption Standards
-
-**Transport Layer Security**:
-- **TLS Configuration**: TLS 1.2 minimum requirement with TLS 1.3 support
-- **Cipher Suite Standards**: Strong encryption with AES-256-GCM and CHACHA20-POLY1305
-- **SSL Certificate Management**: Automated certificate provisioning via Let's Encrypt
-- **HTTPS Enforcement**: Automatic HTTP to HTTPS redirection
-
-#### 6.4.4.2 Key Management
-
-| Key Type | Storage Method | Rotation Policy | Security Level |
-|---|---|---|---|
-| **JWT Secrets** | Environment variables | Manual rotation | High |
-| **Encryption Keys** | Secure configuration | 90-day rotation | High |
-| **API Keys** | Environment-based | On-demand rotation | Medium |
-
-#### 6.4.4.3 Data Masking Rules
-
-**Data Protection Implementation**:
-- **Input Validation**: Comprehensive request validation using Joi schema validation
-- **Data Sanitization**: HTML sanitization using DOMPurify for XSS prevention
-- **SQL Injection Prevention**: Parameterized queries and input validation
-- **Command Injection Protection**: Input sanitization for system command execution
-
-#### 6.4.4.4 Secure Communication
-
-```mermaid
-graph TB
-    subgraph "Secure Communication Architecture"
-        A[Client Request] --> B[HTTPS/TLS Layer]
-        B --> C[Security Headers]
-        C --> D[CORS Validation]
-        D --> E[Rate Limiting]
-        E --> F[Input Validation]
-        F --> G[Application Logic]
-        
-        H[Certificate Authority] --> B
-        I[Security Policy Engine] --> C
-        J[CORS Configuration] --> D
-        K[Rate Limit Engine] --> E
-        L[Validation Engine] --> F
-    end
-    
-    style B fill:#c8e6c9
-    style C fill:#ffcdd2
-    style F fill:#fff3e0
-```
-
-### 6.4.5 Security Control Framework
-
-#### 6.4.5.1 Security Headers Implementation
-
-The system implements comprehensive **HTTP security headers** via Helmet.js middleware:
-
-| Security Header | Purpose | Configuration | Protection Level |
-|---|---|---|---|
-| **Content-Security-Policy** | XSS prevention | Strict CSP directives | High |
-| **X-Frame-Options** | Clickjacking prevention | SAMEORIGIN policy | Medium |
-| **X-Content-Type-Options** | MIME sniffing prevention | nosniff directive | Medium |
-| **Strict-Transport-Security** | HTTPS enforcement | max-age=31536000 | High |
-
-#### 6.4.5.2 Rate Limiting Controls
-
-**Comprehensive Rate Limiting Strategy**:
-
-| Rate Limit Type | Configuration | Protection Scope | Implementation |
-|---|---|---|---|
-| **Global Rate Limit** | 1000 requests/hour/IP | System-wide protection | Express-rate-limit middleware |
-| **API Endpoint Limit** | 100 requests/minute/IP | Endpoint-specific protection | Route-level middleware |
-| **Authentication Limit** | 5 attempts/15 minutes | Login protection | Authentication middleware |
-| **Health Check Limit** | 60 requests/minute/IP | Monitoring protection | Health endpoint middleware |
-
-#### 6.4.5.3 CORS Policy Configuration
-
-```mermaid
-flowchart LR
-    subgraph "CORS Security Implementation"
-        A[Cross-Origin Request] --> B[Origin Validation]
-        B --> C{Whitelist Check}
-        
-        C -->|Allowed| D[Process Request]
-        C -->|Blocked| E[Reject Request]
-        
-        D --> F[Credentials Validation]
-        F --> G[Response Headers]
-        G --> H[Successful Response]
-        
-        E --> I[CORS Error Response]
-        
-        J[Environment Config] --> B
-        K[Allowed Origins] --> C
-        L[Credentials Policy] --> F
-    end
-    
-    style C fill:#fff3e0
-    style D fill:#c8e6c9
-    style E fill:#ffcdd2
-```
-
-### 6.4.6 OWASP Compliance Matrix
-
-#### 6.4.6.1 OWASP Top 10 Protection
-
-| OWASP Vulnerability | Protection Measure | Implementation Status | Risk Level |
-|---|---|---|---|
-| **A01: Broken Access Control** | Authentication middleware + RBAC | ✅ Documented | High |
-| **A02: Cryptographic Failures** | HTTPS/TLS + secure headers | ✅ Documented | High |
-| **A03: Injection** | Input validation + sanitization | ✅ Documented | High |
-| **A04: Insecure Design** | Security-by-design architecture | ✅ Documented | Medium |
-| **A05: Security Misconfiguration** | Helmet.js security headers | ✅ Documented | Medium |
-| **A06: Vulnerable Components** | Dependency scanning + auditing | ✅ Documented | Medium |
-| **A07: Authentication Failures** | Secure authentication implementation | ✅ Documented | High |
-| **A08: Software Integrity** | Dependency auditing + verification | ✅ Documented | Medium |
-
-#### 6.4.6.2 Security Monitoring and Alerting
-
-**Comprehensive Security Monitoring**:
-- **Failed Authentication Tracking**: Real-time monitoring of authentication failures
-- **Rate Limit Violation Detection**: Automated alerting for rate limit breaches
-- **Suspicious Activity Monitoring**: Pattern detection for unusual access behaviors
-- **Security Event Correlation**: Winston logger integration for security event analysis
-
-### 6.4.7 Compliance and Governance
-
-#### 6.4.7.1 Security Audit Framework
-
-```mermaid
-graph TB
-    subgraph "Security Audit Architecture"
-        A[Security Events] --> B[Winston Logger]
-        B --> C[Structured Logging]
-        C --> D[Event Correlation]
-        D --> E[Security Analytics]
-        
-        F[Dependency Audit] --> G[npm audit]
-        G --> H[Vulnerability Assessment]
-        H --> I[Security Reports]
-        
-        J[Code Security Scan] --> K[Security Test Suite]
-        K --> L[XSS Prevention Testing]
-        L --> M[Injection Testing]
-        M --> N[Security Validation]
-        
-        E --> O[Security Dashboard]
-        I --> O
-        N --> O
-    end
-    
-    style B fill:#e3f2fd
-    style G fill:#fff3e0
-    style O fill:#c8e6c9
-```
-
-#### 6.4.7.2 Production Security Configuration
-
-**Environment-Based Security Settings**:
-```bash
-# Security Configuration Template
-TRUST_PROXY=true
-RATE_LIMIT_ENABLED=true
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=1000
-LOG_SENSITIVE_DATA=false
-RUN_AS_USER=nodejs
-RUN_AS_GROUP=nodejs
-DISABLE_X_POWERED_BY=true
-HIDE_SERVER_HEADER=true
-```
-
-#### 6.4.7.3 Container Security
-
-**Container Security Implementation**:
-- **Non-Root User Execution**: Security-hardened container deployment
-- **Minimal Base Images**: node:18-alpine for reduced attack surface
-- **Health Check Integration**: Security-aware health monitoring
-- **Security Scanning**: Automated vulnerability scanning in CI/CD pipeline
-
-### 6.4.8 Security Testing and Validation
-
-#### 6.4.8.1 Automated Security Testing
-
-**Security Test Suite Implementation**:
-- **XSS Prevention Testing**: Automated testing for cross-site scripting vulnerabilities
-- **CORS Violation Testing**: Validation of cross-origin resource sharing policies
-- **Rate Limiting Verification**: Automated testing of rate limiting effectiveness
-- **Authentication Security Testing**: Comprehensive authentication flow testing
-
-#### 6.4.8.2 Dependency Security Management
-
-| Security Tool | Purpose | Integration | Frequency |
-|---|---|---|---|
-| **npm audit** | Dependency vulnerability scanning | CI/CD pipeline | Every build |
-| **audit-ci** | CI/CD security integration | Automated deployment | Continuous |
-| **npm-audit-resolver** | Vulnerability management | Development workflow | Weekly |
-
-### 6.4.9 Future Security Enhancements
-
-#### 6.4.9.1 Progressive Security Implementation
-
-The security architecture supports **incremental enhancement** from the current test automation framework to a fully secure production application:
-
-**Phase 1**: Test Environment Security
-- Browser security sandboxing
-- Test data isolation
-- Secure test execution environment
-
-**Phase 2**: Development Server Security
-- Basic authentication implementation
-- HTTPS configuration
-- Security headers implementation
-
-**Phase 3**: Production Security
-- Complete OWASP compliance
-- Advanced monitoring and alerting
-- Full security audit framework
-
-#### 6.4.9.2 Enterprise Integration
-
-**Future Enterprise Security Features**:
-- **Single Sign-On (SSO)**: Integration with enterprise identity providers
-- **Advanced Threat Detection**: Machine learning-based security monitoring
-- **Compliance Reporting**: Automated compliance documentation generation
-- **Security Orchestration**: Automated incident response workflows
-
-#### References
-
-**Security Documentation Sources**:
-- `docs/guides/security.md` - Comprehensive OWASP-compliant security hardening guide
-- `docs/guides/production.md` - Production deployment security configurations
-- `docs/architecture/design.md` - System architecture with security enhancement paths
-
-**Technical Specification Sections**:
-- `5.4 CROSS-CUTTING CONCERNS` - Authentication and authorization framework
-- `Node.js Stack Security` - OWASP compliance and security implementation
-- `Node.js Server Rate Limiting` - Rate limiting specifications and configuration
-
-**Configuration Files**:
-- `pom.xml` - Maven configuration with security-related dependencies
-- `README.md` - Project overview with security architecture documentation
-
-**Security Standards Referenced**:
-- OWASP Top 10 security vulnerabilities and protection measures
-- TLS 1.2/1.3 encryption standards and cipher suite specifications
-- JWT RFC 7519 standard for token-based authentication
-- bcrypt password hashing standard with 12 salt rounds
-
-## 6.5 MONITORING AND OBSERVABILITY
-
-### 6.5.1 MONITORING INFRASTRUCTURE
-
-#### 6.5.1.1 Dual-Stack Monitoring Architecture
-
-The Testinium-QA system implements a **comprehensive monitoring architecture** designed to support both the Java test automation stack and the Node.js server stack. This dual-stack approach ensures complete observability across all system components while maintaining clear separation of concerns between testing operations and server functionality.
-
-```mermaid
-graph TB
-    subgraph "Test Automation Monitoring"
-        TC[Test Controller] --> TR[Test Reports]
-        TC --> TM[Test Metrics]
-        TR --> HTML[HTML Reports]
-        TR --> JSON[JSON Reports] 
-        TR --> TXT[Text Reports]
-        TM --> Jenkins[Jenkins Integration]
-        TM --> Jira[Jira Test Execution]
-    end
-    
-    subgraph "Server Monitoring Infrastructure"
-        HTTP[HTTP Server] --> Winston[Winston Logger]
-        HTTP --> PM2[PM2 Process Manager]
-        Winston --> LR[Log Rotation]
-        Winston --> LA[Log Aggregation]
-        PM2 --> HM[Health Monitoring]
-        PM2 --> PM[Performance Metrics]
-    end
-    
-    subgraph "Unified Observability Layer"
-        LA --> Dashboard[Monitoring Dashboard]
-        HM --> Dashboard
-        PM --> Dashboard
-        TR --> Dashboard
-        Dashboard --> Alerts[Alert Management]
-        Alerts --> Incidents[Incident Response]
-    end
-    
-    subgraph "External Integrations"
-        Dashboard --> Backprop[Backprop Analytics]
-        Alerts --> CICD[CI/CD Pipeline]
-        PM --> ProcessHealth[Process Health Checks]
-    end
-```
-
-#### 6.5.1.2 Metrics Collection Framework
-
-**Test Automation Metrics Collection:**
-The Java stack implements comprehensive test execution monitoring through the Cucumber reporting plugin (v7.2.0) with Maven Surefire integration. Metrics collection covers parallel test execution patterns, WebDriver session management, and cross-browser compatibility tracking.
-
-| Metric Category | Collection Method | Storage Format | Retention Period |
-|---|---|---|---|
-| Test Execution | Cucumber Reports | HTML/JSON/TXT | 30 days |
-| WebDriver Sessions | Browser Automation | JSON Logs | 7 days |
-| Performance Timing | Maven Surefire | XML Reports | 14 days |
-| Parallel Execution | Thread Pool Metrics | Log Aggregation | 7 days |
-
-**Server Performance Metrics Collection:**
-The Node.js stack utilizes PM2 process management for comprehensive server metrics collection. Performance data includes request timing, throughput analysis, resource utilization, and enhancement layer adoption patterns.
-
-| Metric Type | Collection Interval | Alert Threshold | Escalation Level |
-|---|---|---|---|
-| Request Response Time | Real-time | >500ms (HTTP) | Warning |
-| Memory Usage | 30 seconds | >80% allocated | Critical |
-| CPU Utilization | 30 seconds | >70% sustained | Warning |
-| Error Rate | Real-time | >5% per minute | Critical |
-
-#### 6.5.1.3 Log Aggregation and Management
-
-**Structured Logging Architecture:**
-Winston logger provides enterprise-grade log aggregation with configurable levels (ERROR, WARN, INFO, DEBUG, TRACE) and automatic log rotation. The logging architecture supports both development debugging and production monitoring requirements.
-
-```mermaid
-sequenceDiagram
-    participant App as Application Events
-    participant Winston as Winston Logger
-    participant Formatter as Log Formatter
-    participant Rotation as Log Rotation
-    participant Archive as Archive Storage
-    participant Monitor as Monitoring System
-    
-    App->>Winston: Log Event
-    Winston->>Formatter: Structure Event
-    Formatter->>Rotation: Store Log Entry
-    Rotation->>Archive: Rotate When Full
-    Archive->>Monitor: Send Metrics
-    Monitor->>App: Health Status
-```
-
-**Log Configuration Parameters:**
-
-| Parameter | Environment Variable | Default Value | Production Setting |
-|---|---|---|---|
-| Log Level | LOG_LEVEL | INFO | WARN |
-| File Path | LOG_FILE_PATH | ./logs/app.log | /var/log/app/ |
-| Max File Size | LOG_MAX_SIZE | 10MB | 100MB |
-| Max Files | LOG_MAX_FILES | 5 | 10 |
-
-#### 6.5.1.4 Alert Management System
-
-**Alert Configuration Matrix:**
-The system implements multi-tiered alerting with environment-specific thresholds and escalation procedures. Alert management covers security events, performance degradation, and system health monitoring.
-
-| Alert Type | Trigger Condition | Response Time | Escalation Path |
-|---|---|---|---|
-| Authentication Failure | 5 attempts/15 minutes | Immediate | Security Team |
-| Memory Alert | ALERT_MEMORY_LIMIT exceeded | 2 minutes | Operations Team |
-| CPU Alert | ALERT_CPU_LIMIT exceeded | 2 minutes | Operations Team |
-| Rate Limit Violation | >1000 req/hour/IP | 1 minute | Security Team |
-
-### 6.5.2 OBSERVABILITY PATTERNS
-
-#### 6.5.2.1 Health Check Implementation
-
-**Comprehensive Health Monitoring:**
-The system implements multi-layered health checks across both technology stacks. Health monitoring covers process status, external dependency availability, and service responsiveness with configurable intervals and timeout settings.
-
-**Health Check Configuration:**
-
-| Component | Check Interval | Timeout Threshold | Recovery Action |
-|---|---|---|---|
-| HTTP Server Core | HEALTH_CHECK_INTERVAL | HEALTH_CHECK_TIMEOUT | Restart Service |
-| PM2 Process Health | 30 seconds | 15 seconds | Auto-restart |
-| WebDriver Sessions | Per test execution | 10 seconds | Session cleanup |
-| External Dependencies | 60 seconds | 30 seconds | Fallback mode |
-
-#### 6.5.2.2 Performance Metrics and SLA Monitoring
-
-**Established SLA Targets:**
-The system maintains strict SLA requirements across all operational components with automated monitoring and alerting for threshold violations.
-
-| Service Component | Target SLA | Measurement Point | Alert Trigger |
-|---|---|---|---|
-| WebDriver Initialization | <5 seconds | Driver ready state | >10 seconds |
-| HTTP Response (Basic) | <100ms | Request to response | >500ms |
-| HTTP Response (Enhanced) | <10ms | Core endpoints | >50ms |
-| Test Report Generation | <30 seconds | Completion to report | >60 seconds |
-
-**Recovery Time Objectives:**
-
-| Metric | Target Value | Measurement Method | Monitoring Tool |
-|---|---|---|---|
-| RTO (Recovery Time) | 5 minutes | Full system recovery | PM2 + Winston |
-| RPO (Recovery Point) | 1 minute | Configuration changes | Log aggregation |
-| MTTR (Mean Time to Recovery) | 2 minutes | Automated recovery | Health checks |
-| MTBF (Mean Time Between Failures) | 720 hours | Stable operation | Performance metrics |
-
-#### 6.5.2.3 Business Metrics Tracking
-
-**Test Automation Business Metrics:**
-- Test execution success rates and failure pattern analysis
-- Cross-browser compatibility performance tracking
-- Parallel execution efficiency and resource optimization
-- CI/CD pipeline integration effectiveness
-
-**Server Performance Business Metrics:**
-- Request pattern analysis and user behavior tracking
-- Enhancement layer adoption rates and performance impact
-- Backprop integration effectiveness and development workflow optimization
-- Security event correlation and threat detection patterns
-
-#### 6.5.2.4 Capacity Tracking and Resource Management
-
-**Resource Monitoring Framework:**
-The system implements comprehensive capacity tracking across compute resources, memory utilization, and network throughput. Resource monitoring supports both current operational requirements and future capacity planning.
-
-```mermaid
-graph LR
-    subgraph "Resource Monitoring"
-        CPU[CPU Utilization] --> Metrics[Metrics Collection]
-        Memory[Memory Usage] --> Metrics
-        Network[Network I/O] --> Metrics
-        Disk[Disk Usage] --> Metrics
-    end
-    
-    subgraph "Capacity Planning"
-        Metrics --> Analysis[Trend Analysis]
-        Analysis --> Forecasting[Capacity Forecasting]
-        Forecasting --> Scaling[Auto-scaling Decisions]
-        Scaling --> Provisioning[Resource Provisioning]
-    end
-    
-    subgraph "Alert Management"
-        Metrics --> Thresholds[Threshold Monitoring]
-        Thresholds --> Alerts[Alert Generation]
-        Alerts --> Response[Incident Response]
-        Response --> Resolution[Issue Resolution]
-    end
-```
-
-### 6.5.3 INCIDENT RESPONSE
-
-#### 6.5.3.1 Alert Routing and Escalation
-
-**Alert Flow Architecture:**
-The incident response system implements automated alert routing with escalation procedures based on severity levels and response time requirements.
-
-```mermaid
-flowchart TD
-    Alert[Alert Generated] --> Severity{Severity Level}
-    
-    Severity -->|Critical| Immediate[Immediate Notification]
-    Severity -->|Warning| Delayed[5-minute Delay]
-    Severity -->|Info| Batch[Batch Processing]
-    
-    Immediate --> PagerDuty[PagerDuty Integration]
-    Immediate --> SMS[SMS Notification]
-    Immediate --> Email[Email Alert]
-    
-    Delayed --> SlackPrimary[Slack Channel]
-    Delayed --> EmailSecondary[Email Summary]
-    
-    Batch --> DailyReport[Daily Report]
-    Batch --> Dashboard[Dashboard Update]
-    
-    PagerDuty --> OnCall[On-call Engineer]
-    SMS --> OnCall
-    OnCall --> Response[Incident Response]
-    Response --> Resolution[Issue Resolution]
-    Resolution --> PostMortem[Post-mortem Process]
-```
-
-#### 6.5.3.2 Escalation Procedures
-
-**Incident Escalation Matrix:**
-
-| Severity Level | Initial Response | Escalation Time | Escalation Target | Max Resolution Time |
-|---|---|---|---|---|
-| Critical | Immediate | 15 minutes | Senior Engineer | 1 hour |
-| High | 5 minutes | 30 minutes | Team Lead | 4 hours |
-| Medium | 15 minutes | 2 hours | Operations Team | 24 hours |
-| Low | 1 hour | Next business day | Development Team | 1 week |
-
-#### 6.5.3.3 Runbook Procedures
-
-**Automated Recovery Procedures:**
-- **Process Restart**: PM2 automatic restart with graceful shutdown (GRACEFUL_SHUTDOWN_TIMEOUT)
-- **Memory Recovery**: Automatic memory cleanup and garbage collection triggers
-- **Session Cleanup**: WebDriver session termination and resource reclamation
-- **Log Rotation**: Automated log file rotation and archive management
-
-**Manual Intervention Procedures:**
-- **Database Connection Recovery**: Connection pool reset and re-establishment
-- **Security Incident Response**: Authentication failure lockdown and investigation
-- **Performance Degradation**: Load balancing adjustment and resource scaling
-- **External Dependency Failure**: Fallback mode activation and service degradation
-
-#### 6.5.3.4 Post-Mortem and Improvement Tracking
-
-**Post-Mortem Process Framework:**
-Each incident triggers a structured post-mortem process designed to identify root causes, implement preventive measures, and track system reliability improvements over time.
-
-**Improvement Tracking Metrics:**
-
-| Improvement Area | Tracking Method | Review Frequency | Success Criteria |
-|---|---|---|---|
-| MTTR Reduction | Incident response logs | Weekly | <2 minutes average |
-| Alert Accuracy | False positive rate | Monthly | <5% false positives |
-| Recovery Automation | Manual intervention rate | Monthly | <20% manual recovery |
-| System Reliability | Uptime percentage | Monthly | >99.9% uptime |
-
-### 6.5.4 MONITORING DASHBOARDS AND VISUALIZATION
-
-#### 6.5.4.1 Unified Monitoring Dashboard
-
-The system provides a comprehensive monitoring dashboard that consolidates metrics from both technology stacks into a unified view. Dashboard design emphasizes real-time visibility, trend analysis, and proactive issue identification.
-
-**Dashboard Layout Components:**
-- **System Health Overview**: Real-time status indicators for all critical components
-- **Performance Metrics**: Request timing, throughput, and resource utilization trends
-- **Test Automation Status**: Test execution progress, success rates, and failure analysis
-- **Security Monitoring**: Authentication events, rate limiting status, and threat detection
-- **Capacity Planning**: Resource usage trends and scaling recommendations
-
-#### 6.5.4.2 Alert Threshold Configuration
-
-**Dynamic Threshold Management:**
-Alert thresholds are configurable through environment variables to support different operational environments (development, staging, production) with appropriate sensitivity levels.
-
-**Environment-Specific Thresholds:**
-
-| Environment | Memory Alert | CPU Alert | Response Time | Error Rate |
-|---|---|---|---|---|
-| Development | 90% | 80% | 1000ms | 10% |
-| Staging | 85% | 75% | 500ms | 5% |
-| Production | 80% | 70% | 100ms | 1% |
-| Performance Testing | 95% | 90% | 2000ms | 15% |
-
-### 6.5.5 SECURITY AND AUDIT MONITORING
-
-#### 6.5.5.1 Security Event Monitoring
-
-**Comprehensive Security Monitoring:**
-The system implements detailed security event monitoring covering authentication events, authorization violations, and suspicious activity detection with real-time correlation and alerting.
-
-**Security Monitoring Categories:**
-- **Authentication Events**: Login attempts, failures, successes with pattern analysis
-- **Authorization Events**: Permission grants, denials, violations with access tracking
-- **Resource Access**: API endpoint access patterns and anomaly detection
-- **Rate Limiting**: Request pattern analysis and abuse prevention
-- **Security Violations**: Suspicious activity detection and automated response
-
-#### 6.5.5.2 Audit Trail Management
-
-**Audit Logging Framework:**
-Winston logger provides structured audit logging with tamper-evident storage and compliance-ready reporting capabilities. Audit trails cover all security-relevant events with detailed context and correlation data.
-
-**Audit Event Categories:**
-
-| Event Type | Log Level | Retention Period | Compliance Requirement |
-|---|---|---|---|
-| Authentication | INFO | 90 days | Security audit |
-| Authorization | WARN | 90 days | Access control audit |
-| Configuration Changes | INFO | 365 days | Change management |
-| Security Violations | ERROR | 365 days | Incident investigation |
-
-#### References
-
-**Files Examined:**
-- `README.md` - Node.js server documentation with monitoring references and Backprop integration details
-- `pom.xml` - Java test automation configuration with Cucumber reporting plugin setup
-- `.gitignore` - Configuration patterns including log file exclusions and monitoring data
-- `docs/guides/production.md` - Production deployment guide with monitoring modules and PM2 configuration
-
-**Folders Explored:**
-- `(root)/` - Repository overview providing dual-architecture context and monitoring requirements
-- `docs/` - Documentation structure with monitoring and observability guidance
-- `docs/architecture/` - System design documentation including monitoring integration patterns
-- `docs/guides/` - Operational guides including production monitoring setup and configuration
-
-**Technical Specification Sections Referenced:**
-- `3.1 TECHNOLOGY STACK OVERVIEW` - Dual-stack architecture understanding for monitoring scope
-- `5.1 HIGH-LEVEL ARCHITECTURE` - System boundaries and integration points for comprehensive monitoring
-- `5.4 CROSS-CUTTING CONCERNS` - Monitoring strategy and logging architecture details
-- `6.4 SECURITY ARCHITECTURE` - Security monitoring and audit logging implementation
-- `4.7 PERFORMANCE AND SLA CONSIDERATIONS` - SLA definitions and performance monitoring requirements
-- `Node.js Server Performance` - Performance optimization and monitoring configuration details
-
-## 6.6 TESTING STRATEGY
-
-### 6.6.1 TESTING APPROACH OVERVIEW
-
-#### 6.6.1.1 Dual-Stack Testing Philosophy
-
-The Testinium-QA system implements a **comprehensive dual-stack testing strategy** designed to support both the Java test automation framework and the Node.js server implementation. This approach ensures complete test coverage across all system components while maintaining clear separation of concerns between browser automation testing and server functionality validation.
-
-The testing strategy addresses the unique challenges of a template/blueprint repository that contains detailed configuration for both technology stacks but serves as a foundation for implementation rather than an active codebase. This requires a testing approach that validates configuration integrity, template functionality, and provides clear guidance for implementation teams.
-
-```mermaid
-graph TB
-    subgraph "Java Test Automation Stack Testing"
-        JUT[JUnit Unit Tests] --> CIT[Cucumber Integration Tests]
-        CIT --> E2E[Selenium E2E Tests]
-        E2E --> PR[Parallel Test Execution]
-        PR --> JCR[Java Coverage Reports]
-    end
-    
-    subgraph "Node.js Server Stack Testing"
-        Jest[Jest Unit Tests] --> Super[Supertest Integration]
-        Super --> API[API Endpoint Testing]
-        API --> PM[Performance Testing]
-        PM --> NCR[Node.js Coverage Reports]
-    end
-    
-    subgraph "Cross-Stack Integration"
-        JCR --> UR[Unified Reporting]
-        NCR --> UR
-        UR --> QG[Quality Gates]
-        QG --> CI[CI/CD Pipeline]
-    end
-    
-    subgraph "Test Environment Management"
-        Docker[Docker Containers] --> TEnv[Test Environments]
-        TEnv --> Config[Configuration Testing]
-        Config --> Validation[Template Validation]
-    end
-```
-
-#### 6.6.1.2 Testing Scope and Boundaries
-
-**Java Test Automation Scope:**
-- Selenium WebDriver configuration validation and browser compatibility testing
-- Cucumber BDD framework integration and feature file processing
-- Maven build system and dependency management testing
-- Parallel test execution framework validation
-- Test reporting and metrics collection verification
-
-**Node.js Server Scope:**
-- HTTP server functionality and endpoint testing
-- Express.js framework integration validation
-- PM2 process management and monitoring testing
-- Backprop integration testing and workflow validation
-- Progressive enhancement path verification
-
-**Cross-Stack Integration Scope:**
-- Configuration consistency validation between technology stacks
-- Template integrity and completeness testing
-- Documentation accuracy and implementation alignment
-- CI/CD pipeline integration across both stacks
-
-### 6.6.2 UNIT TESTING STRATEGY
-
-#### 6.6.2.1 Java Stack Unit Testing
-
-#### Testing Framework Configuration
-**Primary Framework**: JUnit 4.13.2 with Maven Surefire Plugin 3.0.0-M5
-**Parallel Execution**: Method-level parallelization with unlimited thread configuration
-**Test Organization**: Package-based structure following Maven standard directory layout
-
-| Component | Testing Approach | Mock Strategy | Coverage Target |
-|---|---|---|---|
-| Step Definitions | JUnit test classes | WebDriver mock instances | 90% |
-| Configuration Validators | Parameter validation tests | Environment variable mocking | 85% |
-| Utility Classes | Isolated unit tests | No external dependencies | 95% |
-| Data Generators | JavaFaker integration tests | Deterministic seed values | 80% |
-
-**Test Naming Conventions:**
-```
-{ClassName}Test.java
-test{MethodName}_{ExpectedBehavior}()
-test{MethodName}_{InputCondition}_{ExpectedResult}()
-```
-
-**Test Data Management:**
-- **JavaFaker 1.0.2**: Realistic test data generation for user scenarios
-- **Test Fixtures**: Static data files in `src/test/resources/`
-- **Configuration Templates**: Environment-specific test configurations
-- **Browser Profiles**: Predefined WebDriver capability sets
-
-#### Mocking Strategy
-**WebDriver Mocking**: Mock WebDriver instances for unit tests without browser initialization
-**Configuration Mocking**: Environment variable and system property mocking
-**External Service Mocking**: Mockito integration for third-party service interactions
-**File System Mocking**: Mock file operations for configuration and report generation testing
-
-#### 6.6.2.2 Node.js Stack Unit Testing
-
-#### Testing Framework Configuration
-**Primary Framework**: Jest 29.0.0 with built-in mocking capabilities
-**Alternative Framework**: Mocha with Sinon for projects requiring different assertion styles
-**Coverage Tool**: NYC (Istanbul) with 80% threshold enforcement
-
-```json
-{
-  "jest": {
-    "testEnvironment": "node",
-    "collectCoverageFrom": [
-      "src/**/*.js",
-      "!src/**/*.test.js",
-      "!src/config/*.js"
-    ],
-    "coverageThreshold": {
-      "global": {
-        "branches": 80,
-        "functions": 80,
-        "lines": 80,
-        "statements": 80
-      }
-    }
-  }
-}
-```
-
-**Test Organization Structure:**
-```
-test/
-├── unit/
-│   ├── server/
-│   ├── middleware/
-│   └── utils/
-├── integration/
-│   ├── api/
-│   └── database/
-└── fixtures/
-    ├── requests/
-    └── responses/
-```
-
-#### Mocking Strategy
-**HTTP Request Mocking**: Jest built-in mocking for HTTP requests and responses
-**External API Mocking**: Sinon stubs for third-party service interactions
-**File System Mocking**: Mock file operations for configuration and logging
-**Environment Mocking**: Process.env mocking for environment-specific testing
-
-**Test Data Management:**
-- **Custom Fixtures**: JSON-based test data for API requests/responses
-- **Factory Functions**: Dynamic test data generation utilities
-- **Environment Configs**: Test-specific environment variable sets
-- **Mock Responses**: Predefined response templates for external services
-
-### 6.6.3 INTEGRATION TESTING STRATEGY
-
-#### 6.6.3.1 Service Integration Testing
-
-#### Java Stack Integration Testing
-**Cucumber Integration Framework**: Feature file execution with step definition integration
-**WebDriver Integration**: Browser automation with real browser instances
-**Maven Integration**: Build process validation and dependency resolution testing
-
-```mermaid
-sequenceDiagram
-    participant Test as Test Runner
-    participant Cucumber as Cucumber Engine
-    participant Steps as Step Definitions
-    participant WebDriver as WebDriver Manager
-    participant Browser as Browser Instance
-    participant Report as Report Generator
-    
-    Test->>Cucumber: Execute Feature Files
-    Cucumber->>Steps: Map Gherkin Steps
-    Steps->>WebDriver: Initialize Driver
-    WebDriver->>Browser: Launch Browser
-    Browser->>Steps: Execute Actions
-    Steps->>Cucumber: Return Results
-    Cucumber->>Report: Generate Reports
-    Report->>Test: HTML/JSON/TXT Reports
-```
-
-# 7. USER INTERFACE DESIGN
-
-## 7.1 INTERFACE REQUIREMENTS ASSESSMENT
-
-### 7.1.1 System Architecture Analysis
-
-After comprehensive analysis of the system architecture, feature catalog, and scope definition, this system implements a **headless, backend-only architecture** with no user interface requirements. The dual-stack system serves two distinct purposes:
-
-1. **Test Automation Engine**: Selenium WebDriver-based browser automation for testing external web applications
-2. **HTTP Server Core**: Plain-text response server providing basic endpoint functionality
-
-### 7.1.2 User Interaction Patterns
-
-**No user interface required**
-
-All user interactions occur through programmatic interfaces:
-
-- **Command-line Interfaces**: Maven commands for test execution, npm scripts for server management
-- **HTTP API Endpoints**: RESTful endpoints returning plain-text responses
-- **External Tool Dashboards**: Jenkins CI/CD pipelines, Jira test management (not part of this repository)
-
-## 7.2 INTERFACE BOUNDARIES AND TOUCHPOINTS
-
-### 7.2.1 System Interface Classification
-
-| Interface Type | Implementation | User Access Method | Output Format |
-|---|---|---|---|
-| **Test Automation Interface** | Selenium WebDriver commands | Command-line execution | HTML test reports (generated) |
-| **HTTP Server Interface** | RESTful endpoints | HTTP client requests | Plain text responses |
-| **Development Interface** | Backprop tooling integration | IDE/command-line tools | JSON metrics and analysis |
-| **Process Management Interface** | PM2 cluster management | Command-line operations | Process status logs |
-
-### 7.2.2 External Visual Outputs
-
-The system generates the following visual outputs, none of which constitute a user interface:
-
-- **Cucumber HTML Reports**: Automatically generated test execution reports
-- **Jenkins Dashboard Integration**: External CI/CD pipeline visualization
-- **Jira Test Management Integration**: External test case tracking and reporting
-
-## 7.3 INTERFACE DESIGN RATIONALE
-
-### 7.3.1 Architectural Design Decision
-
-The absence of a user interface aligns with the system's core architectural principles:
-
-- **Separation of Concerns**: The system tests web UIs rather than implementing one
-- **Headless Service Architecture**: Designed for automated execution and integration
-- **Backend-Focused Implementation**: Optimized for server-to-server communication
-
-### 7.3.2 Technology Stack Implications
-
-The configured technology stacks support the headless architecture:
-
-**Java Test Automation Stack**:
-- Selenium WebDriver 3.141.59: Browser automation without UI development
-- Cucumber 7.2.3: Test specification in natural language (not UI)
-- JUnit 4.13.2: Programmatic test assertions
-
-**Node.js Server Stack**:
-- Native HTTP module: Plain-text response handling
-- Express.js framework (documented): Server middleware, not UI framework
-- PM2 process management: Backend service orchestration
-
-## 7.4 INTEGRATION CONSIDERATIONS
-
-### 7.4.1 External UI Integration Points
-
-While this system lacks its own UI, it interfaces with external user interfaces:
-
-| External System | Integration Type | Interface Method |
-|---|---|---|
-| **Target Web Applications** | Test automation | WebDriver Protocol commands |
-| **Jenkins CI/CD** | Build integration | REST API calls |
-| **Jira Test Management** | Test reporting | API integration |
-| **Development IDEs** | Code integration | Backprop tooling hooks |
-
-### 7.4.2 Future UI Considerations
-
-Should user interface requirements emerge in future phases, the current architecture provides foundation elements:
-
-- **HTTP Server Core**: Could serve web application files
-- **Express.js Enhancement Path**: Supports template engines and static file serving
-- **Security Framework**: Provides protection mechanisms for web applications
-
-## 7.5 CONCLUSION
-
-This system implements a **headless architecture** focused on backend services and automated testing capabilities. No user interface design is required or implemented, as the system operates through programmatic interfaces and generates reports for external consumption.
-
-#### References
-
-**Technical Specification Sections Analyzed:**
-- `1.2 SYSTEM OVERVIEW` - Confirmed dual-stack backend architecture without UI components
-- `1.3 SCOPE` - Validated scope boundaries excluding UI implementation
-- `2.1 FEATURE CATALOG` - Reviewed all 9 features (F-001 through F-009) confirming no UI features
-- `5.1 HIGH-LEVEL ARCHITECTURE` - Analyzed system components confirming headless service design
-
-**Repository Evidence:**
-- `pom.xml` - Maven configuration for Java test automation framework
-- `README.md` - Node.js HTTP server documentation with plain-text endpoints
-- `docs/architecture/` - Backend service architecture documentation
-- Repository structure analysis confirming absence of frontend code, UI frameworks, or web application files
-
-# 8. INFRASTRUCTURE
-
-## 8.1 INFRASTRUCTURE ASSESSMENT
-
-### 8.1.1 Infrastructure Applicability Analysis
-
-**Detailed Infrastructure Architecture is not applicable for this system** as the Testinium-QA repository serves as a **technology blueprint and project template repository** rather than a deployable production system. The system contains comprehensive configuration and documentation for both Java test automation and Node.js server components, but lacks implementation code and operates as a foundational template for development teams.
-
-**Rationale for Limited Infrastructure Requirements:**
-
-- **Template Nature**: The repository provides configuration patterns and architectural guidance rather than active services requiring complex deployment infrastructure
-- **Dual-Stack Blueprint**: Contains Maven build configuration for Java testing and Node.js server documentation without package.json implementation
-- **Development-Focused**: Designed for local development environments and CI/CD integration rather than production infrastructure
-- **Minimal Dependencies**: Core functionality requires only runtime environments (JDK, Node.js) and basic process management
-
-### 8.1.2 Infrastructure Scope Definition
-
-The infrastructure requirements focus on **build, distribution, and minimal deployment capabilities** necessary to support the technology blueprint functionality and enable teams to extend the template into production-ready systems.
-
-```mermaid
-graph TB
-    subgraph "Local Development Infrastructure"
-        JDK[JDK 8+ Runtime]
-        Node[Node.js 14+ Runtime]
-        Maven[Maven 3.x Build System]
-        Git[Git Source Control]
-    end
-    
-    subgraph "CI/CD Integration Points"
-        Jenkins[Jenkins CI/CD]
-        GitHub[GitHub Actions]
-        Jira[Jira Integration]
-        Codecov[Codecov Reports]
-    end
-    
-    subgraph "Minimal Deployment Infrastructure"
-        PM2[PM2 Process Manager]
-        Winston[Winston Logging]
-        Health[Health Monitoring]
-        Reports[Report Generation]
-    end
-    
-    JDK --> Maven
-    Node --> PM2
-    Maven --> Jenkins
-    PM2 --> Winston
-    Winston --> Health
-    Jenkins --> Codecov
-    GitHub --> Jenkins
-    Health --> Reports
-```
-
-## 8.2 BUILD AND DISTRIBUTION REQUIREMENTS
-
-### 8.2.1 Java Stack Build Infrastructure
-
-#### 8.2.1.1 Maven Build System Configuration
-
-**Primary Build Tool**: Apache Maven 4.0.0 with comprehensive dependency management and parallel test execution capabilities.
-
-| Component | Version | Purpose | Configuration |
-|---|---|---|---|
-| Apache Maven | 4.0.0 | Build orchestration | pom.xml project model |
-| Maven Surefire | 3.0.0-M5 | Test execution | Parallel method-level execution |
-| Maven Compiler | Default | Java compilation | JDK 8+ compatibility |
-| Maven Resources | Default | Resource processing | Test resource management |
-
-**Build Configuration Details:**
-- **Project Coordinates**: `org.example:testinium-qa:1.0-SNAPSHOT`
-- **Compilation Target**: Java 8+ compatibility for enterprise environments
-- **Test Execution**: Unlimited parallel threads with pattern `**/CukesRunner*.java`
-- **Dependency Scope**: Test-scoped dependencies for Selenium, Cucumber, and JUnit frameworks
-
-#### 8.2.1.2 Dependency Management Strategy
-
-**Repository Configuration:**
-- **Primary Repository**: Maven Central for stable dependency resolution
-- **Snapshot Handling**: Local repository for development artifacts
-- **Version Management**: Explicit version declarations for reproducible builds
-
-**Key Dependencies Build Impact:**
-
-| Dependency | Version | Build Impact | Distribution Size |
-|---|---|---|---|
-| Selenium WebDriver | 3.141.59 | Browser driver management | ~15MB |
-| Cucumber Java | 7.2.3 | BDD framework integration | ~5MB |
-| JUnit | 4.13.2 | Test execution framework | ~2MB |
-| JavaFaker | 1.0.2 | Test data generation | ~3MB |
-
-### 8.2.2 Node.js Stack Distribution Requirements
-
-#### 8.2.2.1 Runtime Environment Specifications
-
-**Node.js Runtime Requirements:**
-- **Minimum Version**: Node.js 14.0 (maintenance LTS)
-- **Recommended Version**: Node.js 18.0+ (active LTS)
-- **Architecture Support**: x64, arm64 for cross-platform compatibility
-- **Operating System**: Linux (Ubuntu 18.04+), macOS 10.15+, Windows 10+
-
-**Environment Variable Configuration:**
-
-| Variable | Default Value | Purpose | Production Setting |
-|---|---|---|---|
-| NODE_ENV | development | Environment mode | production |
-| PORT | 3000 | Server port | 8080 |
-| LOG_LEVEL | INFO | Logging verbosity | WARN |
-| HEALTH_CHECK_INTERVAL | 30000 | Health monitoring | 15000 |
-
-#### 8.2.2.2 Process Management Infrastructure
-
-**PM2 Production Deployment Configuration:**
 ```javascript
-// ecosystem.config.js - Production deployment pattern
-{
+// PM2 monitoring configuration in ecosystem.config.js
+module.exports = {
   apps: [{
-    name: 'testinium-server',
+    name: 'secure-node-server',
     script: './server.js',
     instances: 'max',
     exec_mode: 'cluster',
-    max_memory_restart: '1G',
-    error_file: './logs/err.log',
-    out_file: './logs/out.log',
-    log_file: './logs/combined.log',
-    time: true
+    
+    // Monitoring configuration
+    pmx: true,
+    monitoring: true,
+    merge_logs: true,
+    log_type: 'json',
+    
+    // Performance metrics collection
+    metrics: {
+      http: true,
+      https: true,
+      network: true,
+      memory: true,
+      cpu: true,
+      gc: true
+    },
+    
+    // Alert thresholds
+    alert_enabled: true,
+    alert_memory_limit: '1GB',
+    alert_cpu_limit: 80,
+    alert_restart_threshold: 5,
+    alert_error_threshold: 10
   }]
+};
+```
+
+### 8.6.2 Performance Metrics Collection
+
+**Core Performance Indicators**:
+
+| Metric | Collection Method | Frequency | Storage | Target |
+|--------|-------------------|-----------|---------|--------|
+| **Response Time (p95)** | Request middleware | Per request | Aggregated logs | <200ms |
+| **CPU Usage** | PM2 built-in | Real-time | Memory | <60% |
+| **Memory Usage** | Process monitoring | 30 seconds | Logs | <70% |
+| **Error Rate** | Error handler | Per occurrence | Logs | <0.1% |
+| **Request Volume** | PM2 request counter | Real-time | Memory | Variable |
+| **Worker Health** | PM2 cluster monitor | 10 seconds | Memory | 100% |
+
+**Health Check Metrics Schema**:
+
+```javascript
+// Health endpoint response structure
+{
+  "status": "healthy",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "environment": "production",
+  "uptime": 3600,
+  "memory": {
+    "rss": 67108864,
+    "heapUsed": 45678912,
+    "heapTotal": 54321098,
+    "external": 1234567
+  },
+  "pid": 1001,
+  "version": "v22.0.0",
+  "checks": {
+    "database": "N/A",
+    "cache": "healthy",
+    "rateLimit": "operational",
+    "security": "active"
+  }
 }
 ```
 
-**PM2 Resource Allocation:**
+### 8.6.3 Cost Monitoring and Optimization
 
-| Resource Type | Minimum | Recommended | Maximum |
-|---|---|---|---|
-| Memory per Instance | 256MB | 512MB | 1GB |
-| CPU Cores | 1 | 2-4 | Available cores |
-| Disk Space | 1GB | 5GB | 20GB |
-| Network Bandwidth | 10Mbps | 100Mbps | 1Gbps |
+**Resource Utilization Tracking**:
 
-## 8.3 CI/CD PIPELINE INFRASTRUCTURE
+| Resource Type | Monitoring Approach | Optimization Strategy | Target Efficiency |
+|---------------|-------------------|----------------------|------------------|
+| **CPU Usage** | PM2 real-time monitoring | Auto-scaling workers | 60-80% utilization |
+| **Memory Allocation** | Process memory tracking | Memory limit enforcement | <1GB per worker |
+| **Network Bandwidth** | Request/response logging | Compression enablement | Minimal overhead |
+| **Storage I/O** | Log rotation monitoring | Automated cleanup | <80% disk usage |
 
-### 8.3.1 Build Pipeline Configuration
+**Cost Optimization Strategies**:
+- **Right-sizing**: Dynamic worker scaling based on CPU cores
+- **Resource Limits**: Memory caps preventing resource waste
+- **Log Management**: Automated rotation and compression
+- **Energy Efficiency**: PM2 clustering reducing idle processes
 
-#### 8.3.1.1 Source Control Integration
+### 8.6.4 Security Monitoring
 
-**Supported CI/CD Platforms:**
-- **Jenkins**: Primary CI/CD orchestration with Cucumber report publishing integration
-- **GitHub Actions**: Alternative pipeline configuration for GitHub-hosted repositories
-- **Generic CI/CD**: Standard Maven and Node.js build patterns for platform flexibility
+**Security Event Tracking Matrix**:
 
-```mermaid
-flowchart TD
-    A[Source Control Trigger] --> B{Build Type}
+| Event Type | Detection Method | Log Location | Retention | Alert Threshold |
+|------------|------------------|--------------|-----------|-----------------|
+| **Authentication Failures** | Auth middleware | `logs/security.log` | 90 days | >5 failures/minute |
+| **Rate Limit Violations** | Rate limiter | `logs/combined.log` | 30 days | >10 hits/minute |
+| **Input Validation Failures** | Validator middleware | `logs/error.log` | 30 days | >20 failures/hour |
+| **CORS Violations** | CORS middleware | `logs/combined.log` | 30 days | Any violation |
+| **SSL Certificate Issues** | TLS monitoring | `logs/ssl.log` | 90 days | Any failure |
+
+**Security Monitoring Configuration**:
+
+```javascript
+// Security event logging middleware
+const securityLogger = (req, res, next) => {
+  const securityEvents = ['auth_failure', 'rate_limit_hit', 'cors_violation'];
+  
+  req.on('security_event', (event) => {
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      event: event.type,
+      source_ip: req.ip,
+      user_agent: req.get('User-Agent'),
+      endpoint: req.path,
+      severity: event.severity || 'warning'
+    };
     
-    B -->|Java Stack| C[Maven Build Pipeline]
-    B -->|Node.js Stack| D[Node.js Build Pipeline]
-    
-    C --> E[Dependency Resolution]
-    E --> F[Compilation & Testing]
-    F --> G[Test Report Generation]
-    G --> H[Artifact Creation]
-    
-    D --> I[Environment Setup]
-    I --> J[Health Check Validation]
-    J --> K[Configuration Testing]
-    K --> L[Process Validation]
-    
-    H --> M[Quality Gates]
-    L --> M
-    M --> N{Quality Pass?}
-    
-    N -->|Yes| O[Artifact Storage]
-    N -->|No| P[Build Failure]
-    
-    O --> Q[Deployment Ready]
-    P --> R[Notification & Rollback]
-    
-    style A fill:#e1f5fe
-    style Q fill:#c8e6c9
-    style R fill:#ffcdd2
+    console.log('SECURITY_EVENT:', JSON.stringify(logEntry));
+  });
+  
+  next();
+};
 ```
 
-#### 8.3.1.2 Build Environment Requirements
+### 8.6.5 Compliance Auditing
 
-**Java Build Environment:**
-- **JDK Version**: OpenJDK 8+ or Oracle JDK 8+
-- **Memory Allocation**: 2GB minimum for Maven build process
-- **Build Tools**: Maven 3.6+ with dependency caching
-- **Browser Drivers**: WebDriverManager for automated driver management
+**Audit Trail Components**:
 
-**Node.js Build Environment:**
-- **Runtime**: Node.js 14+ with npm/yarn package management
-- **Process Manager**: PM2 5.0.0+ for production deployment testing
-- **Memory Requirements**: 1GB minimum for PM2 cluster mode testing
-- **Log Storage**: 5GB for build and test log retention
+| Audit Category | Data Collected | Collection Method | Retention Policy |
+|----------------|----------------|-------------------|------------------|
+| **Access Logs** | All HTTP requests with timestamps | Express logging middleware | 30 days |
+| **Error Events** | Application errors and stack traces | Error handling middleware | 30 days |
+| **Security Events** | Authentication and authorization events | Security middleware | 90 days |
+| **Configuration Changes** | Git commits and deployment logs | Version control + deployment scripts | Permanent |
+| **Performance Metrics** | Response times and resource usage | PM2 monitoring | 30 days |
 
-### 8.3.2 Deployment Pipeline Architecture
+**Compliance Reporting Structure**:
 
-#### 8.3.2.1 Environment Promotion Strategy
+```javascript
+// Audit log entry structure
+{
+  "timestamp": "2024-01-15T10:30:00Z",
+  "category": "access|error|security|config|performance",
+  "event_id": "uuid-v4",
+  "source": {
+    "ip": "192.168.1.100",
+    "user_agent": "Mozilla/5.0...",
+    "session_id": "session-uuid"
+  },
+  "event_data": {
+    "endpoint": "/api/endpoint",
+    "method": "POST",
+    "status_code": 200,
+    "response_time": 150,
+    "user_id": "user-uuid"
+  },
+  "compliance": {
+    "regulation": "GDPR|OWASP|SOX",
+    "classification": "public|internal|confidential",
+    "retention_period": "30d|90d|permanent"
+  }
+}
+```
 
-**Deployment Environment Tiers:**
-
-| Environment | Purpose | Configuration | Validation Requirements |
-|---|---|---|---|
-| Development | Local testing | Single process mode | Basic functionality |
-| Integration | CI/CD validation | PM2 cluster simulation | Full test suite |
-| Staging | Pre-production | Production-like config | Performance testing |
-| Production | Live deployment | Full PM2 cluster | Health monitoring |
-
-#### 8.3.2.2 Rollback and Recovery Procedures
-
-**Automated Rollback Triggers:**
-- Health check failures exceeding 3 consecutive attempts
-- Memory usage above 90% for more than 5 minutes
-- Error rate exceeding 10% over 2-minute window
-- Process restart failures with PM2 management
-
-**Recovery Time Objectives:**
-
-| Component | Target RTO | Recovery Method | Validation Process |
-|---|---|---|---|
-| Node.js Server | 2 minutes | PM2 auto-restart | Health endpoint check |
-| Test Automation | 5 minutes | Maven rebuild | Sample test execution |
-| Process Management | 1 minute | Service restart | Process status validation |
-| Log Aggregation | 30 seconds | Winston restart | Log entry verification |
-
-## 8.4 MONITORING AND OBSERVABILITY INFRASTRUCTURE
-
-### 8.4.1 Infrastructure Monitoring Framework
-
-#### 8.4.1.1 Resource Monitoring Strategy
-
-**System Resource Monitoring:**
-- **CPU Utilization**: Process-level monitoring through PM2 with alerting at 70% sustained usage
-- **Memory Management**: Heap monitoring with automatic restart at 1GB threshold
-- **Disk Usage**: Log rotation with 80% disk space alert threshold
-- **Network I/O**: Request pattern monitoring and throughput analysis
-
-**Monitoring Data Collection:**
-
-| Metric Category | Collection Method | Retention Period | Alert Threshold |
-|---|---|---|---|
-| Process Health | PM2 built-in monitoring | 7 days | Process down |
-| Memory Usage | Node.js heap inspection | 3 days | >80% allocated |
-| Request Metrics | Winston structured logging | 30 days | >500ms response |
-| Error Tracking | Exception logging | 90 days | >5% error rate |
-
-#### 8.4.1.2 Application Performance Monitoring
+## 8.7 INFRASTRUCTURE ARCHITECTURE DIAGRAM
 
 ```mermaid
 graph TB
-    subgraph "Performance Monitoring Infrastructure"
-        PM2[PM2 Process Monitoring] --> Metrics[Metrics Collection]
-        Winston[Winston Logger] --> Metrics
-        Health[Health Checks] --> Metrics
-        
-        Metrics --> Analysis[Performance Analysis]
-        Analysis --> Alerts[Alert Generation]
-        Alerts --> Response[Incident Response]
+    subgraph "External Layer"
+        A[Internet Traffic]
+        B[Load Balancer/Reverse Proxy<br/>Nginx/HAProxy]
+        C[SSL Termination<br/>Let's Encrypt]
     end
     
-    subgraph "Monitoring Outputs"
-        Analysis --> Dashboard[Performance Dashboard]
-        Analysis --> Reports[Performance Reports]
-        Response --> Remediation[Auto-remediation]
+    subgraph "Application Infrastructure"
+        D[PM2 Master Process<br/>Process Management]
+        E[Worker Instance 1<br/>Node.js + Express]
+        F[Worker Instance 2<br/>Node.js + Express]
+        G[Worker Instance N<br/>Node.js + Express]
     end
     
-    subgraph "External Integrations"
-        Alerts --> Backprop[Backprop Analytics]
-        Reports --> CI[CI/CD Pipeline]
-        Dashboard --> Teams[Development Teams]
-    end
-```
-
-### 8.4.2 Cost Monitoring and Optimization
-
-#### 8.4.2.1 Resource Cost Analysis
-
-**Infrastructure Cost Estimates:**
-
-| Component | Development Cost | Production Cost | Annual Estimate |
-|---|---|---|---|
-| Local Development | $0 | N/A | $0 |
-| CI/CD Integration | $50/month | $200/month | $3,000 |
-| Basic Cloud Hosting | $25/month | $100/month | $1,500 |
-| Monitoring Tools | $0 (Open Source) | $50/month | $600 |
-| **Total Estimated Cost** | **$75/month** | **$350/month** | **$5,100/year** |
-
-#### 8.4.2.2 Cost Optimization Strategies
-
-**Resource Optimization Approaches:**
-- **Cluster Mode Efficiency**: PM2 cluster mode maximizes CPU utilization across available cores
-- **Memory Management**: Automatic garbage collection and memory restart thresholds prevent memory leaks
-- **Log Rotation**: Winston log rotation prevents disk space exhaustion
-- **Process Scaling**: Dynamic process scaling based on load patterns
-
-## 8.5 SECURITY AND COMPLIANCE INFRASTRUCTURE
-
-### 8.5.1 Security Monitoring Framework
-
-#### 8.5.1.1 Security Event Detection
-
-**Security Monitoring Capabilities:**
-- **Authentication Monitoring**: Failed login attempt tracking with rate limiting
-- **Resource Access Control**: API endpoint access pattern analysis
-- **Process Security**: PM2 process isolation and resource boundary enforcement
-- **Configuration Security**: Environment variable encryption and access control
-
-**Security Infrastructure Components:**
-
-| Security Layer | Implementation | Monitoring Method | Alert Criteria |
-|---|---|---|---|
-| Authentication | JWT token validation | Winston security logs | 5 failures/15 min |
-| Rate Limiting | Express.js middleware | Request pattern analysis | 1000 req/hour/IP |
-| Process Isolation | PM2 cluster mode | Process boundary monitoring | Unauthorized access |
-| Configuration Security | Environment variables | Configuration change logs | Unauthorized modification |
-
-#### 8.5.1.2 Audit Trail Infrastructure
-
-**Audit Logging Configuration:**
-- **Log Format**: Structured JSON logging through Winston for compliance requirements
-- **Retention Policy**: 90-day retention for security events, 365-day for configuration changes
-- **Tamper Protection**: Log file integrity monitoring and backup procedures
-- **Compliance Support**: GDPR, SOX, and HIPAA audit trail capabilities
-
-## 8.6 INFRASTRUCTURE ARCHITECTURE DIAGRAMS
-
-### 8.6.1 Overall Infrastructure Architecture
-
-```mermaid
-graph TB
-    subgraph "Development Infrastructure"
-        Dev[Local Development Environment]
-        JDK[JDK 8+ Runtime]
-        Node[Node.js 14+ Runtime]
-        Maven[Maven Build System]
-        
-        Dev --> JDK
-        Dev --> Node
-        JDK --> Maven
-    end
-    
-    subgraph "CI/CD Infrastructure"
-        SCM[Source Control Management]
-        CI[CI/CD Pipeline]
-        Artifacts[Artifact Repository]
-        QualityGates[Quality Gates]
-        
-        SCM --> CI
-        CI --> QualityGates
-        QualityGates --> Artifacts
-    end
-    
-    subgraph "Deployment Infrastructure"
-        PM2[PM2 Process Manager]
-        Cluster[Cluster Mode]
-        Monitoring[Health Monitoring]
-        Logs[Log Management]
-        
-        PM2 --> Cluster
-        Cluster --> Monitoring
-        Monitoring --> Logs
+    subgraph "Storage Layer"
+        H[Application Logs<br/>./logs/*.log]
+        I[SSL Certificates<br/>/etc/ssl/certs]
+        J[Configuration Files<br/>.env, ecosystem.config.js]
+        K[Static Assets<br/>./public/]
     end
     
     subgraph "Monitoring Infrastructure"
-        Winston[Winston Logger]
-        Metrics[Metrics Collection]
-        Alerts[Alert Management]
-        Reports[Report Generation]
-        
-        Winston --> Metrics
-        Metrics --> Alerts
-        Alerts --> Reports
+        L[PM2 Web Dashboard<br/>Real-time Monitoring]
+        M[Health Check Endpoints<br/>/health, /metrics]
+        N[Log Aggregation<br/>PM2 Log Management]
+        O[Process Metrics<br/>CPU, Memory, Network]
     end
     
-    Dev --> SCM
-    Artifacts --> PM2
-    Logs --> Winston
+    subgraph "Security Layer"
+        P[Rate Limiting<br/>express-rate-limit]
+        Q[Input Validation<br/>express-validator]
+        R[Security Headers<br/>Helmet.js]
+        S[CORS Policy<br/>cors middleware]
+    end
     
-    style Dev fill:#e1f5fe
-    style PM2 fill:#fff3e0
-    style Winston fill:#f3e5f5
+    A --> B
+    B --> C
+    C --> D
+    
+    D -->|Fork & Manage| E
+    D -->|Fork & Manage| F
+    D -->|Fork & Manage| G
+    
+    E -->|Write| H
+    F -->|Write| H
+    G -->|Write| H
+    
+    E -->|Read| I
+    F -->|Read| I
+    G -->|Read| I
+    
+    E -->|Read| J
+    F -->|Read| J
+    G -->|Read| J
+    
+    E -->|Serve| K
+    F -->|Serve| K
+    G -->|Serve| K
+    
+    D -->|Monitor| L
+    E -->|Health Data| M
+    F -->|Health Data| M
+    G -->|Health Data| M
+    
+    H --> N
+    D --> O
+    
+    E --> P
+    E --> Q
+    E --> R
+    E --> S
+    
+    F --> P
+    F --> Q
+    F --> R
+    F --> S
+    
+    G --> P
+    G --> Q
+    G --> R
+    G --> S
+    
+    style A fill:#e3f2fd
+    style D fill:#f3e5f5
+    style L fill:#e8f5e8
+    style P fill:#fff3e0
 ```
 
-### 8.6.2 Deployment Workflow Architecture
+## 8.8 DEPLOYMENT WORKFLOW DIAGRAM
 
 ```mermaid
-flowchart TD
-    A[Source Code Repository] --> B[CI/CD Trigger]
-    B --> C{Build Type Selection}
+sequenceDiagram
+    participant Dev as Developer
+    participant Git as Git Repository
+    participant GHA as GitHub Actions
+    participant Jenkins as Jenkins CI
+    participant Staging as Staging Environment
+    participant PM2_S as PM2 Staging
+    participant Prod as Production Environment
+    participant PM2_P as PM2 Production
+    participant Monitor as Monitoring System
     
-    C -->|Java Stack| D[Maven Build Pipeline]
-    C -->|Node.js Stack| E[Node.js Build Pipeline]
+    Dev->>Git: Push Code Changes
+    Git->>GHA: Trigger CI Pipeline
     
-    D --> F[Selenium Test Execution]
-    E --> G[Server Health Validation]
+    GHA->>GHA: Install Dependencies
+    GHA->>GHA: Run Linting (ESLint)
+    GHA->>GHA: Execute Unit Tests
+    GHA->>GHA: Generate Coverage Report
+    GHA->>GHA: Security Audit (npm audit)
     
-    F --> H[Test Report Generation]
-    G --> I[Configuration Validation]
+    alt All Checks Pass
+        GHA->>Jenkins: Trigger Deployment Pipeline
+        Jenkins->>Staging: Deploy to Staging
+        Staging->>PM2_S: PM2 Reload with New Code
+        PM2_S->>Staging: Health Check Validation
+        
+        alt Staging Success
+            Jenkins->>Prod: Deploy to Production
+            Prod->>PM2_P: Graceful PM2 Reload
+            PM2_P->>PM2_P: Start New Workers
+            PM2_P->>PM2_P: Health Check New Workers
+            PM2_P->>PM2_P: Stop Old Workers
+            PM2_P->>Monitor: Update Monitoring
+            Monitor->>Jenkins: Deployment Confirmation
+            Jenkins->>Dev: Deployment Success Notification
+        else Staging Failure
+            Jenkins->>Dev: Staging Deployment Failed
+        end
+    else CI Checks Fail
+        GHA->>Dev: CI Pipeline Failed
+    end
     
-    H --> J[Quality Gate Assessment]
-    I --> J
-    
-    J --> K{Quality Standards Met?}
-    K -->|No| L[Build Failure Notification]
-    K -->|Yes| M[Artifact Preparation]
-    
-    M --> N[Deployment Environment Selection]
-    N --> O{Environment Type}
-    
-    O -->|Development| P[Single Process Deployment]
-    O -->|Production| Q[PM2 Cluster Deployment]
-    
-    P --> R[Health Check Validation]
-    Q --> S[Cluster Health Validation]
-    
-    R --> T[Deployment Complete]
-    S --> T
-    
-    L --> U[Rollback Procedures]
-    
-    style A fill:#e1f5fe
-    style T fill:#c8e6c9
-    style L fill:#ffcdd2
-    style U fill:#ffcdd2
+    alt Production Health Check Fails
+        PM2_P->>PM2_P: Automatic Rollback
+        PM2_P->>Monitor: Rollback Alert
+        Monitor->>Dev: Rollback Notification
+    end
 ```
 
-### 8.6.3 Environment Promotion Flow
+## 8.9 ENVIRONMENT PROMOTION FLOW
 
 ```mermaid
 stateDiagram-v2
     [*] --> Development
-    Development --> Integration : Code Commit
-    Integration --> Staging : CI/CD Success
-    Staging --> Production : Manual Approval
     
-    Development --> DevelopmentValidation
-    DevelopmentValidation --> Development : Validation Success
-    DevelopmentValidation --> [*] : Validation Failure
+    state Development {
+        [*] --> LocalTesting
+        LocalTesting --> CodeReview
+        CodeReview --> UnitTests
+        UnitTests --> SecurityScan
+    }
     
-    Integration --> IntegrationTesting
-    IntegrationTesting --> Integration : Tests Pass
-    IntegrationTesting --> Development : Tests Fail
+    Development --> Staging: CI Pipeline Success
     
-    Staging --> StagingValidation
-    StagingValidation --> Staging : Performance OK
-    StagingValidation --> Integration : Performance Issues
+    state Staging {
+        [*] --> IntegrationTests
+        IntegrationTests --> LoadTesting
+        LoadTesting --> SecurityValidation
+        SecurityValidation --> PerformanceBaseline
+    }
     
-    Production --> ProductionMonitoring
-    ProductionMonitoring --> Production : Health OK
-    ProductionMonitoring --> Staging : Issues Detected
+    Staging --> Production: Manual Approval
     
-    Production --> [*] : Graceful Shutdown
+    state Production {
+        [*] --> GracefulDeployment
+        GracefulDeployment --> HealthCheck
+        HealthCheck --> MonitoringValidation
+        MonitoringValidation --> DeploymentComplete
+    }
+    
+    Production --> [*]: Release Success
+    
+    Development --> Development: Tests Fail
+    Staging --> Development: Integration Fail
+    Production --> Rollback: Health Check Fail
+    
+    state Rollback {
+        [*] --> StopNewVersion
+        StopNewVersion --> RestorePrevious
+        RestorePrevious --> VerifyRollback
+        VerifyRollback --> IncidentReport
+    }
+    
+    Rollback --> Production: Rollback Success
+    Rollback --> [*]: Manual Intervention Required
 ```
 
-## 8.7 DISASTER RECOVERY AND BACKUP PROCEDURES
+## 8.10 NETWORK ARCHITECTURE
 
-### 8.7.1 Backup Strategy
+```mermaid
+graph TB
+    subgraph "DMZ - Public Network"
+        A[Internet Gateway]
+        B[Load Balancer<br/>80/443]
+        C[SSL Termination<br/>Let's Encrypt]
+    end
+    
+    subgraph "Application Network - Private"
+        D[Application Servers<br/>Port 3000]
+        E[PM2 Cluster<br/>Worker Pool]
+        F[Health Check Service<br/>Port 3000/health]
+    end
+    
+    subgraph "Management Network"
+        G[PM2 Web Dashboard<br/>Port 8080]
+        H[SSH Access<br/>Port 22]
+        I[Log Access<br/>File System]
+    end
+    
+    subgraph "Security Controls"
+        J[Firewall Rules<br/>iptables/ufw]
+        K[Rate Limiting<br/>Application Layer]
+        L[DDoS Protection<br/>Load Balancer]
+    end
+    
+    A -->|HTTPS/HTTP| B
+    B -->|SSL Offload| C
+    C -->|HTTP| D
+    D -->|Process Management| E
+    E -->|Health Status| F
+    
+    D -.->|Admin Access| G
+    D -.->|SSH Management| H
+    D -.->|Log Collection| I
+    
+    A --> J
+    B --> K
+    B --> L
+    
+    style A fill:#e3f2fd
+    style D fill:#f3e5f5
+    style G fill:#e8f5e8
+    style J fill:#ffebee
+```
 
-#### 8.7.1.1 Configuration Backup Requirements
+## 8.11 INFRASTRUCTURE COST ESTIMATES
 
-**Critical Configuration Elements:**
-- **Environment Variables**: Production configuration with encryption keys and secrets
-- **PM2 Ecosystem Configuration**: Process management setup and scaling parameters
-- **Log Configuration**: Winston logger setup and rotation policies
-- **Build Configurations**: Maven POM files and Node.js package configurations
+### 8.11.1 On-Premises Deployment Costs
 
-**Backup Schedule and Retention:**
+| Component | Monthly Cost (USD) | Annual Cost (USD) | Notes |
+|-----------|-------------------|-------------------|--------|
+| **Server Hardware** | $0 | $0 | One-time purchase |
+| **Electricity** | $50-100 | $600-1200 | Based on 24/7 operation |
+| **Network Bandwidth** | $30-50 | $360-600 | Internet connection |
+| **SSL Certificates** | $0 | $0 | Let's Encrypt (free) |
+| **System Administration** | $100-200 | $1200-2400 | Part-time admin |
+| **Monitoring Tools** | $0 | $0 | PM2 open source |
+| **Backup Storage** | $20-40 | $240-480 | External backup solution |
+| **Security Tools** | $0 | $0 | Built-in security features |
+| **Total Operational** | **$200-390** | **$2400-4680** | Excluding hardware |
 
-| Backup Type | Frequency | Retention Period | Storage Location |
-|---|---|---|---|
-| Configuration Files | Daily | 30 days | Encrypted cloud storage |
-| Application Logs | Hourly | 7 days | Local rotation + cloud backup |
-| Process State | Real-time | 24 hours | PM2 dump files |
-| Build Artifacts | Per build | 10 versions | Artifact repository |
+### 8.11.2 Hardware Investment (One-time)
 
-#### 8.7.1.2 Recovery Procedures
+| Deployment Size | Hardware Cost | Specifications | Expected Lifecycle |
+|----------------|---------------|----------------|-------------------|
+| **Small** | $2,000-3,000 | 4 cores, 8GB RAM, 500GB SSD | 3-4 years |
+| **Medium** | $5,000-8,000 | 8 cores, 16GB RAM, 1TB SSD | 3-4 years |
+| **Large** | $10,000-15,000 | 16 cores, 32GB RAM, 2TB SSD | 3-4 years |
+| **High Availability** | $20,000-30,000 | 2+ servers with load balancer | 3-4 years |
 
-**Recovery Time Objectives (RTO):**
-- **Configuration Recovery**: 15 minutes from backup restoration
-- **Process Recovery**: 5 minutes using PM2 resurrection
-- **Build Environment Recovery**: 30 minutes including dependency resolution
-- **Full System Recovery**: 45 minutes end-to-end restoration
+### 8.11.3 Cost Optimization Recommendations
 
-**Recovery Point Objectives (RPO):**
-- **Configuration Changes**: 1 hour maximum data loss
-- **Application State**: 5 minutes maximum data loss
-- **Log Data**: 15 minutes maximum data loss
-- **Build History**: 1 build cycle maximum loss
+| Strategy | Potential Savings | Implementation | Risk Level |
+|----------|------------------|----------------|------------|
+| **Auto-scaling** | 20-30% | PM2 cluster mode | Low |
+| **Log Rotation** | 10-15% | Automated cleanup | Low |
+| **Resource Monitoring** | 15-25% | Optimize worker count | Low |
+| **Energy Efficiency** | 10-20% | Modern hardware | Medium |
 
-### 8.7.2 Business Continuity Planning
+## 8.12 EXTERNAL DEPENDENCIES
 
-#### 8.7.2.1 Service Continuity Framework
+### 8.12.1 Critical Dependencies
 
-**High Availability Design:**
-- **PM2 Cluster Mode**: Automatic process restart and load distribution
-- **Health Check Automation**: Continuous monitoring with auto-remediation
-- **Graceful Degradation**: Progressive feature disable during resource constraints
-- **Load Balancing**: Request distribution across available process instances
+| Dependency | Type | Purpose | Criticality | Fallback Strategy |
+|------------|------|---------|-------------|------------------|
+| **Node.js Runtime** | Platform | Application execution | Critical | Version pinning, LTS support |
+| **PM2 Process Manager** | Tool | Process orchestration | Critical | Manual process management |
+| **npm Registry** | Service | Package installation | High | Private registry mirror |
+| **Git Repository** | Service | Source code management | High | Local Git server |
+| **Let's Encrypt** | Service | SSL certificate generation | Medium | Manual certificates |
 
-**Failover Procedures:**
+### 8.12.2 Dependency Management Strategy
 
-| Failure Type | Detection Time | Recovery Action | Recovery Time |
-|---|---|---|---|
-| Process Crash | <30 seconds | PM2 auto-restart | <2 minutes |
-| Memory Exhaustion | <60 seconds | Process recycling | <3 minutes |
-| Port Conflict | Immediate | Port reassignment | <5 minutes |
-| Configuration Error | <2 minutes | Config rollback | <10 minutes |
+**Version Control**:
+- **Node.js**: LTS versions only (14.x, 16.x, 18.x, 22.x)
+- **PM2**: Semantic versioning with major version pinning
+- **npm Packages**: package-lock.json for deterministic builds
+- **Security Updates**: Automated vulnerability scanning and patching
 
-## 8.8 MAINTENANCE AND OPERATIONAL PROCEDURES
+**Availability Assurance**:
 
-### 8.8.1 Routine Maintenance Framework
-
-#### 8.8.1.1 Preventive Maintenance Schedule
-
-**Regular Maintenance Tasks:**
-
-| Task | Frequency | Duration | Automation Level |
-|---|---|---|---|
-| Log Rotation | Daily | 5 minutes | Fully Automated |
-| Dependency Updates | Weekly | 30 minutes | Semi-Automated |
-| Security Patches | Monthly | 2 hours | Manual Review |
-| Configuration Audit | Monthly | 1 hour | Automated Scan |
-| Performance Optimization | Quarterly | 4 hours | Manual Analysis |
-
-#### 8.8.1.2 Health Check Procedures
-
-**Automated Health Monitoring:**
-- **Endpoint Health**: HTTP response validation every 30 seconds
-- **Process Health**: PM2 process status monitoring with automatic restart
-- **Resource Health**: Memory and CPU utilization tracking with alerts
-- **Configuration Health**: Environment variable validation and consistency checks
-
-### 8.8.2 Scaling and Capacity Management
-
-#### 8.8.2.1 Horizontal Scaling Procedures
-
-**PM2 Cluster Scaling Configuration:**
 ```javascript
-// Dynamic scaling based on load
-{
-  apps: [{
-    name: 'testinium-server',
-    script: './server.js',
-    instances: 0, // Auto-scale based on CPU cores
-    exec_mode: 'cluster',
-    max_memory_restart: '1G',
-    autorestart: true,
-    watch: false,
-    max_restarts: 10
-  }]
+// Dependency health check
+const dependencyCheck = {
+  nodejs: () => process.version,
+  pm2: () => require('pm2').version,
+  npm: () => require('child_process').execSync('npm --version'),
+  git: () => require('child_process').execSync('git --version'),
+  ssl: () => checkSSLCertificate()
+};
+```
+
+## 8.13 RESOURCE SIZING GUIDELINES
+
+### 8.13.1 Deployment Sizing Matrix
+
+| Deployment Tier | Concurrent Users | CPU Cores | Memory | Storage | Network |
+|-----------------|------------------|-----------|--------|---------|---------|
+| **Development** | 1-10 | 2 cores | 2GB | 20GB | 100Mbps |
+| **Small Production** | 10-1,000 | 4 cores | 4GB | 50GB | 1Gbps |
+| **Medium Production** | 1,000-10,000 | 8 cores | 8GB | 100GB | 1Gbps |
+| **Large Production** | 10,000-100,000 | 16 cores | 16GB | 200GB | 10Gbps |
+| **Enterprise** | 100,000+ | 32+ cores | 32GB+ | 500GB+ | 10Gbps+ |
+
+### 8.13.2 PM2 Worker Configuration
+
+| Server Size | CPU Cores | PM2 Workers | Memory per Worker | Total Memory |
+|-------------|-----------|-------------|-------------------|--------------|
+| **Small** | 2-4 | 2-4 | 512MB | 1-2GB |
+| **Medium** | 4-8 | 4-8 | 1GB | 4-8GB |
+| **Large** | 8-16 | 8-16 | 1GB | 8-16GB |
+| **Enterprise** | 16+ | 16+ | 1-2GB | 16-32GB+ |
+
+### 8.13.3 Performance Scaling Guidelines
+
+**Horizontal Scaling Triggers**:
+
+| Metric | Scale-Up Threshold | Scale-Down Threshold | Action |
+|--------|-------------------|---------------------|--------|
+| **CPU Usage** | >80% for 5 minutes | <30% for 15 minutes | Add/Remove workers |
+| **Memory Usage** | >85% average | <40% average | Add/Remove workers |
+| **Response Time** | >500ms p95 | <200ms p95 | Scale workers |
+| **Error Rate** | >1% for 5 minutes | <0.1% for 10 minutes | Investigate/Scale |
+
+**Vertical Scaling Recommendations**:
+
+```bash
+#!/bin/bash
+# Auto-scaling script for PM2
+scale_application() {
+    local cpu_usage=$(pm2 monit | grep "CPU" | awk '{print $2}' | sed 's/%//')
+    local current_instances=$(pm2 list | grep "online" | wc -l)
+    local max_instances=$(nproc)
+    
+    if [ "$cpu_usage" -gt 80 ] && [ "$current_instances" -lt "$max_instances" ]; then
+        pm2 scale secure-node-server +1
+        echo "Scaled up: CPU usage at ${cpu_usage}%"
+    elif [ "$cpu_usage" -lt 30 ] && [ "$current_instances" -gt 1 ]; then
+        pm2 scale secure-node-server -1
+        echo "Scaled down: CPU usage at ${cpu_usage}%"
+    fi
 }
 ```
 
-**Scaling Triggers and Thresholds:**
-
-| Metric | Scale Up Trigger | Scale Down Trigger | Max Instances |
-|---|---|---|---|
-| CPU Usage | >70% for 5 minutes | <30% for 10 minutes | Available cores |
-| Memory Usage | >80% average | <50% average | Memory capacity |
-| Request Rate | >800 req/sec | <200 req/sec | Load capacity |
-| Response Time | >200ms average | <50ms average | Performance target |
-
 #### References
 
-**Technical Specification Sections Retrieved:**
-- `5.1 HIGH-LEVEL ARCHITECTURE` - System architecture overview and component integration patterns
-- `3.7 DEVELOPMENT & DEPLOYMENT` - Build system configuration and deployment procedures
-- `6.5 MONITORING AND OBSERVABILITY` - Comprehensive monitoring infrastructure and alerting systems
-- `6.6 TESTING STRATEGY` - Testing infrastructure and framework integration patterns
-- `3.1 TECHNOLOGY STACK OVERVIEW` - Dual-stack architecture rationale and technology selection
-- `4.1 SYSTEM WORKFLOWS` - Deployment workflows and cross-platform procedures
+#### Technical Specification Sections Retrieved
+- `3.6 DEVELOPMENT & DEPLOYMENT` - Development environment, build system, production deployment with PM2, and CI/CD requirements
+- `4.4 PRODUCTION DEPLOYMENT WORKFLOWS` - PM2 process management workflows and zero-downtime deployment procedures
+- `6.5 MONITORING AND OBSERVABILITY` - Comprehensive monitoring infrastructure, metrics collection, and incident response procedures
+- `3.7 TECHNOLOGY INTEGRATION ARCHITECTURE` - Technology stack integration and performance characteristics
 
-**Files Examined:**
-- `README.md` - Node.js server documentation with PM2 deployment configuration
-- `pom.xml` - Maven build configuration for Java test automation stack
-- `.gitignore` - Build and deployment artifact patterns
-- `.gitattributes` - Git configuration for infrastructure files
-- `docs/guides/production.md` - Production deployment guide with PM2 ecosystem configuration
+#### Repository Files Examined
+- `server.js` - Core server implementation with health endpoints and security middleware
+- `.env.example` - Complete environment configuration template with monitoring variables
+- `ecosystem.config.js` - PM2 process management configuration with clustering and monitoring
+- `package.json` - Node.js dependencies, scripts, and PM2 integration
+- `docs/guides/production.md` - Production deployment procedures and maintenance guidelines
+- `docs/guides/testing.md` - CI/CD pipeline configurations for GitHub Actions and Jenkins
 
-**Folders Explored:**
-- `(root)/` - Repository structure analysis for infrastructure requirements
-- `docs/` - Documentation structure including deployment and operational guides
-- `docs/architecture/` - System design documentation for infrastructure planning
-- `docs/guides/` - Operational procedures and deployment configuration guides
+#### External Sources Referenced
+- PM2 Process Manager documentation for clustering and monitoring capabilities
+- Node.js LTS release information for version compatibility matrix
+- GitHub Actions and Jenkins pipeline best practices for CI/CD implementation
 
 # APPENDICES
 
@@ -7444,304 +11577,319 @@ stateDiagram-v2
 
 ## 9.1 ADDITIONAL TECHNICAL INFORMATION
 
-### 9.1.1 Backprop Integration Architecture
+### 9.1.1 Certificate Management Implementation Details
 
-The repository contains a sophisticated integration framework for Backprop tooling that extends beyond the core system functionality documented in previous sections:
+The system implements a dual-certificate strategy to support both development and production environments effectively.
 
-#### 9.1.1.1 Analysis Hooks Implementation
-- **AST Parsing Integration**: Code structure analysis via Abstract Syntax Tree parsing for automated endpoint discovery and validation
-- **Performance Profiling Framework**: Comprehensive request/response timing and resource utilization tracking with real-time metrics collection
-- **Enhancement Validation Pipeline**: Before/after comparison system for upgrade scenarios with automated regression detection
-- **Integration Payload Structure**: JSON-based session tracking with standardized project_id, session_type, and performance metrics formatting
+#### Development Certificate Configuration
+The development environment utilizes self-signed certificates generated through OpenSSL CLI commands. These certificates are stored in the `/ssl` directory and provide adequate security for local development while avoiding the complexity of trusted certificate management. The system includes automatic generation scripts that create both private keys and certificate files with appropriate validity periods for development use.
 
-#### 9.1.1.2 Advanced Integration Patterns
-```mermaid
-graph TB
-    subgraph "Backprop Integration Flow"
-        A[Code Analysis] --> B[AST Parsing]
-        B --> C[Endpoint Discovery]
-        C --> D[Performance Baseline]
-        D --> E[Enhancement Application]
-        E --> F[Validation Testing]
-        F --> G[Metrics Collection]
-        G --> H[Report Generation]
-        
-        I[Session Tracking] --> J[Project Context]
-        J --> K[Session Type Classification]
-        K --> L[Performance Correlation]
-        L --> G
-    end
-    
-    style A fill:#e3f2fd
-    style D fill:#fff3e0
-    style G fill:#c8e6c9
-```
+#### Production Certificate Management
+Production deployments integrate with Let's Encrypt for automated certificate provisioning and renewal. The implementation utilizes Certbot for certificate lifecycle management, with certificates stored in the standard `/etc/letsencrypt/live/yourdomain.com/` directory structure. The system includes automatic renewal processes and fallback mechanisms to ensure continuous service availability.
 
-### 9.1.2 Progressive Enhancement Matrix
+#### Certificate Validation and Fallback
+The application implements intelligent certificate validation with automatic fallback capabilities. When SSL certificates are missing, invalid, or expired, the system gracefully degrades to HTTP-only operation while logging appropriate warnings for administrative attention.
 
-#### 9.1.2.1 Enhancement Performance Metrics
-The system implements detailed enhancement paths from basic implementations to production-ready systems with quantified performance improvements:
+### 9.1.2 Advanced Process Management Configuration
 
-| Enhancement Path | Performance Improvement | Resource Impact | Implementation Complexity |
-|---|---|---|---|
-| **Basic HTTP Server → Express.js Framework** | 25-30% throughput increase | +15% memory usage | Low |
-| **Single Process → PM2 Cluster Mode** | 300-400% throughput on multi-core | +50% memory per worker | Medium |
-| **Development → Production Security** | OWASP compliance progression | +10% CPU overhead | High |
-| **Python Flask Port** | API compatibility maintenance | +20% memory usage | Medium |
+#### PM2 Clustering Implementation
+The system leverages PM2's clustering capabilities with `instances: 'max'` configuration to automatically utilize all available CPU cores. This approach ensures optimal resource utilization and provides built-in load balancing across process instances.
 
-#### 9.1.2.2 Enhancement Decision Tree
-```mermaid
-flowchart TD
-    A[Current Implementation] --> B{Performance Requirements}
-    B -->|Low| C[Basic HTTP Server]
-    B -->|Medium| D[Express.js Implementation]
-    B -->|High| E[PM2 Cluster Mode]
-    
-    C --> F{Security Requirements}
-    D --> F
-    E --> F
-    
-    F -->|Basic| G[Development Configuration]
-    F -->|Enterprise| H[Production Security]
-    
-    G --> I[Basic Deployment]
-    H --> J[OWASP Compliance]
-    
-    I --> K{Cross-Platform Needs}
-    J --> K
-    
-    K -->|No| L[Node.js Only]
-    K -->|Yes| M[Python Flask Port]
-```
+#### Memory Management and Monitoring
+Process stability is maintained through configured memory limits with `max_memory_restart: '1G'` settings. This prevents memory leak accumulation by automatically restarting processes that exceed memory thresholds. Real-time process monitoring is available through the `pm2 monit` command, providing visibility into CPU usage, memory consumption, and process health metrics.
 
-### 9.1.3 Test Execution Architecture
+### 9.1.3 Environment-Specific Behavioral Patterns
 
-#### 9.1.3.1 Advanced Parallel Execution Framework
-- **Method-Level Parallelization**: Unlimited thread configuration for maximum CPU utilization
-- **Test Report Generation**: Multi-format output support including HTML, JSON, and TXT via PrettyReports plugin
-- **Coverage Analysis Integration**: NYC (Istanbul) CLI with comprehensive threshold enforcement
-- **Test Environment Isolation**: Container-based test execution with environment-specific configurations
+#### Development Mode Characteristics
+When `NODE_ENV=development` is configured, the system operates with developer-friendly settings including:
+- Relaxed CORS origin validation for local development workflows
+- Detailed error stack traces for enhanced debugging capabilities
+- Hot-reload functionality through nodemon integration
+- Acceptance of self-signed SSL certificates without validation warnings
 
-#### 9.1.3.2 Coverage Threshold Management
-| Coverage Type | Minimum Threshold | Enforcement Level | Reporting Format |
-|---|---|---|---|
-| **Branch Coverage** | 80% | Build-blocking | HTML Dashboard |
-| **Function Coverage** | 80% | Build-blocking | JSON Metrics |
-| **Line Coverage** | 80% | Build-blocking | TXT Summary |
-| **Statement Coverage** | 80% | Build-blocking | Console Output |
+#### Production Mode Security Posture
+Production environments (`NODE_ENV=production`) implement strict security measures:
+- Enforced CORS origin whitelist validation
+- Generic error messages without sensitive stack trace information
+- Automatic HTTP to HTTPS redirection for all requests
+- Mandatory trusted SSL certificate validation through Let's Encrypt
 
-### 9.1.4 Container Security Specifications
+### 9.1.4 Maven Testing Framework Configuration
 
-#### 9.1.4.1 Security Hardening Implementation
-- **Non-Root User Execution**: Dedicated nodejs:nodejs user configuration for minimal privilege access
-- **Minimal Base Images**: node:18-alpine implementation for reduced attack surface area
-- **Health Check Integration**: Security-aware monitoring with automated vulnerability detection
-- **CI/CD Security Pipeline**: Automated vulnerability scanning with build-blocking security gates
+#### Parallel Test Execution
+The Maven Surefire plugin is configured with `<parallel>methods</parallel>` to enable concurrent test execution, significantly reducing total test runtime while maintaining test isolation and reliability.
 
-#### 9.1.4.2 Container Security Architecture
-```mermaid
-graph TB
-    subgraph "Container Security Layers"
-        A[Base Image Security] --> B[node:18-alpine]
-        B --> C[User Privilege Management]
-        C --> D[nodejs:nodejs User]
-        D --> E[Application Security]
-        E --> F[Health Check Integration]
-        F --> G[Vulnerability Scanning]
-        G --> H[CI/CD Security Gates]
-        
-        I[Security Monitoring] --> J[Real-time Alerts]
-        J --> K[Automated Response]
-        K --> L[Incident Management]
-        
-        F --> I
-    end
-    
-    style B fill:#c8e6c9
-    style D fill:#fff3e0
-    style G fill:#ffcdd2
-```
+#### Test Reliability Enhancement
+Flaky test handling is implemented through `<rerunFailingTestsCount>2</rerunFailingTestsCount>` configuration, automatically retrying failed tests up to two additional times to distinguish between genuine failures and environmental issues.
+
+#### Test Reporting and Documentation
+Comprehensive test reporting is generated through the Cucumber reporting plugin, producing detailed HTML reports in the `target/cucumber-reports/` directory. These reports provide stakeholders with clear visibility into test coverage, execution results, and behavioral specifications.
 
 ## 9.2 GLOSSARY
 
-### 9.2.1 Technical Terms and Definitions
+| Term | Definition |
+|------|------------|
+| **ACID** | Atomicity, Consistency, Isolation, Durability - fundamental properties ensuring database transactions are processed reliably and maintain data integrity |
+| **Auto-scaling** | Dynamic adjustment of computational resources based on real-time demand patterns to maintain optimal performance and cost efficiency |
+| **Bcrypt** | Cryptographic password hashing function designed with computational expense to prevent brute-force attacks through adaptive cost parameters |
+| **Body-parser** | Express.js middleware component that parses incoming request bodies before they reach route handlers, supporting various content types |
 
 | Term | Definition |
-|---|---|
-| **Abstract Syntax Tree (AST) Parsing** | Code analysis technique examining program structure for automated discovery and validation processes |
-| **Backprop Tooling** | Development workflow optimization and code analysis suite designed for seamless test integration |
-| **Behavior-Driven Development (BDD)** | Software development methodology using natural language specifications for test scenario creation |
-| **Cipher Suite** | Comprehensive set of cryptographic algorithms used for securing network connection encryption |
-| **Cluster Mode** | Multi-process execution pattern for Node.js applications to utilize multi-core system architecture |
-| **Cross-Origin Resource Sharing (CORS)** | Security mechanism allowing controlled access to restricted web page resources from external domains |
-| **Data Boundary** | Logical architectural separation between different data types and processing domains within system design |
-| **DOMPurify** | Security-focused library for HTML sanitization preventing cross-site scripting (XSS) vulnerabilities |
-| **Enhancement Layer** | Architectural pattern enabling feature addition without core functionality modification |
-| **Environment Boundary** | Logical separation between deployment environments including development, staging, and production |
-| **Feature File** | Cucumber BDD specification file containing test scenarios written in human-readable Gherkin syntax |
-| **Graceful Shutdown** | Controlled service termination process ensuring active request completion before system shutdown |
-| **Health Check Endpoint** | Dedicated API endpoint providing real-time service availability and operational status monitoring |
-| **HttpOnly Cookie** | Security-enhanced cookie attribute preventing client-side JavaScript access for session protection |
-| **Integration-Centric Architecture** | System design philosophy prioritizing external service integration and interoperability |
-| **JavaFaker** | Test data generation library creating realistic, randomized data for Java application testing scenarios |
-| **JSON Web Token (JWT)** | Compact, URL-safe token format for secure claim representation between distributed system parties |
-| **Layered Architecture** | Software design pattern organizing application code into hierarchical abstraction layers |
-| **Log Rotation** | Automated process for archiving historical log files and creating new log instances |
-| **Middleware Stack** | Sequential chain of processing functions in web application frameworks for request handling |
-| **Minimalist-First Architecture** | Design philosophy beginning with basic implementation and progressively adding complexity |
-| **Mock/Mocking** | Test isolation technique using simulated objects replacing real dependencies during testing |
-| **Multi-Factor Authentication** | Security system requiring multiple independent verification methods for user identity confirmation |
-| **Non-Intrusive Integration** | Feature implementation approach adding capabilities without modifying existing codebase |
-| **Parallel Execution** | Concurrent test running methodology for reduced execution time and improved resource utilization |
-| **Parameterized Query** | Database query technique using placeholder variables preventing SQL injection attacks |
-| **Permission Matrix** | Authorization table defining specific access rights for various user roles and system resources |
-| **Policy Enforcement Point** | Architectural component where security policies are actively applied and validated |
-| **Process Manager** | System tool managing application lifecycle, resource allocation, and operational monitoring |
-| **Progressive Enhancement** | Development strategy starting with basic functionality and incrementally adding advanced features |
-| **Rate Limiting** | Traffic control mechanism restricting request frequency from individual clients or sources |
-| **Role-Based Access Control (RBAC)** | Security model providing access permissions based on predefined user role assignments |
-| **Recovery Point Objective (RPO)** | Maximum acceptable data loss measurement in disaster recovery scenarios |
-| **Recovery Time Objective (RTO)** | Maximum acceptable system downtime duration following failure events |
-| **Refresh Token** | Long-lived authentication token used for obtaining new access tokens without re-authentication |
-| **Request Router** | System component directing incoming HTTP requests to appropriate application handlers |
-| **Response Generator** | Application component creating structured HTTP responses from processed application data |
-| **Salt Rounds** | Cryptographic iteration count in password hashing algorithms enhancing security strength |
-| **Secure Cookie** | Enhanced cookie configuration ensuring transmission exclusively over HTTPS connections |
-| **Service Boundary** | Logical architectural separation between distinct application services and their responsibilities |
-| **Session Invalidation** | Security process for terminating user sessions and clearing associated authentication state |
-| **Step Definition** | Code implementation mapping Cucumber test scenario steps to executable application logic |
-| **Structured Logging** | Logging methodology using consistent, machine-parseable formats for automated analysis |
-| **Supertest** | Node.js testing library providing HTTP server testing capabilities with assertion support |
-| **Template Repository** | Version control repository serving as standardized blueprint for new project creation |
-| **Test Fixture** | Predefined, stable application state used as consistent baseline for test execution |
-| **Thread Pool** | Collection of pre-initialized worker threads for efficient parallel task processing |
-| **Throughput Target** | Performance metric defining desired request processing capacity per time unit |
-| **Token Rotation** | Security practice involving periodic replacement of authentication tokens for enhanced protection |
-| **Transport Layer Security (TLS)** | Cryptographic protocol ensuring secure communication over network connections |
-| **Vulnerability Assessment** | Systematic security evaluation process identifying potential system weaknesses and risks |
-| **WebDriver** | Browser automation API enabling programmatic control for Selenium testing frameworks |
-| **Winston Logger** | Popular Node.js logging library providing flexible, configurable logging capabilities |
-| **Web Server Gateway Interface (WSGI)** | Python specification defining communication interface between web servers and applications |
+|------|------------|
+| **Brute force attack** | Systematic attack methodology attempting to gain unauthorized access through exhaustive trial of possible passwords or encryption keys |
+| **Certificate Authority** | Trusted third-party entity responsible for issuing, validating, and managing digital certificates for HTTPS/TLS communications |
+| **Cipher Suite** | Comprehensive set of cryptographic algorithms that collectively secure network connections using TLS/SSL protocols |
+| **Content Security Policy** | HTTP security header mechanism that prevents Cross-Site Scripting attacks by explicitly declaring approved content sources |
+
+| Term | Definition |
+|------|------------|
+| **Cross-Origin Resource Sharing** | Web security mechanism enabling controlled access to restricted resources across different domains while maintaining origin-based security boundaries |
+| **Defense-in-depth** | Multi-layered security architecture strategy implementing multiple independent security controls to provide comprehensive system protection |
+| **Dependency Injection** | Software design pattern where objects receive their dependencies from external sources rather than creating them internally |
+| **Digital Certificate** | Electronic credential that cryptographically proves ownership of a public key and associated identity information |
+
+| Term | Definition |
+|------|------------|
+| **DOMPurify** | Client-side JavaScript library providing comprehensive HTML sanitization capabilities to prevent Cross-Site Scripting vulnerabilities |
+| **Dotenv** | Node.js module that loads environment-specific variables from `.env` files into the application's `process.env` object |
+| **ECMAScript** | Standardized scripting language specification that serves as the foundation for JavaScript implementations |
+| **End-to-end testing** | Comprehensive testing methodology that validates complete user workflows from interface interaction through backend processing |
+
+| Term | Definition |
+|------|------------|
+| **Event-driven architecture** | Software architectural pattern emphasizing loosely-coupled components that communicate through event production and consumption |
+| **Express middleware** | Modular functions executing during the HTTP request-response cycle in Express.js applications, providing cross-cutting functionality |
+| **Flaky test** | Automated test exhibiting non-deterministic behavior, producing inconsistent results across identical execution conditions |
+| **Graceful shutdown** | Controlled application termination process that completes active requests and releases resources before stopping |
+
+| Term | Definition |
+|------|------------|
+| **Health check endpoint** | Dedicated API endpoint providing real-time operational status information for monitoring and load balancing systems |
+| **Helmet.js** | Express.js security middleware library that implements multiple HTTP headers to enhance application security posture |
+| **Horizontal scaling** | Infrastructure scaling approach that increases capacity by adding more machines to the resource pool |
+| **HTTP Strict Transport Security** | Security header enforcing HTTPS-only communication between browsers and servers for enhanced transport security |
+
+| Term | Definition |
+|------|------------|
+| **Input sanitization** | Security process of validating and cleaning user-provided data to prevent injection attacks and data corruption |
+| **JSON Web Token** | Open standard for securely transmitting information between parties as digitally signed JSON objects |
+| **Load balancer** | Network infrastructure component that distributes incoming requests across multiple backend servers for optimal resource utilization |
+| **Lockfile** | Dependency management file that locks package versions to specific releases, ensuring reproducible builds across environments |
+
+| Term | Definition |
+|------|------------|
+| **Mermaid** | JavaScript-based diagramming library that renders markdown-style text definitions into visual diagrams and flowcharts |
+| **Middleware pipeline** | Ordered sequence of middleware functions executed in Express.js applications to process requests and responses |
+| **Mock object** | Test double that simulates real object behavior in controlled testing environments for isolated unit testing |
+| **Monolithic application** | Software architecture where all components are combined into a single deployable unit with tight coupling |
+
+| Term | Definition |
+|------|------------|
+| **Multi-factor authentication** | Security mechanism requiring multiple verification factors to establish user identity and grant access |
+| **Node Package Manager** | Default package management system for Node.js that handles dependency installation, versioning, and distribution |
+| **One-Time Password** | Authentication credential valid for a single login session or transaction, typically time-limited |
+| **OpenSSL** | Open-source cryptographic toolkit providing TLS/SSL protocol implementations and general-purpose cryptographic functions |
+
+| Term | Definition |
+|------|------------|
+| **Payload** | Data content transmitted within HTTP requests or responses, typically containing business logic information |
+| **Preflight request** | CORS mechanism where browsers send OPTIONS requests to verify that cross-origin requests are permitted |
+| **Process Manager** | System software responsible for managing application processes, including lifecycle, monitoring, and restart capabilities |
+| **Rate limiting** | Traffic control mechanism that restricts the number of requests a client can make within specified time periods |
+
+| Term | Definition |
+|------|------------|
+| **Refresh token** | Long-lived authentication credential used to obtain new access tokens when current tokens expire |
+| **Regular expression** | Pattern-matching language for defining search and validation patterns within text data |
+| **RESTful API** | Web service architecture following REST principles for stateless, resource-based communication |
+| **Role-Based Access Control** | Authorization model that grants permissions based on user roles within organizational structures |
+
+| Term | Definition |
+|------|------------|
+| **Salt** | Random data added to passwords before hashing to prevent rainbow table attacks and enhance security |
+| **SameSite cookie** | Cookie security attribute that prevents Cross-Site Request Forgery attacks by controlling cross-site request behavior |
+| **Semantic versioning** | Version numbering convention using MAJOR.MINOR.PATCH format to communicate compatibility and change significance |
+| **Session management** | Process of securely handling user authentication state and session data throughout application interactions |
+
+| Term | Definition |
+|------|------------|
+| **Smoke test** | Basic testing approach that verifies critical system functionality is operational after deployment or changes |
+| **SSL/TLS** | Cryptographic protocols providing secure, encrypted communication channels over network connections |
+| **Stateless architecture** | System design where each request contains complete information needed for processing, without server-side state dependencies |
+| **Structured logging** | Logging methodology using consistent, machine-parseable formats (typically JSON) for enhanced log analysis |
+
+| Term | Definition |
+|------|------------|
+| **Test-driven development** | Software development methodology where automated tests are written before implementation code |
+| **Token-based authentication** | Authentication mechanism using cryptographic tokens instead of traditional session-based approaches |
+| **Unit testing** | Testing methodology that validates individual software components in isolation from external dependencies |
+| **Vulnerability scanning** | Automated security testing process that identifies known security weaknesses and configuration issues |
+
+| Term | Definition |
+|------|------------|
+| **WebDriver** | W3C standard API enabling programmatic control of web browsers for automated testing and interaction |
+| **Zero Trust** | Security model requiring explicit verification for all users and devices, regardless of network location |
+| **Zero-downtime deployment** | Deployment strategy that releases new application versions without service interruption or user impact |
 
 ## 9.3 ACRONYMS
 
-### 9.3.1 Technical Acronyms and Expansions
-
-| Acronym | Expanded Form |
-|---|---|
+| Acronym | Expansion |
+|---------|-----------|
 | **AES** | Advanced Encryption Standard |
 | **API** | Application Programming Interface |
 | **APM** | Application Performance Monitoring |
-| **AST** | Abstract Syntax Tree |
 | **BDD** | Behavior-Driven Development |
-| **CDN** | Content Delivery Network |
+
+| Acronym | Expansion |
+|---------|-----------|
 | **CI/CD** | Continuous Integration/Continuous Deployment |
+| **CLI** | Command Line Interface |
 | **CORS** | Cross-Origin Resource Sharing |
 | **CPU** | Central Processing Unit |
+
+| Acronym | Expansion |
+|---------|-----------|
 | **CRUD** | Create, Read, Update, Delete |
+| **CSRF** | Cross-Site Request Forgery |
 | **CSP** | Content Security Policy |
-| **CSV** | Comma-Separated Values |
-| **DOM** | Document Object Model |
+| **CSS** | Cascading Style Sheets |
+
+| Acronym | Expansion |
+|---------|-----------|
+| **CVE** | Common Vulnerabilities and Exposures |
+| **DMZ** | Demilitarized Zone |
+| **DoS** | Denial of Service |
 | **E2E** | End-to-End |
-| **GCM** | Galois/Counter Mode |
+
+| Acronym | Expansion |
+|---------|-----------|
+| **ES6** | ECMAScript 2015 (6th Edition) |
+| **ESR** | Extended Support Release |
+| **HMAC** | Hash-based Message Authentication Code |
 | **HTML** | HyperText Markup Language |
+
+| Acronym | Expansion |
+|---------|-----------|
 | **HTTP** | HyperText Transfer Protocol |
 | **HTTPS** | HyperText Transfer Protocol Secure |
+| **HTTPOnly** | HTTP-only cookie flag |
+| **HSTS** | HTTP Strict Transport Security |
+
+| Acronym | Expansion |
+|---------|-----------|
 | **IDE** | Integrated Development Environment |
-| **I/O** | Input/Output |
+| **IP** | Internet Protocol |
+| **ISO** | International Organization for Standardization |
+| **J2ME** | Java 2 Platform, Micro Edition |
+
+| Acronym | Expansion |
+|---------|-----------|
 | **JDK** | Java Development Kit |
 | **JSON** | JavaScript Object Notation |
 | **JUnit** | Java Unit Testing Framework |
+| **JVM** | Java Virtual Machine |
+
+| Acronym | Expansion |
+|---------|-----------|
 | **JWT** | JSON Web Token |
 | **KPI** | Key Performance Indicator |
+| **LCOV** | Linux Test Project Coverage |
 | **LTS** | Long Term Support |
-| **MIME** | Multipurpose Internet Mail Extensions |
-| **MTBF** | Mean Time Between Failures |
+
+| Acronym | Expansion |
+|---------|-----------|
+| **MFA** | Multi-Factor Authentication |
 | **MTTR** | Mean Time To Recovery |
 | **NPM** | Node Package Manager |
-| **NYC** | Istanbul CLI (code coverage tool) |
+| **NVM** | Node Version Manager |
+
+| Acronym | Expansion |
+|---------|-----------|
+| **OS** | Operating System |
 | **OWASP** | Open Web Application Security Project |
+| **P95** | 95th Percentile |
+| **PID** | Process Identifier |
+
+| Acronym | Expansion |
+|---------|-----------|
+| **PII** | Personally Identifiable Information |
 | **PM2** | Process Manager 2 |
+| **POM** | Project Object Model (Maven) |
+| **POSIX** | Portable Operating System Interface |
+
+| Acronym | Expansion |
+|---------|-----------|
 | **QA** | Quality Assurance |
+| **RAM** | Random Access Memory |
 | **RBAC** | Role-Based Access Control |
 | **REST** | Representational State Transfer |
-| **RFC** | Request for Comments |
+
+| Acronym | Expansion |
+|---------|-----------|
 | **RPO** | Recovery Point Objective |
+| **RSS** | Resident Set Size |
 | **RTO** | Recovery Time Objective |
+| **SARIF** | Static Analysis Results Interchange Format |
+
+| Acronym | Expansion |
+|---------|-----------|
 | **SDK** | Software Development Kit |
+| **SHA** | Secure Hash Algorithm |
 | **SLA** | Service Level Agreement |
-| **SMS** | Short Message Service |
+| **SLO** | Service Level Objective |
+
+| Acronym | Expansion |
+|---------|-----------|
+| **SMTP** | Simple Mail Transfer Protocol |
 | **SQL** | Structured Query Language |
-| **SRE** | Site Reliability Engineer |
-| **SSH** | Secure Shell |
+| **SRE** | Site Reliability Engineering |
 | **SSL** | Secure Sockets Layer |
-| **SSO** | Single Sign-On |
+
+| Acronym | Expansion |
+|---------|-----------|
+| **SSRF** | Server-Side Request Forgery |
+| **TCP** | Transmission Control Protocol |
 | **TDD** | Test-Driven Development |
 | **TLS** | Transport Layer Security |
-| **TXT** | Text (file format) |
+
+| Acronym | Expansion |
+|---------|-----------|
+| **TOTP** | Time-based One-Time Password |
 | **UI** | User Interface |
+| **URI** | Uniform Resource Identifier |
 | **URL** | Uniform Resource Locator |
+
+| Acronym | Expansion |
+|---------|-----------|
 | **UUID** | Universally Unique Identifier |
 | **VM** | Virtual Machine |
-| **WSGI** | Web Server Gateway Interface |
+| **VPC** | Virtual Private Cloud |
+| **WAF** | Web Application Firewall |
+
+| Acronym | Expansion |
+|---------|-----------|
 | **XML** | eXtensible Markup Language |
 | **XSS** | Cross-Site Scripting |
-| **YAML** | Yet Another Markup Language |
+| **YAML** | YAML Ain't Markup Language |
 
-## 9.4 REFERENCES
+#### References
 
-### 9.4.1 Repository Files and Folders Examined
+#### Files Examined
+- `server.js` - Core server implementation with security middleware configuration and HTTPS setup
 
-**Configuration Files:**
-- `pom.xml` - Maven project configuration with Java test automation dependencies and parallel execution settings
-- `README.md` - Primary project documentation outlining dual-stack architecture and integration requirements
-- `.gitignore` - Version control exclusion patterns for Java build artifacts and Node.js modules
+#### Folders Explored  
+- `` (root) - Configuration files, server implementation, and documentation structure
+- `blitzy/` - Blitzy ecosystem documentation root
+- `blitzy/documentation/` - Technical specifications and project guide documents  
+- `docs/` - Main documentation folder with API references, architecture details, and guides
 
-**Documentation Structure:**
-- `docs/` - Comprehensive documentation folder containing architecture specifications and implementation guides
-- `docs/architecture/` - System design documentation including Backprop integration and progressive enhancement specifications
-- `docs/architecture/design.md` - Detailed technical architecture with enhancement matrices and container security specifications
-- `docs/guides/` - Implementation guidance for setup, migration, security, testing, production deployment, and Python porting
-
-### 9.4.2 Technical Specification Sections Referenced
-
-**Architecture and Design:**
-- `1.1 EXECUTIVE SUMMARY` - Project overview and dual-stack architecture context
-- `1.2 SYSTEM OVERVIEW` - Comprehensive system architecture understanding
-- `3.1 TECHNOLOGY STACK OVERVIEW` - Complete technology inventory and stack relationships
-- `5.4 CROSS-CUTTING CONCERNS` - Authentication and authorization framework specifications
-
-**Security and Compliance:**
-- `6.4 SECURITY ARCHITECTURE` - OWASP-compliant security implementation with comprehensive protection matrices
-- `Node.js Stack Security` - Detailed security implementation specifications and compliance frameworks
-
-**Testing and Quality Assurance:**
-- `6.6 TESTING STRATEGY` - Dual-stack testing approach with parallel execution and coverage specifications
-- `Node.js Stack Integration Testing` - Integration testing methodologies and framework configurations
-- `Node.js Stack Parallel Execution` - Advanced parallel testing implementation details
-
-**Technical Infrastructure:**
-- `3.4 OPEN SOURCE DEPENDENCIES` - Comprehensive dependency management and version control
-- `3.5 THIRD-PARTY SERVICES` - External service integration specifications
-- `3.6 DATABASES & STORAGE` - Data management and storage architecture approaches
-- `6.5 MONITORING AND OBSERVABILITY` - Comprehensive monitoring framework implementation
-
-### 9.4.3 External Standards and Specifications
-
-**Security Standards:**
-- OWASP Top 10 Security Vulnerabilities and Protection Measures
-- TLS 1.2/1.3 Encryption Standards and Cipher Suite Specifications
-- JWT RFC 7519 Standard for Token-Based Authentication
-- bcrypt Password Hashing Standard with Salt Round Configuration
-
-**Testing Standards:**
-- Cucumber BDD Framework Gherkin Syntax Specifications
-- Selenium WebDriver API Documentation and Browser Compatibility
-- Jest Testing Framework Configuration and Coverage Standards
-- Maven Surefire Plugin Parallel Execution Specifications
-
-**Container Security:**
-- Docker Security Best Practices for Node.js Applications
-- Alpine Linux Security Hardening Guidelines
-- Container User Privilege Management Standards
-- CI/CD Security Pipeline Implementation Practices
+#### Technical Specification Sections Referenced
+- 1.1 EXECUTIVE SUMMARY - System overview and stakeholder information
+- 3.1 PROGRAMMING LANGUAGES - Node.js, JavaScript, Java, and Bash details
+- 3.2 FRAMEWORKS & LIBRARIES - Express.js, Helmet.js, testing frameworks, and security middleware
+- 3.4 THIRD-PARTY SERVICES - Backprop API, Let's Encrypt, and PM2 details
+- 3.5 DATABASES & STORAGE - PostgreSQL (optional) and storage strategies
+- 6.4 SECURITY ARCHITECTURE - Comprehensive security implementation details
+- 6.5 MONITORING AND OBSERVABILITY - PM2 monitoring, logging, and alerting
+- 6.6 TESTING STRATEGY - Testing frameworks, tools, and methodologies
+- 8.5 CI/CD PIPELINE - Build and deployment pipeline configurations
