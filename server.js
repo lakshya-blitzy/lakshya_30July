@@ -467,14 +467,19 @@ const gracefulShutdown = (signal) => {
   
   Promise.all(shutdownPromises).then(() => {
     console.log('✅ Graceful shutdown completed');
-    process.exit(0);
+    // Only exit in production, not during testing
+    if (process.env.NODE_ENV !== 'test') {
+      process.exit(0);
+    }
   });
   
-  // Force exit after 30 seconds
-  setTimeout(() => {
-    console.error('❌ Forced shutdown after timeout');
-    process.exit(1);
-  }, 30000);
+  // Force exit after 30 seconds (only in production)
+  if (process.env.NODE_ENV !== 'test') {
+    setTimeout(() => {
+      console.error('❌ Forced shutdown after timeout');
+      process.exit(1);
+    }, 30000);
+  }
 };
 
 // Register shutdown handlers
