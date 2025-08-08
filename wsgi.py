@@ -61,15 +61,17 @@ def configure_logging():
     # Get numeric log level, default to INFO if invalid
     numeric_log_level = log_level_mapping.get(LOG_LEVEL, logging.INFO)
     
-    # Configure basic logging with structured format
+    # Configure basic logging with structured format (force configuration)
     logging.basicConfig(
         level=numeric_log_level,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
+        datefmt='%Y-%m-%d %H:%M:%S',
+        force=True  # Force reconfiguration even if already configured
     )
     
-    # Get logger instance for this module
+    # Get logger instance for this module and explicitly set level
     logger = logging.getLogger(__name__)
+    logger.setLevel(numeric_log_level)
     
     # Log startup information
     logger.info(f"WSGI entry point configured for {NODE_ENV} environment")
