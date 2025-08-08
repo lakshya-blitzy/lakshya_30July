@@ -20,8 +20,8 @@ describe('Integration Tests', () => {
       expect(packageJson.dependencies).toHaveProperty('express-rate-limit');
       expect(packageJson.dependencies).toHaveProperty('dotenv');
       expect(packageJson.dependencies).toHaveProperty('winston');
-      // pm2 should be in devDependencies, not dependencies
-      expect(packageJson.devDependencies).toHaveProperty('pm2');
+      // pm2 should be in dependencies for production deployment
+      expect(packageJson.dependencies).toHaveProperty('pm2');
       
       // Check dev dependencies
       expect(packageJson.devDependencies).toHaveProperty('jest');
