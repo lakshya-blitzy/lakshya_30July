@@ -15,7 +15,7 @@
  * - Graceful shutdown security procedures
  */
 
-const { describe, test, beforeEach, afterEach, beforeAll, afterAll, expect, jest } = require('jest');
+// Jest functions are globally available - no need to import
 const request = require('supertest');
 const process = require('process');
 const http = require('http');
@@ -600,10 +600,11 @@ describe('Security Test Suite - OWASP Top 10 & CVE Validation', () => {
       const response = await request(app)
         .get('/api/status')
         .set('Origin', 'https://malicious-site.com')
-        .expect(200);
+        .expect(403);
       
-      // Should not include CORS headers for unauthorized origins
-      expect(response.headers['access-control-allow-origin']).toBeUndefined();
+      // Should return proper error message for unauthorized origins
+      expect(response.body).toHaveProperty('error', 'Access denied');
+      expect(response.body).toHaveProperty('message', 'CORS policy violation');
     });
 
     test('should allow requests from authorized origins', async () => {
