@@ -1,0 +1,41 @@
+# Flask Core Framework
+Flask==2.3.3
+
+# Security Extensions (equivalent to Helmet.js and other Node.js security middleware)
+Flask-Talisman==1.1.0
+Flask-Limiter==3.5.0
+Flask-CORS==4.0.0
+
+# Environment and Configuration
+python-dotenv==1.0.0
+
+# Production WSGI Server (equivalent to PM2 for Node.js)
+gunicorn==21.2.0
+
+# Testing Framework (equivalent to Jest/Mocha)
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-flask==1.3.0
+
+# HTTP Testing (equivalent to Supertest)
+requests==2.31.0
+
+# Logging (equivalent to Winston)
+python-json-logger==2.0.7
+
+# Flask Dependencies and Compatibility
+Werkzeug==2.3.7
+Jinja2==3.1.2
+MarkupSafe==2.1.3
+click==8.1.7
+itsdangerous==2.1.2
+
+# Security and Validation
+email-validator==2.1.0.post1
+
+# Development Tools
+flake8==6.1.0
+black==23.12.1
+
+# Performance and Monitoring
+psutil==5.9.6
