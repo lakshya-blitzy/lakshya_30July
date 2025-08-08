@@ -21,7 +21,6 @@
 const request = require('supertest');
 const http = require('http');
 const path = require('path');
-const { describe, test, beforeEach, afterEach, beforeAll, afterAll, expect } = require('jest');
 
 // Import server components and configuration
 const { httpServer, app } = require('../server.js');
@@ -476,9 +475,9 @@ describe('Endpoint Testing Suite', () => {
 
       const responses = await Promise.all(requests);
       
-      // Check that rate limit headers are present
+      // Check that rate limit headers are present (standardHeaders format)
       responses.forEach(response => {
-        expect(response.headers['x-ratelimit-limit'] || response.headers['x-ratelimit-remaining']).toBeDefined();
+        expect(response.headers['ratelimit-limit'] || response.headers['ratelimit-remaining']).toBeDefined();
       });
     });
 
