@@ -1,0 +1,354 @@
+# Docker Compose v3.8 Configuration for Node.js Tutorial Project
+# Multi-service orchestration for Node.js and Python Flask applications
+# 
+# This configuration provides:
+# - Node.js Express server with comprehensive security middleware
+# - Python Flask server maintaining feature parity with Node.js implementation
+# - Persistent volumes for logs and SSL certificates
+# - Network isolation and inter-service communication
+# - Health checks for container orchestration
+# - Environment-based configuration management
+#
+# Usage:
+#   Development: docker-compose up
+#   Production:  docker-compose -f docker-compose.yml up -d
+#   Logs:        docker-compose logs -f [service-name]
+#   Health:      docker-compose ps
+
+version: '3.8'
+
+# =============================================================================
+# SERVICES CONFIGURATION
+# =============================================================================
+
+services:
+  # Node.js Express Application Service
+  # Primary tutorial implementation with comprehensive security features
+  node-app:
+    # Build configuration
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    image: secure-node-server:latest
+    container_name: nodejs-tutorial-server
+    
+    # Port mappings
+    # 3000: HTTP port for web traffic and health checks
+    # 443: HTTPS port for secure web traffic (if SSL certificates available)
+    ports:
+      - "3000:3000"
+      - "443:443"
+    
+    # Environment configuration
+    # Load all environment variables from .env file
+    # Supports development, staging, and production configurations
+    env_file:
+      - .env
+    environment:
+      # Override specific environment variables for containerized deployment
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=3000
+      - HTTPS_PORT=443
+      - USE_EXPRESS=true
+      # Health check configuration
+      - HEALTH_CHECK_ENABLED=true
+      - HEALTH_CHECK_TIMEOUT=2000
+      # Security configuration
+      - RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS:-1000}
+      - API_RATE_LIMIT_MAX_REQUESTS=${API_RATE_LIMIT_MAX_REQUESTS:-100}
+      # SSL/TLS configuration
+      - SSL_CERT_PATH=/app/certs/server.crt
+      - SSL_KEY_PATH=/app/certs/server.key
+    
+    # Volume mounts for persistence and configuration
+    volumes:
+      # Persistent log storage for debugging and monitoring
+      - app-logs:/app/logs
+      # SSL certificate storage for HTTPS support
+      - ssl-certs:/app/certs
+      # Optional: Mount local .env for dynamic configuration updates
+      - ./.env:/app/.env:ro
+    
+    # Restart policy for production reliability
+    # Always restart unless explicitly stopped
+    restart: unless-stopped
+    
+    # Health check configuration
+    # Monitors the /health endpoint to ensure application is responding
+    # Configured to match the comprehensive health check in server.js
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Network configuration
+    networks:
+      - app-network
+    
+    # Resource limits for production deployment
+    # Prevents resource exhaustion and ensures stable operation
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Python Flask Application Service  
+  # Cross-language implementation maintaining feature parity with Node.js
+  python-app:
+    # Build configuration for Python Flask application
+    build:
+      context: .
+      dockerfile: Dockerfile.python
+      target: runner
+    image: flask-server:latest
+    container_name: python-tutorial-server
+    
+    # Port mapping
+    # 5000: HTTP port for Flask application
+    ports:
+      - "5000:5000"
+    
+    # Environment configuration
+    # Load shared environment variables and Python-specific settings
+    env_file:
+      - .env
+    environment:
+      # Python/Flask specific environment variables
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=5000
+      - USE_EXPRESS_EQUIVALENT=true
+      # Flask configuration
+      - FLASK_ENV=${NODE_ENV:-production}
+      - FLASK_APP=app.py
+      # Gunicorn configuration for production
+      - GUNICORN_WORKERS=${GUNICORN_WORKERS:-4}
+      - GUNICORN_TIMEOUT=${GUNICORN_TIMEOUT:-30}
+      - GUNICORN_BIND=0.0.0.0:5000
+      # Security configuration (matching Node.js settings)
+      - RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS:-1000}
+      - API_RATE_LIMIT_MAX_REQUESTS=${API_RATE_LIMIT_MAX_REQUESTS:-100}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000,http://localhost:5000}
+    
+    # Production command using Gunicorn WSGI server
+    # Matches the PM2 clustering model from Node.js for consistency
+    # Uses wsgi.py entry point for production-grade deployment
+    command: >
+      gunicorn 
+      --workers ${GUNICORN_WORKERS:-4}
+      --bind 0.0.0.0:5000
+      --timeout ${GUNICORN_TIMEOUT:-30}
+      --keep-alive 2
+      --max-requests 1000
+      --max-requests-jitter 100
+      --access-logfile -
+      --error-logfile -
+      --log-level info
+      wsgi:app
+    
+    # Volume mounts for Python application
+    volumes:
+      # Shared log volume for centralized logging
+      - app-logs:/app/logs
+      # Python application code (for development)
+      - ./app.py:/app/app.py:ro
+      - ./wsgi.py:/app/wsgi.py:ro
+      - ./.env:/app/.env:ro
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Health check for Flask application
+    # Monitors the /health endpoint to ensure Python app is responding
+    # Configured to match the health check format from app.py
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Network configuration
+    networks:
+      - app-network
+    
+    # Service dependencies
+    # Optional dependency on node-app for demonstration purposes
+    # In practice, these services are independent and can run separately
+    depends_on:
+      node-app:
+        condition: service_healthy
+    
+    # Resource limits for Python application
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# =============================================================================
+# VOLUMES CONFIGURATION
+# =============================================================================
+
+volumes:
+  # Persistent log storage
+  # Stores application logs, access logs, and error logs for both services
+  # Enables log analysis and debugging across container restarts
+  app-logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./logs
+  
+  # SSL certificate storage
+  # Stores SSL/TLS certificates for HTTPS support
+  # Enables certificate persistence and sharing between containers
+  ssl-certs:
+    driver: local
+    driver_opts:
+      type: none  
+      o: bind
+      device: ./certs
+
+# =============================================================================
+# NETWORKS CONFIGURATION  
+# =============================================================================
+
+networks:
+  # Application network for inter-service communication
+  # Provides isolated network environment for security
+  # Enables service discovery and communication between Node.js and Python apps
+  app-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        # Custom subnet for network isolation
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1
+    driver_opts:
+      # Network optimization for local development
+      com.docker.network.bridge.name: tutorial-bridge
+      com.docker.network.bridge.enable_ip_masquerade: 'true'
+      com.docker.network.driver.mtu: 1500
+
+# =============================================================================
+# DOCKER COMPOSE USAGE EXAMPLES
+# =============================================================================
+#
+# Development with live reload:
+#   docker-compose up --build
+#
+# Production deployment:
+#   docker-compose -f docker-compose.yml up -d --build
+#
+# Scale Python service:
+#   docker-compose up --scale python-app=3
+#
+# View logs:
+#   docker-compose logs -f node-app
+#   docker-compose logs -f python-app
+#
+# Health check status:
+#   docker-compose ps
+#
+# Execute commands in running containers:
+#   docker-compose exec node-app /bin/sh
+#   docker-compose exec python-app /bin/bash
+#
+# Stop all services:
+#   docker-compose down
+#
+# Remove volumes (destructive):
+#   docker-compose down -v
+#
+# =============================================================================
+# MONITORING AND DEBUGGING
+# =============================================================================
+#
+# Service Health Monitoring:
+#   - Node.js health: http://localhost:3000/health
+#   - Python health: http://localhost:5000/health
+#   - Node.js ping: http://localhost:3000/ping  
+#   - Python ping: http://localhost:5000/ping
+#
+# API Testing:
+#   - Node.js hello: http://localhost:3000/hello
+#   - Python hello: http://localhost:5000/hello
+#   - Node.js good-evening: http://localhost:3000/good-evening
+#   - Python good-evening: http://localhost:5000/good-evening
+#
+# Security Status:
+#   - Node.js status: http://localhost:3000/api/status
+#   - Python status: http://localhost:5000/api/status
+#
+# Container Resource Usage:
+#   docker stats $(docker-compose ps -q)
+#
+# Network Inspection:
+#   docker network inspect nodejs-tutorial-project_app-network
+#
+# Volume Inspection:
+#   docker volume inspect nodejs-tutorial-project_app-logs
+#   docker volume inspect nodejs-tutorial-project_ssl-certs
+#
+# =============================================================================
+# PRODUCTION DEPLOYMENT CONSIDERATIONS
+# =============================================================================
+#
+# 1. Environment Variables:
+#    - Create production .env file with secure secrets
+#    - Use Docker secrets for sensitive data in production
+#    - Configure proper CORS origins for production domains
+#
+# 2. SSL Certificates:
+#    - Mount production SSL certificates to ssl-certs volume
+#    - Use Let's Encrypt for automated certificate management
+#    - Configure proper certificate paths in environment variables
+#
+# 3. Logging:
+#    - Configure external logging driver (e.g., fluentd, syslog)
+#    - Set up log aggregation for production monitoring
+#    - Configure log rotation policies
+#
+# 4. Security:
+#    - Use non-root users in production containers
+#    - Implement container image scanning
+#    - Configure firewall rules for port access
+#    - Enable Docker security features (AppArmor, SELinux)
+#
+# 5. Performance:
+#    - Adjust resource limits based on production requirements
+#    - Configure proper Gunicorn worker count for Python app
+#    - Use PM2 clustering for Node.js in production
+#    - Implement load balancing for high availability
+#
+# 6. Monitoring:
+#    - Integrate with monitoring systems (Prometheus, Grafana)
+#    - Set up alerting for service failures
+#    - Configure health check endpoints for load balancers
+#    - Monitor resource usage and performance metrics
