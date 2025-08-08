@@ -29,7 +29,7 @@ load_dotenv()
 # Import Flask and core dependencies
 from flask import Flask, request, jsonify, make_response
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 import time
 
 # Import security and middleware extensions
@@ -44,14 +44,27 @@ app = Flask(__name__)
 # Configure environment variables with secure defaults
 HTTP_PORT = int(os.environ.get('PORT', 3000))
 NODE_ENV = os.environ.get('NODE_ENV', 'development')
+USE_EXPRESS_EQUIVALENT = os.environ.get('USE_EXPRESS_EQUIVALENT', 'true').lower() in ['true', '1', 'yes']
 CORS_ORIGINS = os.environ.get('CORS_ORIGINS', 'http://localhost:3000').split(',') if os.environ.get('CORS_ORIGINS') else ['http://localhost:3000']
 RATE_LIMIT_WINDOW_MS = int(os.environ.get('RATE_LIMIT_WINDOW_MS', 3600000))  # 1 hour in ms
 RATE_LIMIT_MAX_REQUESTS = int(os.environ.get('RATE_LIMIT_MAX_REQUESTS', 1000))
 API_RATE_LIMIT_WINDOW_MS = int(os.environ.get('API_RATE_LIMIT_WINDOW_MS', 60000))  # 1 minute in ms
 API_RATE_LIMIT_MAX_REQUESTS = int(os.environ.get('API_RATE_LIMIT_MAX_REQUESTS', 100))
 
+# Configure Flask app
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', os.urandom(24).hex())
+app.config['TESTING'] = False
+
 # Store application start time for uptime calculation
 app_start_time = time.time()
+
+# Make variables available at module level for testing
+globals().update({
+    'NODE_ENV': NODE_ENV,
+    'USE_EXPRESS_EQUIVALENT': USE_EXPRESS_EQUIVALENT,
+    'HTTP_PORT': HTTP_PORT,
+    'app_start_time': app_start_time
+})
 
 # Security middleware configuration
 # 1. Flask-Talisman - Comprehensive security headers (equivalent to Helmet.js)
@@ -74,8 +87,6 @@ talisman = Talisman(
     strict_transport_security_max_age=31536000,  # 1 year
     strict_transport_security_include_subdomains=True,
     strict_transport_security_preload=True,
-    # X-Content-Type-Options - prevents MIME type sniffing
-    content_type_options=True,
     # X-Frame-Options - prevents clickjacking
     frame_options='DENY',
     # X-XSS-Protection - legacy XSS filter
@@ -95,9 +106,12 @@ def cors_origin_validator(origin):
     
     return False
 
+# Configure CORS with proper origins list for development and production
+cors_origins = CORS_ORIGINS if NODE_ENV != 'development' else '*'
+
 cors = CORS(
     app,
-    origins=cors_origin_validator,
+    origins=cors_origins,
     methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allow_headers=['Content-Type', 'Authorization', 'X-Requested-With'],
     supports_credentials=True
@@ -106,13 +120,13 @@ cors = CORS(
 # 3. Rate limiting configuration
 # Global rate limiter - 1000 requests per hour per IP
 limiter = Limiter(
-    app,
     key_func=get_remote_address,
     default_limits=[f"{RATE_LIMIT_MAX_REQUESTS} per hour"],
     storage_uri="memory://",
     # Convert milliseconds to human-readable format for limiter
     headers_enabled=True
 )
+limiter.init_app(app)
 
 # API rate limiter - 100 requests per minute per IP for API endpoints  
 api_rate_limit = f"{API_RATE_LIMIT_MAX_REQUESTS} per minute"
@@ -219,11 +233,13 @@ def good_evening():
 @limiter.exempt  # Skip rate limiting for health checks
 def health():
     """Health check endpoint for load balancer integration"""
+    mode = 'flask-express-equivalent' if USE_EXPRESS_EQUIVALENT else 'flask-basic'
     return jsonify({
         'status': 'healthy',
-        'timestamp': datetime.utcnow().isoformat() + 'Z',
+        'timestamp': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
         'environment': NODE_ENV,
-        'uptime': time.time() - app_start_time
+        'uptime': time.time() - app_start_time,
+        'mode': mode
     }), 200
 
 # Ping endpoint for basic connectivity checks
@@ -265,7 +281,7 @@ def api_data():
     return jsonify({
         'message': 'Data processed successfully',
         'received': sanitized_data,
-        'timestamp': datetime.utcnow().isoformat() + 'Z'
+        'timestamp': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
     }), 200
 
 @app.route('/api/status', methods=['GET'])
